@@ -95,7 +95,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         if ( this is { CanExecuteMethod: not null, CanExecuteProperty: not null } )
         {
-            builder.Diagnostics.Report( Diagnostics.ErrorCannotSpecifyBothCanExecuteMethodAndCanExecuteProperty );
+            builder.Diagnostics.Report( Diagnostics.CannotSpecifyBothCanExecuteMethodAndCanExecuteProperty );
 
             // Further diagnostics would be confusing and transformation is not possible.
 
@@ -180,7 +180,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
                 if ( canExecuteProperty.Accessibility != MetalamaAccessibility.Public )
                 {
                     builder.Diagnostics.Report(
-                        Diagnostics.WarningCommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ),
+                        Diagnostics.CommandNotifiableCanExecutePropertyIsNotPublic.WithArguments( target ),
                         canExecuteProperty );
                 }
 

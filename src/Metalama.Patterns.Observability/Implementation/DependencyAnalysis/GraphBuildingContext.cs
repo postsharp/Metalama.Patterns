@@ -4,9 +4,9 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Engine.CodeModel;
+using Metalama.Patterns.Immutability;
 using Metalama.Patterns.Observability.Configuration;
 using Microsoft.CodeAnalysis;
-using SpecialType = Microsoft.CodeAnalysis.SpecialType;
 using TypeKind = Microsoft.CodeAnalysis.TypeKind;
 
 namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
@@ -45,12 +45,6 @@ internal abstract class GraphBuildingContext
 
     public bool IsAutoPropertyOrField( ISymbol symbol ) => this._compilation.GetDeclaration( symbol ) is IFieldOrProperty { IsAutoPropertyOrField: true };
 
-    public ObservabilityContract? GetObservabilityContract( ISymbol symbol ) => this.GetDependencyAnalysisOptions( symbol ).ObservabilityContract;
-
-    public bool IsConstant( IFieldSymbol field ) => this.IsConstantMember( field );
-
-    public bool IsConstant( IPropertySymbol property ) => this.IsConstantMember( property );
-
     public bool IsConstant( IMethodSymbol method ) => this.IsConstantMember( method );
 
     private bool IsConstantMember( ISymbol symbol )
@@ -66,7 +60,7 @@ internal abstract class GraphBuildingContext
 
         if ( symbol.Kind is SymbolKind.Property or SymbolKind.Field or SymbolKind.Method )
         {
-            return this.IsConstant( symbol.ContainingType );
+            return this.IsDeeplyImmutable( symbol.ContainingType );
         }
         else
         {
@@ -74,31 +68,15 @@ internal abstract class GraphBuildingContext
         }
     }
 
-    public bool IsConstant( ITypeSymbol type )
+    public bool IsDeeplyImmutable( ITypeSymbol fieldOrPropertyType )
     {
-        var hasContract = this.GetDependencyAnalysisOptions( type ).ObservabilityContract != null;
-
-        if ( hasContract )
+        if ( fieldOrPropertyType is INamedTypeSymbol )
         {
-            return true;
+            return ((INamedType) this._compilation.GetDeclaration( fieldOrPropertyType )).GetImmutabilityKind() != ImmutabilityKind.None;
         }
-        
-        return type is {
-            SpecialType: SpecialType.System_Boolean or
-            SpecialType.System_Byte or
-            SpecialType.System_Char or
-            SpecialType.System_DateTime or
-            SpecialType.System_Decimal or
-            SpecialType.System_Double or
-            SpecialType.System_Int16 or
-            SpecialType.System_Int32 or
-            SpecialType.System_Int64 or
-            SpecialType.System_SByte or
-            SpecialType.System_Single or
-            SpecialType.System_String or
-            SpecialType.System_UInt16 or
-            SpecialType.System_UInt32 or
-            SpecialType.System_UInt64
-        } or { IsValueType: true, ContainingNamespace.Name: "System" } or { TypeKind: TypeKind.Enum or TypeKind.Delegate };
+        else
+        {
+            return fieldOrPropertyType.TypeKind is TypeKind.Pointer or TypeKind.FunctionPointer or TypeKind.TypeParameter;
+        }
     }
 }

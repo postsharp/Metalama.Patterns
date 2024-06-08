@@ -24,19 +24,21 @@ public sealed class DependencyPropertyOptionsBuilder
     /// <summary>
     /// Gets or sets a value indicating whether the property should be registered as a read-only property.
     /// </summary>
-    public bool? IsReadOnly { get; set; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
-    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
-    /// </summary>
-    public bool? InitializerProvidesInitialValue { get; set; }
+    public bool? IsReadOnly
+    {
+        get => this._options.IsReadOnly;
+        set => this._options = this._options with { IsReadOnly = value };
+    }
 
     /// <summary>
     /// Gets or sets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
     /// The default is <see langword="true"/>.
     /// </summary>
-    public bool? InitializerProvidesDefaultValue { get; set; }
+    public bool? InitializerProvidesDefaultValue 
+    {
+        get => this._options.InitializerProvidesDefaultValue;
+        set => this._options = this._options with { InitializerProvidesDefaultValue = value };
+    }
 
     /// <summary>
     /// Adds or updates a naming convention that specifies, based on the name of the target method of the <see cref="DependencyProperty"/>

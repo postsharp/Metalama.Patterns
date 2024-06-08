@@ -1,7 +1,3 @@
-// Warning LAMA5206 on `ExecuteInstanceNoParameters`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteInstanceNoParameters'.`
-// Warning LAMA5206 on `ExecuteStaticNoParameters`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteStaticNoParameters'.`
-// Warning LAMA5206 on `ExecuteInstanceWithParameter`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteInstanceWithParameter'.`
-// Warning LAMA5206 on `ExecuteStaticWithParameter`: `No can-execute method or can-execute property was found using the default naming convention, with candidate member name 'CanExecuteStaticWithParameter'.`
 using System.Windows.Input;
 using Metalama.Patterns.Xaml.Implementation;
 namespace Metalama.Patterns.Xaml.AspectTests.CommandTests.Callbacks;

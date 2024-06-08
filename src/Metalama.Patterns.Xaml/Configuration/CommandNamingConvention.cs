@@ -43,15 +43,15 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
     public string? CommandPropertyName { get; init; }
 
     /// <summary>
-    /// Gets or sets a regular expression pattern that will be evaluated against method and/or property names to identify candidate can-execute members. 
+    /// Gets or sets a list of regular expression patterns that will be evaluated against method and/or property names to identify candidate can-execute members. 
     /// In this pattern, all occurrences of the substring <c>{CommandName}</c> will be replaced with the command name
     /// determined according to <see cref="CommandNamePattern"/> before the expression is evaluated.
     /// </summary>
-    public string? CanExecutePattern { get; init; }
+    public string[]? CanExecutePatterns { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether a matching valid unambiguous can-execute method or property must be found for a match to be considered successful.
-    /// The default value is <see langword="true"/> when <see cref="CanExecutePattern"/> is specified, otherwise <see langword="false"/>.
+    /// The default value is <see langword="true"/> when <see cref="CanExecutePatterns"/> is specified, otherwise <see langword="false"/>.
     /// </summary>
     public bool? IsCanExecuteRequired { get; init; }
 
@@ -107,7 +107,7 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
                 null,
                 MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Invalid(),
                 MemberMatch<IMember, DefaultMatchKind>.NotFound(),
-                this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePattern != null ) );
+                this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePatterns != null ) );
         }
 
 #if NETCOREAPP
@@ -117,9 +117,19 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
             ? this.CommandPropertyName.Replace( _commandNameToken, commandName )
             : DefaultCommandNamingConvention.GetCommandPropertyNameFromCommandName( commandName );
 
-        var canExecutePredicate = this.CanExecutePattern != null
-            ? (INameMatchPredicate) new RegexNameMatchPredicate( new Regex( this.CanExecutePattern.Replace( _commandNameToken, commandName ) ) )
-            : new StringNameMatchPredicate( DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) );
+        INameMatchPredicate canExecutePredicate;
+
+        if ( this.CanExecutePatterns != null )
+        {
+            var pattern = string.Join( "|", this.CanExecutePatterns.Select( x => x.Replace( _commandNameToken, commandName ) ) );
+
+            canExecutePredicate =
+                new RegexNameMatchPredicate( new Regex( $"^{pattern}$" ) );
+        }
+        else
+        {
+            canExecutePredicate = new StringNameMatchPredicate( DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) );
+        }
 
 #if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity
@@ -133,6 +143,6 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
             canExecutePredicate,
             considerMethod: this.ConsiderCanExecuteMethod,
             considerProperty: this.ConsiderCanExecuteProperty,
-            requireCanExecuteMatch: this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePattern != null ) );
+            requireCanExecuteMatch: this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePatterns != null ) );
     }
 }

@@ -17,7 +17,7 @@ internal class NsFabric : NamespaceFabric
                     {
                         CommandNamePattern = "^Execute(?<CommandName>.+)$",
                         CommandPropertyName = "{CommandName}CommandRx1",
-                        CanExecutePattern = "CanRx1{CommandName}"
+                        CanExecutePatterns = ["CanRx1{CommandName}"]
                     } );
 
                 b.AddNamingConvention(
@@ -25,7 +25,7 @@ internal class NsFabric : NamespaceFabric
                     {
                         CommandNamePattern = "^Execute(?<CommandName>.+)$",
                         CommandPropertyName = "{CommandName}CommandRx2",
-                        CanExecutePattern = "CanRx2{CommandName}"
+                        CanExecutePatterns = ["CanRx2{CommandName}"]
                     } );
 
                 b.AddNamingConvention(
@@ -33,7 +33,7 @@ internal class NsFabric : NamespaceFabric
                     {
                         CommandNamePattern = "^Execute(?<CommandName>.+)$",
                         CommandPropertyName = "{CommandName}CommandRx3",
-                        CanExecutePattern = "CanRx3{CommandName}"
+                        CanExecutePatterns = ["CanRx3{CommandName}(Property)?"]
                     } );
 
                 b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionName );

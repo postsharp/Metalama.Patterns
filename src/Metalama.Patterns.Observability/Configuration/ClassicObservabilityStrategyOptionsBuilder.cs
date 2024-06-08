@@ -20,18 +20,4 @@ public sealed class ClassicObservabilityStrategyOptionsBuilder
     {
         this.Options = options;
     }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the <c>OnObservablePropertyChanged</c> method should be introduced.
-    /// </summary>
-    /// <remarks>
-    /// <inheritdoc cref="ClassicObservabilityStrategyOptions.EnableOnObservablePropertyChangedMethod"/>
-    /// </remarks>
-    public bool? EnableOnObservablePropertyChangedMethod
-    {
-        get => this.Options?.EnableOnObservablePropertyChangedMethod;
-        
-        // ReSharper disable once WithExpressionModifiesAllMembers
-        set => this.Options = (this.Options ?? new ClassicObservabilityStrategyOptions()) with { EnableOnObservablePropertyChangedMethod = value };
-    }
 }

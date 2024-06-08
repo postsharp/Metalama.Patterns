@@ -18,12 +18,12 @@ internal abstract class DiagnosticReporter
     // ReSharper disable once UnusedParameter.Global
 
     /// <summary>
-    /// Gets a the <c>TargetDeclarationDescription</c> argument for <see cref="Diagnostics.WarningValidCandidateDeclarationIsAmbiguous"/> and <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
+    /// Gets a the <c>TargetDeclarationDescription</c> argument for <see cref="Diagnostics.ValidCandidateDeclarationIsAmbiguous"/> and <see cref="Diagnostics.InvalidCandidateDeclarationSignature"/>.
     /// </summary>
     protected abstract string GetTargetDeclarationDescription();
 
     /// <summary>
-    /// Gets the <c>InvalidityReason</c> argument for <see cref="Diagnostics.WarningInvalidCandidateDeclarationSignature"/>.
+    /// Gets the <c>InvalidityReason</c> argument for <see cref="Diagnostics.InvalidCandidateDeclarationSignature"/>.
     /// </summary>
     /// <param name="addInspectedMember"></param>
     /// <returns></returns>
@@ -31,7 +31,7 @@ internal abstract class DiagnosticReporter
 
     private void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedMember addInspectedMember, bool isRequired )
         => this._builder.Diagnostics.Report(
-            Diagnostics.WarningValidCandidateDeclarationIsAmbiguous.WithArguments(
+            Diagnostics.ValidCandidateDeclarationIsAmbiguous.WithArguments(
                 (
                     addInspectedMember.Member.DeclarationKind,
                     addInspectedMember.Category,
@@ -48,7 +48,7 @@ internal abstract class DiagnosticReporter
         IEnumerable<string> applicableCategories,
         bool isRequired )
         => this._builder.Diagnostics.Report(
-            Diagnostics.WarningExistingMemberNameConflict.WithArguments(
+            Diagnostics.ExistingMemberNameConflict.WithArguments(
                 (
                     conflictingDeclaration.DeclarationKind,
                     conflictingDeclaration,
@@ -59,7 +59,7 @@ internal abstract class DiagnosticReporter
 
     private void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedMember addInspectedMember, bool isRequired )
         => this._builder.Diagnostics.Report(
-            Diagnostics.WarningInvalidCandidateDeclarationSignature.WithArguments(
+            Diagnostics.InvalidCandidateDeclarationSignature.WithArguments(
                 (
                     addInspectedMember.Member.DeclarationKind,
                     addInspectedMember.Category,
@@ -74,16 +74,14 @@ internal abstract class DiagnosticReporter
     private void ReportDeclarationNotFound(
         INamingConvention namingConvention,
         IEnumerable<string> candidateNames,
-        IEnumerable<string> applicableCategories,
-        bool isRequired )
+        IEnumerable<string> applicableCategories )
     {
         var candidateNamesList = candidateNames.PrettyList( " or ", out var candidateNamesPlurality, '\'' );
 
         this._builder.Diagnostics.Report(
-            Diagnostics.WarningCandidateNamesNotFound.WithArguments(
+            Diagnostics.CandidateNamesNotFound.WithArguments(
                 (
                     applicableCategories.PrettyList( " or " ),
-                    isRequired ? "as required by" : "using",
                     namingConvention.Name,
                     candidateNamesPlurality == 2 ? "s" : null,
                     candidateNamesList
@@ -92,10 +90,10 @@ internal abstract class DiagnosticReporter
 
     private void ReportNoNamingConventionMatched( IEnumerable<INamingConvention> namingConventionsTried )
         => this._builder.Diagnostics.Report(
-            Diagnostics.ErrorNoNamingConventionMatched.WithArguments(
+            Diagnostics.NoNamingConventionMatched.WithArguments(
                 (namingConventionsTried.Select( nc => nc.Name ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
 
-    private void ReportNoConfiguredNamingConventions() => this._builder.Diagnostics.Report( Diagnostics.ErrorNoConfiguredNamingConventions );
+    private void ReportNoConfiguredNamingConventions() => this._builder.Diagnostics.Report( Diagnostics.NoConfiguredNamingConventions );
 
     private void ReportDiagnostics(
         INamingConvention namingConvention,
@@ -130,9 +128,9 @@ internal abstract class DiagnosticReporter
 
             case MemberMatchOutcome.NotFound:
 
-                if ( !member.Match.CandidateNames.IsEmpty )
+                if ( !member.Match.CandidateNames.IsEmpty && member.IsRequired )
                 {
-                    this.ReportDeclarationNotFound( namingConvention, member.Match.CandidateNames, member.Categories, member.IsRequired );
+                    this.ReportDeclarationNotFound( namingConvention, member.Match.CandidateNames, member.Categories );
                 }
 
                 break;

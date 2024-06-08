@@ -105,7 +105,7 @@ internal static class DiagnosticDescriptors
         new(
             "LAMA5162",
             Warning,
-            $"The '{{1}}' {{0}} cannot be analysed, and has not been configured with an observability contract. Mark this {{0}} with [{nameof(ConstantAttribute)}] or "
+            $"The '{{1}}' {{0}} cannot be analysed, and has not been configured with an observability contract. Mark this {{0}} with [{nameof(ConstantAttribute)}] or call "
             + nameof(ObservabilityExtensions.ConfigureObservability) + " via a fabric.",
             "Method or property is not supported for dependency analysis.",
             _category );

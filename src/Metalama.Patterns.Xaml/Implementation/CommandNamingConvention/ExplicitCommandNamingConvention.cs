@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
 
@@ -33,7 +34,11 @@ internal sealed class ExplicitCommandNamingConvention : ICommandNamingConvention
             addInspectedMember,
             commandPropertyName,
             new StringNameMatchPredicate(
-                this._canExecuteMethodName ?? this._canExecutePropertyName ?? DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
+                this._canExecuteMethodName != null
+                    ? ImmutableArray.Create( this._canExecuteMethodName )
+                    : this._canExecutePropertyName != null
+                        ? ImmutableArray.Create( this._canExecutePropertyName )
+                        : DefaultCommandNamingConvention.GetCanExecuteNameFromCommandName( commandName ) ),
             considerMethod: this._canExecuteMethodName != null || this._canExecutePropertyName == null,
             considerProperty: this._canExecutePropertyName != null || this._canExecuteMethodName == null,
             requireCanExecuteMatch: this._canExecuteMethodName != null || this._canExecutePropertyName != null );

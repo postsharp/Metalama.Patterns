@@ -7,7 +7,6 @@
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
-    <Version Condition="'$(MetalamaPatternsObservabilityVersion)'!=''">$(MetalamaPatternsObservabilityVersion)</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
   </PropertyGroup>
 
@@ -27,9 +26,9 @@
 
 
   <ItemGroup>
-    <Compile Remove="ShallNotDependOnMutableStateAttribute.cs" />
+    <ProjectReference Include="..\Metalama.Patterns.Immutability\Metalama.Patterns.Immutability.csproj" />
   </ItemGroup>
-
+  
   <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
   
 </Project>

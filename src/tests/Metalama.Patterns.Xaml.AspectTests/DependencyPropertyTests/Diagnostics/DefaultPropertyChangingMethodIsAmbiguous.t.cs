@@ -1,5 +1,3 @@
 // Error LAMA5207 on `Foo`: `No match was found using the default naming convention. See other warnings for details.`
-// Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
-// Warning LAMA5206 on `Foo`: `No validate method was found using the default naming convention, with candidate member name 'ValidateFoo'.`
 // Warning LAMA5205 on `OnFooChanging`: `The method was identified as a valid candidate property-changing method for [DependencyProperty] property DefaultPropertyChangingMethodIsAmbiguous.Foo by the default naming convention, but other members also matched.`
 // Warning LAMA5205 on `OnFooChanging`: `The method was identified as a valid candidate property-changing method for [DependencyProperty] property DefaultPropertyChangingMethodIsAmbiguous.Foo by the default naming convention, but other members also matched.`

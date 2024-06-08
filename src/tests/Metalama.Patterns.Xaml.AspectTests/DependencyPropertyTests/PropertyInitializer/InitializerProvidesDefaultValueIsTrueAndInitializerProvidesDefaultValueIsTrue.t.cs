@@ -1,6 +1,3 @@
-// Warning LAMA5206 on `Foo`: `No property-changed method was found using the default naming convention, with candidate member name 'OnFooChanged'.`
-// Warning LAMA5206 on `Foo`: `No property-changing method was found using the default naming convention, with candidate member name 'OnFooChanging'.`
-// Warning LAMA5206 on `Foo`: `No validate method was found using the default naming convention, with candidate member name 'ValidateFoo'.`
 using System.Windows;
 namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.PropertyInitializer.InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue;
 public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue : DependencyObject
@@ -11,7 +8,7 @@ public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultV
     2,
     3
   };
-  [DependencyProperty(InitializerProvidesInitialValue = true, InitializerProvidesDefaultValue = true)]
+  [DependencyProperty]
   public List<int> Foo
   {
     get

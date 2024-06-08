@@ -15,7 +15,7 @@ internal class NsFabric : NamespaceFabric
                 {
                     CommandNamePattern = "^MakeIt(?<CommandName>.+)$",
                     CommandPropertyName = "The{CommandName}Command",
-                    CanExecutePattern = "(CanIt{CommandName})|({CommandName}ItCan)"
+                    CanExecutePatterns = ["(CanIt{CommandName})|({CommandName}ItCan)"]
                 } ) );
     }
 }

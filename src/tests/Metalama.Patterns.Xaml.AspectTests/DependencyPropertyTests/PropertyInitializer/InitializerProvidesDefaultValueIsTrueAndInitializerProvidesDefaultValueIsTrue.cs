@@ -9,6 +9,6 @@ public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultV
 {
     private static List<int> InitMethod() => new( 3 ) { 1, 2, 3 };
 
-    [DependencyProperty( InitializerProvidesInitialValue = true, InitializerProvidesDefaultValue = true )]
+    [DependencyProperty]
     public List<int> Foo { get; set; } = InitMethod();
 }

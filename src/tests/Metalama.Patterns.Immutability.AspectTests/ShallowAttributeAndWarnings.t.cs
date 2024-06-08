@@ -1,0 +1,2 @@
+// Warning LAMA5021 on `SomeClass`: `The 'SomeClass.MutableProperty' property must not have a setter because of the [Immutable] aspect.`
+// Warning LAMA5020 on `SomeClass`: `The 'SomeClass.MutableStringField' field must be read-only because of the [Immutable] aspect.`

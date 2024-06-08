@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Collections.Immutable;
 using static Metalama.Patterns.Xaml.Implementation.StringHelper;
 
 namespace Metalama.Patterns.Xaml.Implementation.CommandNamingConvention;
@@ -60,5 +61,5 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
     public static string GetCommandPropertyNameFromCommandName( string commandName ) => $"{commandName}Command";
 
-    public static string GetCanExecuteNameFromCommandName( string commandName ) => $"CanExecute{commandName}";
+    public static ImmutableArray<string> GetCanExecuteNameFromCommandName( string commandName ) => ImmutableArray.Create( $"CanExecute{commandName}", $"Can{commandName}", $"Is{commandName}Enabled" );
 }

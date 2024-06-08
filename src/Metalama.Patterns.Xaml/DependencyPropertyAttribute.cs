@@ -25,19 +25,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         get => this._isReadOnly ?? false;
         set => this._isReadOnly = value;
     }
-
-    private bool? _initializerProvidesInitialValue;
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
-    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
-    /// </summary>
-    public bool InitializerProvidesInitialValue
-    {
-        get => this._initializerProvidesInitialValue ?? false;
-        set => this._initializerProvidesInitialValue = value;
-    }
-
+    
     private bool? _initializerProvidesDefaultValue;
 
     /// <summary>
@@ -56,7 +44,6 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
             new DependencyPropertyOptions()
             {
                 IsReadOnly = this._isReadOnly,
-                InitializerProvidesInitialValue = this._initializerProvidesInitialValue,
                 InitializerProvidesDefaultValue = this._initializerProvidesDefaultValue
             }
         };
@@ -119,7 +106,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         builder.MustNotBeStatic();
 
         // ReSharper disable once RedundantNameQualifier
-        builder.MustHaveAccessibility( Framework.Code.Accessibility.Public );
+        builder.MustHaveAccessibility( Metalama.Framework.Code.Accessibility.Public );
         builder.MustBeReadable();
         builder.MustSatisfy( p => p.IsAutoPropertyOrField == true, p => $"{p} must be an auto-property." );
         builder.DeclaringType().MustBe( typeof(DependencyObject), ConversionKind.Reference );

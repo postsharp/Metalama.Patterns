@@ -3,11 +3,10 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
-using Metalama.Patterns.Xaml.Configuration;
 using static Metalama.Framework.Diagnostics.Severity;
 
 namespace Metalama.Patterns.Xaml.Implementation;
-    
+
 // ReSharper disable InconsistentNaming
 [CompileTime]
 internal static class Diagnostics
@@ -17,21 +16,9 @@ internal static class Diagnostics
     // Reserved range 5200-5220
 
     /// <summary>
-    /// Property {0} has an initializer, but it will not be used because options InitializerProvidesDefaultValue and InitializerProvidesInitialValue are both configured as false.
-    /// </summary>
-    public static readonly DiagnosticDefinition<IProperty> WarningDependencyPropertyInitializerWillNotBeUsed =
-        new(
-            "LAMA5200",
-            Warning,
-            "Property {0} has an initializer, but it will not be used because options " + nameof(DependencyPropertyOptions.InitializerProvidesDefaultValue) +
-            " and " + nameof(DependencyPropertyOptions.InitializerProvidesInitialValue) + " are both configured as false.",
-            "Initializer will not be used.",
-            _category );
-
-    /// <summary>
     /// The CanExecuteMethod and CanExecuteProperty properties cannot both be defined at the same time.
     /// </summary>
-    public static readonly DiagnosticDefinition ErrorCannotSpecifyBothCanExecuteMethodAndCanExecuteProperty =
+    public static readonly DiagnosticDefinition CannotSpecifyBothCanExecuteMethodAndCanExecuteProperty =
         new(
             "LAMA5201",
             Error,
@@ -43,7 +30,7 @@ internal static class Diagnostics
     /// The can-execute property for command method {0} is not public, and INotifyPropertyChanged integration is enabled and applicable.
     /// Because the can-execute property is not public, INotifyPropertyChanged.PropertyChanged events might not be raised depending on the INotifyPropertyChanged implementation.
     /// </summary>
-    public static readonly DiagnosticDefinition<IMethod> WarningCommandNotifiableCanExecutePropertyIsNotPublic =
+    public static readonly DiagnosticDefinition<IMethod> CommandNotifiableCanExecutePropertyIsNotPublic =
         new(
             "LAMA5202",
             Warning,
@@ -56,7 +43,7 @@ internal static class Diagnostics
     /// </summary>
     public static readonly DiagnosticDefinition<(DeclarationKind ConflictingDeclarationKind, IDeclaration ConflictingDeclaration, INamedType DeclaringType,
             string? Required, string IntroducedMemberDescription, string NamingConvention)>
-        WarningExistingMemberNameConflict =
+        ExistingMemberNameConflict =
             new(
                 "LAMA5203",
                 Warning,
@@ -71,7 +58,7 @@ internal static class Diagnostics
     /// </summary>
     public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription,
             IDeclaration TargetDeclaration, string? AsRequired, string NamingConvention, string? InvalidityReason)>
-        WarningInvalidCandidateDeclarationSignature =
+        InvalidCandidateDeclarationSignature =
             new(
                 "LAMA5204",
                 Warning,
@@ -84,7 +71,7 @@ internal static class Diagnostics
     /// </summary>
     public static readonly DiagnosticDefinition<(DeclarationKind DiagnosticTargetDeclaration, string? CandidateDescription, string TargetDeclarationDescription,
             IDeclaration TargetDeclaration, string? AsRequired, string NamingConvention)>
-        WarningValidCandidateDeclarationIsAmbiguous =
+        ValidCandidateDeclarationIsAmbiguous =
             new(
                 "LAMA5205",
                 Warning,
@@ -95,13 +82,13 @@ internal static class Diagnostics
     /// <summary>
     /// No {0} was found {1} the {2} naming convention, with candidate member name{3} {4}.
     /// </summary>
-    public static readonly DiagnosticDefinition<(string CandidateDescription, string UsingOrAsRequiredBy, string NamingConvention, string?
+    public static readonly DiagnosticDefinition<(string CandidateDescription, string NamingConvention, string?
             CandidateNamesPluralSuffix, string CandidateNames)>
-        WarningCandidateNamesNotFound =
+        CandidateNamesNotFound =
             new(
                 "LAMA5206",
-                Warning,
-                "No {0} was found {1} the {2} naming convention, with candidate member name{3} {4}.",
+                Error,
+                "No {0} was found using the {1} naming convention, with candidate member name{2} {3}.",
                 "Optional member not found.",
                 _category );
 
@@ -109,7 +96,7 @@ internal static class Diagnostics
     /// No match was found using the {0} naming convention{1}. See other warnings for details.
     /// </summary>
     public static readonly DiagnosticDefinition<(string NamingConventions, string? NamingConventionsPluralSuffix)>
-        ErrorNoNamingConventionMatched =
+        NoNamingConventionMatched =
             new(
                 "LAMA5207",
                 Error,
@@ -121,7 +108,7 @@ internal static class Diagnostics
     /// No naming conventions are configured. At least one naming convention must be configured.
     /// </summary>
     public static readonly DiagnosticDefinition
-        ErrorNoConfiguredNamingConventions =
+        NoConfiguredNamingConventions =
             new(
                 "LAMA5208",
                 Error,

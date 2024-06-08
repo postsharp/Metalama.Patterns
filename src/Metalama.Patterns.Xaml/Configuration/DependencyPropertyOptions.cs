@@ -30,12 +30,6 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     public bool? IsReadOnly { get; init; }
 
     /// <summary>
-    /// Gets a value indicating whether the property initializer (if present) should be used to set the initial value of the <see cref="DependencyProperty"/>
-    /// in the instance constructor of the declaring class of the target property. The default is <see langword="false"/>.
-    /// </summary>
-    public bool? InitializerProvidesInitialValue { get; init; }
-
-    /// <summary>
     /// Gets a value indicating whether the property initializer (if present) should be used to for <see cref="PropertyMetadata.DefaultValue"/>.
     /// The default is <see langword="true"/>.
     /// </summary>
@@ -58,7 +52,6 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         => new DependencyPropertyOptions
         {
             IsReadOnly = false,
-            InitializerProvidesInitialValue = false,
             InitializerProvidesDefaultValue = true,
             NamingConventionRegistrations = DefaultNamingConventionRegistrations()
         };
@@ -77,7 +70,6 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
         return new DependencyPropertyOptions
         {
             IsReadOnly = other.IsReadOnly ?? this.IsReadOnly,
-            InitializerProvidesInitialValue = other.InitializerProvidesInitialValue ?? this.InitializerProvidesInitialValue,
             InitializerProvidesDefaultValue = other.InitializerProvidesDefaultValue ?? this.InitializerProvidesDefaultValue,
             NamingConventionRegistrations = this.NamingConventionRegistrations.ApplyChanges( other.NamingConventionRegistrations, context )
         };
