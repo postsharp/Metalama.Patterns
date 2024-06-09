@@ -1,2 +1,1 @@
-// Error LAMA5206 on `ExecuteFoo`: `No can-execute method or can-execute property was found using the explicitly-configured naming convention, with candidate member name 'DoesNotExist'.`
-// Error LAMA5207 on `ExecuteFoo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
+// Error LAMA5206 on `ExecuteFoo`: `No can-execute method or can-execute property matching the command 'DoesNotExist' was found for 'ErrorCommandConfiguredCanExecutePropertyNotFound.ExecuteFoo()'.`

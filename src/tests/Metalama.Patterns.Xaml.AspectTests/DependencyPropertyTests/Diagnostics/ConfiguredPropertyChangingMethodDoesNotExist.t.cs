@@ -1,2 +1,1 @@
-// Error LAMA5207 on `Foo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
-// Error LAMA5206 on `Foo`: `No property-changing method was found using the explicitly-configured naming convention, with candidate member name 'DoesNotExist'.`
+// Error LAMA5206 on `Foo`: `No property-changing method matching the dependency property 'DoesNotExist' was found for 'ConfiguredPropertyChangingMethodDoesNotExist.Foo'.`

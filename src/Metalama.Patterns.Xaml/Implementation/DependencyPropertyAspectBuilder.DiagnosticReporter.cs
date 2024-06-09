@@ -12,7 +12,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
     {
         public DiagnosticReporter( IAspectBuilder builder ) : base( builder ) { }
 
-        protected override string GetInvalidityReason( in InspectedMember addInspectedMember ) => " Refer to documentation for supported method signatures.";
+        protected override string GetInvalidityReason( in InspectedMember inspectedMember ) => " Refer to documentation for supported method signatures.";
+
+        protected override string GeneratedArtifactKind => "dependency property";
 
         protected override string GetTargetDeclarationDescription() => "[DependencyProperty] property ";
     }

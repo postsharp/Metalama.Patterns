@@ -1,2 +1,1 @@
-// Error LAMA5207 on `Foo`: `No match was found using the default naming convention. See other warnings for details.`
-// Warning LAMA5203 on `Foo`: `The name of existing method ExistingMemberConflictsWithPropertyField.FooProperty(), that is defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required registration field name determined by the default naming convention.`
+// Error LAMA5203 on `Foo`: `The name of existing method ExistingMemberConflictsWithPropertyField.FooProperty(), defined in or inherited by class ExistingMemberConflictsWithPropertyField, conflicts with the required registration field name determined by the default naming convention.`

@@ -36,7 +36,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
     /// </para>
     /// </remarks>
     public bool? EnableINotifyPropertyChangedIntegration { get; init; }
-    
+
     internal IReadOnlyList<ICommandNamingConvention> GetSortedNamingConventions()
     {
         this._namingConventions ??=
@@ -58,7 +58,7 @@ internal sealed record CommandOptions : IHierarchicalOptions<ICompilation>, IHie
             new NamingConventionRegistration<ICommandNamingConvention>(
                 DefaultCommandNamingConvention.RegistrationKey,
                 new DefaultCommandNamingConvention(),
-                1000 ) );
+                int.MaxValue ) );
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {

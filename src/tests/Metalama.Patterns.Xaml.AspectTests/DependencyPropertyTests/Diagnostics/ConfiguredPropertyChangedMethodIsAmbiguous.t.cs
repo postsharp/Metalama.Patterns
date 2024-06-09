@@ -1,3 +1,2 @@
-// Error LAMA5207 on `Foo`: `No match was found using the explicitly-configured naming convention. See other warnings for details.`
-// Warning LAMA5205 on `Changed`: `The method was identified as a valid candidate property-changed method for [DependencyProperty] property ConfiguredPropertyChangedMethodIsAmbiguous.Foo as required by the explicitly-configured naming convention, but other members also matched.`
-// Warning LAMA5205 on `Changed`: `The method was identified as a valid candidate property-changed method for [DependencyProperty] property ConfiguredPropertyChangedMethodIsAmbiguous.Foo as required by the explicitly-configured naming convention, but other members also matched.`
+// Error LAMA5205 on `Changed`: `Ambiguous match while identifying the property-changed method for [DependencyProperty] property 'ConfiguredPropertyChangedMethodIsAmbiguous.Foo' as required by the 'explicitly-configured' naming convention.`
+// Error LAMA5205 on `Changed`: `Ambiguous match while identifying the property-changed method for [DependencyProperty] property 'ConfiguredPropertyChangedMethodIsAmbiguous.Foo' as required by the 'explicitly-configured' naming convention.`

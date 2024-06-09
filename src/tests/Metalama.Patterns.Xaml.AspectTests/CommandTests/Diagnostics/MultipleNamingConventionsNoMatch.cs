@@ -12,28 +12,24 @@ internal class NsFabric : NamespaceFabric
         amender.ConfigureCommand(
             b =>
             {
+                b.RemoveNamingConvention( "default" );
+                
                 b.AddNamingConvention(
                     new CommandNamingConvention( "rx1" )
                     {
-                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
-                        CommandPropertyName = "{CommandName}CommandRx1",
-                        CanExecutePatterns = ["CanRx1{CommandName}"]
+                        CommandNamePattern = "^Rx1(?<CommandName>.+)$",
                     } );
 
                 b.AddNamingConvention(
                     new CommandNamingConvention( "rx2" )
                     {
-                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
-                        CommandPropertyName = "{CommandName}CommandRx2",
-                        CanExecutePatterns = ["CanRx2{CommandName}"]
+                        CommandNamePattern = "^Rx2(?<CommandName>.+)$",
                     } );
 
                 b.AddNamingConvention(
                     new CommandNamingConvention( "rx3" )
                     {
-                        CommandNamePattern = "^Execute(?<CommandName>.+)$",
-                        CommandPropertyName = "{CommandName}CommandRx3",
-                        CanExecutePatterns = ["CanRx3{CommandName}(Property)?"]
+                        CommandNamePattern = "^Rx3(?<CommandName>.+)$",
                     } );
 
                 b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionName );
@@ -46,19 +42,4 @@ internal class MultipleNamingConventionsNoMatch
 {
     [Command]
     private void ExecuteFoo() { }
-
-    // Convention `rx1-name` => ambiguous methods
-    private bool CanRx1Foo() => true;
-
-    private bool CanRx1Foo( int v ) => true;
-
-    // Convention `rx2-name` => invalid methods
-    private void CanRx2Foo() { }
-
-    private void CanRx2Foo( int v ) { }
-
-    // Convention `rx3-name` => ambiguous method or property
-    private bool CanRx3Foo() => true;
-
-    private bool CanRx3FooProperty => true;
 }

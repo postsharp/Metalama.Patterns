@@ -12,7 +12,6 @@ internal static class DependencyPropertyNamingConventionMatcher
     public static DependencyPropertyNamingConventionMatch Match(
         INamingConvention namingConvention,
         IProperty targetProperty,
-        Action<InspectedMember> addInspectedMember,
         string dependencyPropertyName,
         string registrationFieldName,
         INameMatchPredicate matchPropertyChangingPredicate,
@@ -22,6 +21,8 @@ internal static class DependencyPropertyNamingConventionMatcher
         bool requirePropertyChangedMatch = false,
         bool requireValidateMatch = false )
     {
+        var inspectedMembers = new List<InspectedMember>();
+
         var assets = targetProperty.Compilation.Cache.GetOrAdd( _ => new DependencyPropertyAssets() );
 
         var declaringType = targetProperty.DeclaringType;
@@ -43,19 +44,19 @@ internal static class DependencyPropertyNamingConventionMatcher
         var findPropertyChangingResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangingPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
-            addInspectedMember,
+            inspectedMembers.Add,
             DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
 
         var findPropertyChangedResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangedPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
-            addInspectedMember,
+            inspectedMembers.Add,
             DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );
 
         var findValidateResult = declaringType.Methods.FindMatchingMembers(
             matchValidateNamePredicate,
             m => GetValidationHandlerSignature( m, targetProperty, assets ),
-            addInspectedMember,
+            inspectedMembers.Add,
             DependencyPropertyAspectBuilder.ValidateMethodCategory );
 
         return new DependencyPropertyNamingConventionMatch(
@@ -66,6 +67,7 @@ internal static class DependencyPropertyNamingConventionMatcher
             findPropertyChangingResult,
             findPropertyChangedResult,
             findValidateResult,
+            inspectedMembers,
             requirePropertyChangingMatch,
             requirePropertyChangedMatch,
             requireValidateMatch );

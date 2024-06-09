@@ -83,9 +83,7 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
 
     public string Name { get; }
 
-    DependencyPropertyNamingConventionMatch INamingConvention<IProperty, DependencyPropertyNamingConventionMatch>.Match(
-        IProperty targetProperty,
-        Action<InspectedMember> addInspectedMember )
+    DependencyPropertyNamingConventionMatch INamingConvention<IProperty, DependencyPropertyNamingConventionMatch>.Match( IProperty targetProperty )
     {
         string? propertyName = null;
 
@@ -120,6 +118,7 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
                 MemberMatch<IMethod, ChangeHandlerSignatureKind>.NotFound(),
                 MemberMatch<IMethod, ChangeHandlerSignatureKind>.NotFound(),
                 MemberMatch<IMethod, ValidationHandlerSignatureKind>.NotFound(),
+                [],
                 this.IsOnPropertyChangingRequired.GetValueOrDefault( this.OnPropertyChangingPattern != null ),
                 this.IsOnPropertyChangedRequired.GetValueOrDefault( this.OnPropertyChangedPattern != null ),
                 this.IsValidateRequired.GetValueOrDefault( this.ValidatePattern != null ) );
@@ -159,7 +158,6 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
         return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
-            addInspectedMember,
             propertyName,
             registrationFieldName,
             propertyChangingPredicate,

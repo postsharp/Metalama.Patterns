@@ -73,9 +73,7 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
         this.Name = name;
     }
 
-    CommandNamingConventionMatch INamingConvention<IMethod, CommandNamingConventionMatch>.Match(
-        IMethod executeMethod,
-        Action<InspectedMember> addInspectedMember )
+    CommandNamingConventionMatch INamingConvention<IMethod, CommandNamingConventionMatch>.Match( IMethod executeMethod )
     {
         string? commandName = null;
 
@@ -107,6 +105,7 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
                 null,
                 MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Invalid(),
                 MemberMatch<IMember, DefaultMatchKind>.NotFound(),
+                [],
                 this.IsCanExecuteRequired.GetValueOrDefault( this.CanExecutePatterns != null ) );
         }
 
@@ -138,7 +137,6 @@ public sealed record CommandNamingConvention : ICommandNamingConvention
         return CommandNamingConventionMatcher.Match(
             this,
             executeMethod,
-            addInspectedMember,
             commandPropertyName,
             canExecutePredicate,
             considerMethod: this.ConsiderCanExecuteMethod,

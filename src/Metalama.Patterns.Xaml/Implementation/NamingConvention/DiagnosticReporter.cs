@@ -14,6 +14,8 @@ internal abstract class DiagnosticReporter
     {
         this._builder = builder;
     }
+    
+    protected abstract string GeneratedArtifactKind { get; }
 
     // ReSharper disable once UnusedParameter.Global
 
@@ -25,22 +27,22 @@ internal abstract class DiagnosticReporter
     /// <summary>
     /// Gets the <c>InvalidityReason</c> argument for <see cref="Diagnostics.InvalidCandidateDeclarationSignature"/>.
     /// </summary>
-    /// <param name="addInspectedMember"></param>
+    /// <param name="inspectedMember"></param>
     /// <returns></returns>
-    protected abstract string GetInvalidityReason( in InspectedMember addInspectedMember );
+    protected abstract string GetInvalidityReason( in InspectedMember inspectedMember );
 
-    private void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedMember addInspectedMember, bool isRequired )
+    private void ReportAmbiguousDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired )
         => this._builder.Diagnostics.Report(
             Diagnostics.ValidCandidateDeclarationIsAmbiguous.WithArguments(
                 (
-                    addInspectedMember.Member.DeclarationKind,
-                    addInspectedMember.Category,
+                    inspectedMember.Member.DeclarationKind,
+                    inspectedMember.Category,
                     this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
                     namingConvention.Name
                 ) ),
-            addInspectedMember.Member );
+            inspectedMember.Member );
 
     private void ReportConflictingDeclaration(
         INamingConvention namingConvention,
@@ -57,58 +59,59 @@ internal abstract class DiagnosticReporter
                     applicableCategories.PrettyList( " or " ),
                     namingConvention.Name) ) );
 
-    private void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedMember addInspectedMember, bool isRequired )
+    private void ReportInvalidDeclaration( INamingConvention namingConvention, in InspectedMember inspectedMember, bool isRequired )
         => this._builder.Diagnostics.Report(
             Diagnostics.InvalidCandidateDeclarationSignature.WithArguments(
                 (
-                    addInspectedMember.Member.DeclarationKind,
-                    addInspectedMember.Category,
+                    inspectedMember.Member,
+                    inspectedMember.Member.DeclarationKind,
+                    inspectedMember.Category,
                     this.GetTargetDeclarationDescription(),
                     this._builder.Target,
                     isRequired ? "as required " : null,
                     namingConvention.Name,
-                    this.GetInvalidityReason( addInspectedMember )
+                    this.GetInvalidityReason( inspectedMember )
                 ) ),
-            addInspectedMember.Member );
+            inspectedMember.Member );
 
+    
     private void ReportDeclarationNotFound(
-        INamingConvention namingConvention,
+        IDeclaration principalDeclaration,
         IEnumerable<string> candidateNames,
         IEnumerable<string> applicableCategories )
     {
-        var candidateNamesList = candidateNames.PrettyList( " or ", out var candidateNamesPlurality, '\'' );
+        var candidateNamesList = candidateNames.PrettyList( " or ", out _, '\'' );
 
         this._builder.Diagnostics.Report(
             Diagnostics.CandidateNamesNotFound.WithArguments(
                 (
                     applicableCategories.PrettyList( " or " ),
-                    namingConvention.Name,
-                    candidateNamesPlurality == 2 ? "s" : null,
-                    candidateNamesList
+                    this.GeneratedArtifactKind,
+                    candidateNamesList,
+                    principalDeclaration
                 ) ) );
     }
 
-    private void ReportNoNamingConventionMatched( IEnumerable<INamingConvention> namingConventionsTried )
+    public void ReportNoNamingConventionMatched( IDeclaration principalDeclaration )
         => this._builder.Diagnostics.Report(
             Diagnostics.NoNamingConventionMatched.WithArguments(
-                (namingConventionsTried.Select( nc => nc.Name ).PrettyList( " and ", out var plurality ), plurality == 2 ? "s" : null) ) );
-
-    private void ReportNoConfiguredNamingConventions() => this._builder.Diagnostics.Report( Diagnostics.NoConfiguredNamingConventions );
-
+                (this.GeneratedArtifactKind, principalDeclaration) ) );
+    
     private void ReportDiagnostics(
+        IDeclaration principalDeclaration,
         INamingConvention namingConvention,
-        MemberMatchDiagnosticInfo member,
-        IEnumerable<InspectedMember> inspectedDeclarations )
+        MemberMatchDiagnosticInfo matchedMember,
+        IReadOnlyList<InspectedMember> inspectedDeclarations )
     {
-        switch ( member.Match.Outcome )
+        switch ( matchedMember.Match.Outcome )
         {
             case MemberMatchOutcome.Ambiguous:
 
                 foreach ( var inspectedDeclaration in inspectedDeclarations )
                 {
-                    if ( inspectedDeclaration.IsValid && member.Categories.Any( c => c == inspectedDeclaration.Category ) )
+                    if ( inspectedDeclaration.IsValid && matchedMember.Categories.Any( c => c == inspectedDeclaration.Category ) )
                     {
-                        this.ReportAmbiguousDeclaration( namingConvention, inspectedDeclaration, member.IsRequired );
+                        this.ReportAmbiguousDeclaration( namingConvention, inspectedDeclaration, matchedMember.IsRequired );
                     }
                 }
 
@@ -118,9 +121,9 @@ internal abstract class DiagnosticReporter
 
                 foreach ( var inspectedDeclaration in inspectedDeclarations )
                 {
-                    if ( !inspectedDeclaration.IsValid && member.Categories.Any( c => c == inspectedDeclaration.Category ) )
+                    if ( !inspectedDeclaration.IsValid && matchedMember.Categories.Any( c => c == inspectedDeclaration.Category ) )
                     {
-                        this.ReportInvalidDeclaration( namingConvention, inspectedDeclaration, member.IsRequired );
+                        this.ReportInvalidDeclaration( namingConvention, inspectedDeclaration, matchedMember.IsRequired );
                     }
                 }
 
@@ -128,51 +131,31 @@ internal abstract class DiagnosticReporter
 
             case MemberMatchOutcome.NotFound:
 
-                if ( !member.Match.CandidateNames.IsEmpty && member.IsRequired )
+                if ( !matchedMember.Match.CandidateNames.IsEmpty && matchedMember.IsRequired )
                 {
-                    this.ReportDeclarationNotFound( namingConvention, member.Match.CandidateNames, member.Categories );
+                    this.ReportDeclarationNotFound(  principalDeclaration,  matchedMember.Match.CandidateNames, matchedMember.Categories );
                 }
 
                 break;
 
             case MemberMatchOutcome.Conflict:
 
-                this.ReportConflictingDeclaration( namingConvention, member.Match.Member!, member.Categories, member.IsRequired );
+                this.ReportConflictingDeclaration( namingConvention, matchedMember.Match.Member!, matchedMember.Categories, matchedMember.IsRequired );
 
                 break;
         }
     }
 
-    public void ReportDiagnostics<TMatch>( INamingConventionEvaluationResult<TMatch> evaluationResult )
+    public void ReportNamingConventionFailure<TDeclaration, TMatch>(
+        INamingConvention<TDeclaration, TMatch> namingConvention,
+        TDeclaration target,
+        TMatch match )
         where TMatch : NamingConventionMatch
+        where TDeclaration : IDeclaration
     {
-        if ( evaluationResult.Success )
+        foreach ( var memberDiagnostic in match.Members )
         {
-            var match = evaluationResult.SuccessfulMatch.Value.Match;
-
-            foreach ( var member in match.Members )
-            {
-                this.ReportDiagnostics( match.NamingConvention, member, evaluationResult.SuccessfulMatch.Value.InspectedDeclarations );
-            }
-        }
-        else
-        {
-            if ( evaluationResult.UnsuccessfulMatches != null )
-            {
-                this.ReportNoNamingConventionMatched( evaluationResult.UnsuccessfulMatches.Select( um => um.Match.NamingConvention ) );
-
-                foreach ( var unsuccessfulMatch in evaluationResult.UnsuccessfulMatches )
-                {
-                    foreach ( var member in unsuccessfulMatch.Match.Members )
-                    {
-                        this.ReportDiagnostics( unsuccessfulMatch.Match.NamingConvention, member, unsuccessfulMatch.InspectedDeclarations );
-                    }
-                }
-            }
-            else
-            {
-                this.ReportNoConfiguredNamingConventions();
-            }
+            this.ReportDiagnostics(  target, namingConvention, memberDiagnostic, match.InspectedMembers );
         }
     }
 }

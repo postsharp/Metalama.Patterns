@@ -5,5 +5,32 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal readonly record struct InspectedNamingConventionMatch<TMatch>( TMatch Match, IEnumerable<InspectedMember> InspectedDeclarations )
+internal readonly record struct InspectedNamingConventionMatch<TMatch>(
+    TMatch Match,
+    NamingConventionOutcome Outcome,
+    IEnumerable<InspectedMember> InspectedDeclarations )
     where TMatch : NamingConventionMatch;
+
+[CompileTime]
+internal enum NamingConventionOutcome
+{
+    /// <summary>
+    /// Both the primary and the secondary matches succeeded.
+    /// </summary>
+    Success,
+
+    /// <summary>
+    /// The primary match did not succeed, so another naming convention must be considered.
+    /// </summary>
+    Mismatch,
+
+    /// <summary>
+    /// The primary match succeeded but a secondary optional match failed.
+    /// </summary>
+    Warning,
+
+    /// <summary>
+    /// The primary match succeeded but a secondary required match failed.
+    /// </summary>
+    Error
+}
