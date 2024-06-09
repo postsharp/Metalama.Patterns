@@ -14,7 +14,7 @@ internal abstract class DiagnosticReporter
     {
         this._builder = builder;
     }
-    
+
     protected abstract string GeneratedArtifactKind { get; }
 
     // ReSharper disable once UnusedParameter.Global
@@ -74,7 +74,6 @@ internal abstract class DiagnosticReporter
                 ) ),
             inspectedMember.Member );
 
-    
     private void ReportDeclarationNotFound(
         IDeclaration principalDeclaration,
         IEnumerable<string> candidateNames,
@@ -93,10 +92,8 @@ internal abstract class DiagnosticReporter
     }
 
     public void ReportNoNamingConventionMatched( IDeclaration principalDeclaration )
-        => this._builder.Diagnostics.Report(
-            Diagnostics.NoNamingConventionMatched.WithArguments(
-                (this.GeneratedArtifactKind, principalDeclaration) ) );
-    
+        => this._builder.Diagnostics.Report( Diagnostics.NoNamingConventionMatched.WithArguments( (this.GeneratedArtifactKind, principalDeclaration) ) );
+
     private void ReportDiagnostics(
         IDeclaration principalDeclaration,
         INamingConvention namingConvention,
@@ -133,7 +130,7 @@ internal abstract class DiagnosticReporter
 
                 if ( !matchedMember.Match.CandidateNames.IsEmpty && matchedMember.IsRequired )
                 {
-                    this.ReportDeclarationNotFound(  principalDeclaration,  matchedMember.Match.CandidateNames, matchedMember.Categories );
+                    this.ReportDeclarationNotFound( principalDeclaration, matchedMember.Match.CandidateNames, matchedMember.Categories );
                 }
 
                 break;
@@ -155,7 +152,7 @@ internal abstract class DiagnosticReporter
     {
         foreach ( var memberDiagnostic in match.Members )
         {
-            this.ReportDiagnostics(  target, namingConvention, memberDiagnostic, match.InspectedMembers );
+            this.ReportDiagnostics( target, namingConvention, memberDiagnostic, match.InspectedMembers );
         }
     }
 }

@@ -56,14 +56,14 @@ internal static class Diagnostics
     /// For example, "The `method` was a candidate `can-execute method` for `[Command] method ``Foo()`, but the signature is not valid.` The method must blah blah.`".
     /// </summary>
     public static readonly DiagnosticDefinition<(
-            IDeclaration DiagnosticTargetDeclaration,        // 0
-            DeclarationKind DiagnosticTargetDeclarationKind, // 1 
-            string? CandidateDescription,                    // 2
-            string TargetDeclarationDescription,             // 3
-            IDeclaration TargetDeclaration,                  // 4
-            string? AsRequired,                              // 5
-            string NamingConvention,                         // 6
-            string? InvalidityReason                         // 7
+            IDeclaration DiagnosticTargetDeclaration,
+            DeclarationKind DiagnosticTargetDeclarationKind,
+            string? CandidateDescription,
+            string TargetDeclarationDescription,
+            IDeclaration TargetDeclaration,
+            string? AsRequired,
+            string NamingConvention,
+            string? InvalidityReason
             )>
         InvalidCandidateDeclarationSignature =
             new(
@@ -90,11 +90,11 @@ internal static class Diagnostics
     /// No {0} was found {1} the {2} naming convention, with candidate member name{3} {4}.
     /// </summary>
     public static readonly DiagnosticDefinition<(
-            string CandidateDescription, // 0 
-            string MemberKind,// 1
-            string CandidateNames, // 2
-            IDeclaration Declaration // 3  
-            )> 
+            string CandidateDescription,
+            string MemberKind,
+            string CandidateNames,
+            IDeclaration Declaration
+            )>
         CandidateNamesNotFound =
             new(
                 "LAMA5206",
@@ -114,5 +114,4 @@ internal static class Diagnostics
                 "No {0} naming conventioned matched '{1}'.",
                 "No configured naming convention matched.",
                 _category );
-    
 }
