@@ -6,13 +6,13 @@ using System.Collections.Immutable;
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 [CompileTime]
-internal abstract record NamingConventionMatch( INamingConvention NamingConvention )
+internal abstract record NamingConventionMatch( INamingConvention NamingConvention, IReadOnlyList<InspectedMember> InspectedMembers )
 {
     private ImmutableArray<MemberMatchDiagnosticInfo> _members;
 
-    public abstract bool Success { get; }
+    public abstract NamingConventionOutcome Outcome { get; }
 
-    protected abstract ImmutableArray<MemberMatchDiagnosticInfo> GetMembers();
+    protected abstract ImmutableArray<MemberMatchDiagnosticInfo> GetMemberDiagnostics();
 
-    public ImmutableArray<MemberMatchDiagnosticInfo> Members => this._members.IsDefault ? this._members = this.GetMembers() : this._members;
+    public ImmutableArray<MemberMatchDiagnosticInfo> Members => this._members.IsDefault ? this._members = this.GetMemberDiagnostics() : this._members;
 }

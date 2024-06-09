@@ -1,6 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using Metalama.Framework.Aspects;
+using Metalama.Framework.Code;
 using Metalama.Framework.Serialization;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
@@ -12,8 +13,9 @@ internal interface INamingConvention : ICompileTimeSerializable
 }
 
 [CompileTime]
-internal interface INamingConvention<in TArguments, out TMatch> : INamingConvention
+internal interface INamingConvention<in TDeclaration, out TMatch> : INamingConvention
     where TMatch : NamingConventionMatch
+    where TDeclaration : IDeclaration
 {
-    TMatch Match( TArguments arguments, Action<InspectedMember> addInspectedMember );
+    TMatch Match( TDeclaration arguments );
 }

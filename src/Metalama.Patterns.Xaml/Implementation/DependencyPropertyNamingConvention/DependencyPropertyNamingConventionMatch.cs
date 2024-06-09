@@ -16,22 +16,37 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     MemberMatch<IMethod, ChangeHandlerSignatureKind> PropertyChangingMatch,
     MemberMatch<IMethod, ChangeHandlerSignatureKind> PropertyChangedMatch,
     MemberMatch<IMethod, ValidationHandlerSignatureKind> ValidateMatch,
+    IReadOnlyList<InspectedMember> InspectedMembers,
     bool RequirePropertyChangingMatch = false,
     bool RequirePropertyChangedMatch = false,
-    bool RequireValidateMatch = false ) : NamingConventionMatch( NamingConvention )
+    bool RequireValidateMatch = false ) : NamingConventionMatch( NamingConvention, InspectedMembers )
 {
-    public override bool Success
-        => !string.IsNullOrWhiteSpace( this.DependencyPropertyName )
-           && !string.IsNullOrWhiteSpace( this.RegistrationFieldName )
-           && this.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success
-           && (this.PropertyChangingMatch.Outcome == MemberMatchOutcome.Success
-               || (this.RequirePropertyChangingMatch == false && this.PropertyChangingMatch.Outcome == MemberMatchOutcome.NotFound))
-           && (this.PropertyChangedMatch.Outcome == MemberMatchOutcome.Success
-               || (this.RequirePropertyChangedMatch == false && this.PropertyChangedMatch.Outcome == MemberMatchOutcome.NotFound))
-           && (this.ValidateMatch.Outcome == MemberMatchOutcome.Success
-               || (this.RequireValidateMatch == false && this.ValidateMatch.Outcome == MemberMatchOutcome.NotFound));
+    public override NamingConventionOutcome Outcome
+    {
+        get
+        {
+            if ( string.IsNullOrWhiteSpace( this.DependencyPropertyName )
+                 || string.IsNullOrWhiteSpace( this.RegistrationFieldName ) )
+            {
+                return NamingConventionOutcome.Mismatch;
+            }
 
-    protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMembers()
+            if ( this.RegistrationFieldConflictMatch.Outcome != MemberMatchOutcome.Success
+                 || (this.PropertyChangingMatch.Outcome != MemberMatchOutcome.Success
+                     && (this.RequirePropertyChangingMatch || this.PropertyChangingMatch.Outcome != MemberMatchOutcome.NotFound))
+                 || (this.PropertyChangedMatch.Outcome != MemberMatchOutcome.Success
+                     && (this.RequirePropertyChangedMatch || this.PropertyChangedMatch.Outcome != MemberMatchOutcome.NotFound))
+                 || (this.ValidateMatch.Outcome != MemberMatchOutcome.Success
+                     && (this.RequireValidateMatch || this.ValidateMatch.Outcome != MemberMatchOutcome.NotFound)) )
+            {
+                return NamingConventionOutcome.Error;
+            }
+
+            return NamingConventionOutcome.Success;
+        }
+    }
+
+    protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMemberDiagnostics()
         => ImmutableArray.Create(
             new MemberMatchDiagnosticInfo( this.RegistrationFieldConflictMatch, true, _registrationFieldCategories ),
             new MemberMatchDiagnosticInfo( this.PropertyChangingMatch, this.RequirePropertyChangingMatch, _propertyChangingCategories ),

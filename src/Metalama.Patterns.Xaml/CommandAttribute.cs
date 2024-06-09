@@ -104,75 +104,72 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
 
         var hasExplicitCanExecuteNaming = this.CanExecuteMethod != null || this.CanExecuteProperty != null;
 
-        var ncResult = hasExplicitCanExecuteNaming
-            ? NamingConventionEvaluator.Evaluate(
-                new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty ),
-                target )
-            : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
+        var namingConventions = hasExplicitCanExecuteNaming
+            ? [new ExplicitCommandNamingConvention( this.CommandPropertyName, this.CanExecuteMethod, this.CanExecuteProperty )]
+            : options.GetSortedNamingConventions();
 
-        new DiagnosticReporter( builder ).ReportDiagnostics( ncResult );
+        var diagnosticReporter = new DiagnosticReporter( builder );
 
-        var successfulMatch = ncResult.SuccessfulMatch?.Match;
+        if ( !NamingConventionEvaluator.TryEvaluate( namingConventions, target, diagnosticReporter, out var match ) )
+        {
+            builder.SkipAspect();
 
-        var canTransform = true;
+            return;
+        }
+
         IProperty? commandProperty = null;
         IMethod? canExecuteMethod = null;
         IProperty? canExecuteProperty = null;
 
-        if ( successfulMatch != null )
+        switch ( match.CanExecuteMatch.Member )
         {
-            switch ( successfulMatch.CanExecuteMatch.Member )
+            case null:
+                break;
+
+            case IProperty property:
+                canExecuteProperty = property;
+
+                break;
+
+            case IMethod method:
+                canExecuteMethod = method;
+
+                break;
+
+            default:
+                throw new NotSupportedException( "Expected a method or property." );
+        }
+
+        var introducePropertyResult = builder.Advice.IntroduceProperty(
+            declaringType,
+            nameof(CommandProperty),
+            IntroductionScope.Instance,
+            OverrideStrategy.Fail,
+            b =>
             {
-                case null:
-                    break;
+                b.Name = match.CommandPropertyName!;
 
-                case IProperty property:
-                    canExecuteProperty = property;
+                // ReSharper disable once RedundantNameQualifier
+                b.Accessibility = MetalamaAccessibility.Public;
 
-                    break;
+                // ReSharper disable once RedundantNameQualifier
+                b.GetMethod!.Accessibility = MetalamaAccessibility.Public;
+            } );
 
-                case IMethod method:
-                    canExecuteMethod = method;
-
-                    break;
-
-                default:
-                    throw new NotSupportedException( "Expected a method or property." );
-            }
-
-            var introducePropertyResult = builder.Advice.IntroduceProperty(
-                declaringType,
-                nameof(CommandProperty),
-                IntroductionScope.Instance,
-                OverrideStrategy.Fail,
-                b =>
-                {
-                    b.Name = successfulMatch.CommandPropertyName!;
-
-                    // ReSharper disable once RedundantNameQualifier
-                    b.Accessibility = MetalamaAccessibility.Public;
-
-                    // ReSharper disable once RedundantNameQualifier
-                    b.GetMethod!.Accessibility = MetalamaAccessibility.Public;
-                } );
-
-            if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
-            {
-                commandProperty = introducePropertyResult.Declaration;
-            }
-            else
-            {
-                canTransform = false;
-            }
+        if ( introducePropertyResult.Outcome == AdviceOutcome.Default )
+        {
+            commandProperty = introducePropertyResult.Declaration;
         }
         else
         {
-            canTransform = false;
+            builder.SkipAspect();
+
+            return;
         }
 
         var useInpcIntegration = false;
 
-        if ( canTransform && canExecuteProperty != null && options.EnableINotifyPropertyChangedIntegration == true )
+        if ( canExecuteProperty != null && options.EnableINotifyPropertyChangedIntegration == true )
         {
             if ( declaringType.AllImplementedInterfaces.Contains( typeof(INotifyPropertyChanged) ) )
             {
@@ -188,21 +185,18 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             }
         }
 
-        if ( !canTransform || !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
+        if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
-            if ( canTransform )
+            builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, target );
+
+            if ( canExecuteMethod != null )
             {
-                builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, target );
+                builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteMethod );
+            }
 
-                if ( canExecuteMethod != null )
-                {
-                    builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteMethod );
-                }
-
-                if ( canExecuteProperty != null )
-                {
-                    builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteProperty );
-                }
+            if ( canExecuteProperty != null )
+            {
+                builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, canExecuteProperty );
             }
 
             return;

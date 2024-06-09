@@ -1,7 +1,2 @@
-// Error LAMA5207 on `Foo`: `No match was found using the rx1, rx2 and rx3 naming conventions. See other warnings for details.`
-// Error LAMA5206 on `Foo`: `No property-changed method was found using the rx2 naming convention, with candidate member name 'FooRx2Ed'.`
-// Error LAMA5206 on `Foo`: `No property-changed method was found using the rx3 naming convention, with candidate member name 'FooRx3Ed'.`
-// Error LAMA5206 on `Foo`: `No property-changing method was found using the rx3 naming convention, with candidate member name 'FooRx3Ing'.`
-// Warning LAMA5205 on `FooRx1Ing`: `The method was identified as a valid candidate property-changing method for [DependencyProperty] property MultipleNamingConventionsNoMatch.Foo as required by the rx1 naming convention, but other members also matched.`
-// Warning LAMA5205 on `FooRx1Ing`: `The method was identified as a valid candidate property-changing method for [DependencyProperty] property MultipleNamingConventionsNoMatch.Foo as required by the rx1 naming convention, but other members also matched.`
-// Warning LAMA5204 on `FooRx2Ing`: `The method was identified as a candidate property-changing method for [DependencyProperty] property MultipleNamingConventionsNoMatch.Foo as required by the rx2 naming convention, but the signature is not valid. Refer to documentation for supported method signatures.`
+// Error LAMA5205 on `FooRx1Ing`: `Ambiguous match while identifying the property-changing method for [DependencyProperty] property 'MultipleNamingConventionsNoMatch.Foo' as required by the 'rx1' naming convention.`
+// Error LAMA5205 on `FooRx1Ing`: `Ambiguous match while identifying the property-changing method for [DependencyProperty] property 'MultipleNamingConventionsNoMatch.Foo' as required by the 'rx1' naming convention.`

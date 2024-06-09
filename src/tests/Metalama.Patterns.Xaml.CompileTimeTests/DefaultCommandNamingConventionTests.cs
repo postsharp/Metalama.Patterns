@@ -9,11 +9,11 @@ namespace Metalama.Patterns.Xaml.CompileTimeTests;
 public sealed class DefaultCommandNamingConventionTests
 {
     [InlineData( "execute", "execute" )]
-    [InlineData( "m_execute", "m_execute" )]
+    [InlineData( "m_execute", "execute" )]
     [InlineData( "m_", "m_" )]
     [InlineData( "_", "_" )]
     [InlineData( "Command", "Command" )]
-    [InlineData( "_command", "Command" )]
+    [InlineData( "_command", "command" )]
     [InlineData( "executeFoo", "Foo" )]
     [InlineData( "ExecuteFoo", "Foo" )]
     [InlineData( "m_foo", "Foo" )]

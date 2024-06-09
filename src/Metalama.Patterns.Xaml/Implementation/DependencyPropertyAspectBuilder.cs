@@ -42,29 +42,34 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var hasExplicitNaming = this._attribute.PropertyChangingMethod != null || this._attribute.PropertyChangedMethod != null
                                                                                || this._attribute.ValidateMethod != null;
 
-        var ncResult = hasExplicitNaming
-            ? NamingConventionEvaluator.Evaluate(
+        var namingConventions = hasExplicitNaming
+            ?
+            [
                 new ExplicitDependencyPropertyNamingConvention(
                     this._attribute.RegistrationField,
                     this._attribute.PropertyChangingMethod,
                     this._attribute.PropertyChangedMethod,
-                    this._attribute.ValidateMethod ),
-                target )
-            : NamingConventionEvaluator.Evaluate( options.GetSortedNamingConventions(), target );
+                    this._attribute.ValidateMethod )
+            ]
+            : options.GetSortedNamingConventions();
 
-        new DiagnosticReporter( builder ).ReportDiagnostics( ncResult );
+        var diagnosticReporter = new DiagnosticReporter( builder );
 
-        var successfulMatch = ncResult.SuccessfulMatch?.Match;
+        if ( !NamingConventionEvaluator.TryEvaluate( namingConventions, target, diagnosticReporter, out var match ) )
+        {
+            // No match.
+            return;
+        }
 
         // NB: WPF convention requires a specific field name, so we don't try to find an unused name.
 
         IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
 
-        if ( successfulMatch?.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
+        if ( match?.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
         {
             introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
                 declaringType,
-                successfulMatch.RegistrationFieldName!,
+                match.RegistrationFieldName!,
                 typeof(DependencyProperty),
                 IntroductionScope.Static,
                 OverrideStrategy.Fail,
@@ -76,9 +81,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 } );
         }
 
-        var onChangingMethod = successfulMatch?.PropertyChangingMatch.Member;
-        var onChangedMethod = successfulMatch?.PropertyChangedMatch.Member;
-        var validateMethod = successfulMatch?.ValidateMatch.Member;
+        var onChangingMethod = match?.PropertyChangingMatch.Member;
+        var onChangedMethod = match?.PropertyChangedMatch.Member;
+        var validateMethod = match?.ValidateMatch.Member;
 
         if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
@@ -100,7 +105,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             return;
         }
 
-        if ( successfulMatch == null || introduceRegistrationFieldResult is not { Outcome: AdviceOutcome.Default } )
+        if ( match == null || introduceRegistrationFieldResult is not { Outcome: AdviceOutcome.Default } )
         {
             // We cannot proceed with other transformations if there was no naming convention match or
             // we could not introduce the DependencyProperty field.
@@ -166,16 +171,16 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 {
                     dependencyPropertyField = introduceRegistrationFieldResult.Declaration,
                     options = this._options,
-                    propertyName = successfulMatch.DependencyPropertyName,
+                    propertyName = match.DependencyPropertyName,
                     propertyType,
                     declaringType,
                     defaultValueExpr = this._builder.Target.InitializerExpression,
                     onChangingMethod,
-                    onChangingSignatureKind = successfulMatch.PropertyChangingMatch.Kind,
+                    onChangingSignatureKind = match.PropertyChangingMatch.Kind,
                     onChangedMethod,
-                    onChangedSignatureKind = successfulMatch.PropertyChangedMatch.Kind,
+                    onChangedSignatureKind = match.PropertyChangedMatch.Kind,
                     validateMethod,
-                    validateSignatureKind = successfulMatch.ValidateMatch.Kind,
+                    validateSignatureKind = match.ValidateMatch.Kind,
                     applyContractsMethod
                 } );
 

@@ -12,13 +12,14 @@ internal static class CommandNamingConventionMatcher
     public static CommandNamingConventionMatch Match(
         INamingConvention namingConvention,
         IMethod executeMethod,
-        Action<InspectedMember> addInspectedMember,
         string commandPropertyName,
         INameMatchPredicate matchCanExecuteNamePredicate,
         bool considerMethod = true,
         bool considerProperty = true,
         bool requireCanExecuteMatch = false )
     {
+        var inspectedMembers = new List<InspectedMember>();
+
         var declaringType = executeMethod.DeclaringType;
 
         var conflictingMember = (IMemberOrNamedType?) declaringType.AllMembers().FirstOrDefault( m => m.Name == commandPropertyName )
@@ -37,7 +38,7 @@ internal static class CommandNamingConventionMatcher
                 executeMethod.DeclaringType.Methods.FindMatchingMembers(
                     matchCanExecuteNamePredicate,
                     IsValidCanExecuteMethod,
-                    addInspectedMember,
+                    inspectedMembers.Add,
                     CommandAttribute.CanExecuteMethodCategory );
         }
 
@@ -49,7 +50,7 @@ internal static class CommandNamingConventionMatcher
                 executeMethod.DeclaringType.Properties.FindMatchingMembers(
                     matchCanExecuteNamePredicate,
                     IsValidCanExecuteProperty,
-                    addInspectedMember,
+                    inspectedMembers.Add,
                     CommandAttribute.CanExecutePropertyCategory );
         }
 
@@ -61,6 +62,7 @@ internal static class CommandNamingConventionMatcher
                     commandPropertyName,
                     commandPropertyConflictMatch,
                     MemberMatch<IMember, DefaultMatchKind>.Ambiguous(),
+                    inspectedMembers,
                     requireCanExecuteMatch );
 
             case MemberMatchOutcome.Success:
@@ -69,6 +71,7 @@ internal static class CommandNamingConventionMatcher
                     commandPropertyName,
                     commandPropertyConflictMatch,
                     canExecuteMethodMatch.Cast<IMember>(),
+                    inspectedMembers,
                     requireCanExecuteMatch );
 
             default:
@@ -80,6 +83,7 @@ internal static class CommandNamingConventionMatcher
                             commandPropertyName,
                             commandPropertyConflictMatch,
                             canExecutePropertyMatch.Cast<IMember>(),
+                            inspectedMembers,
                             requireCanExecuteMatch );
                     }
                     else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Ambiguous
@@ -90,6 +94,7 @@ internal static class CommandNamingConventionMatcher
                             commandPropertyName,
                             commandPropertyConflictMatch,
                             MemberMatch<IMember, DefaultMatchKind>.Ambiguous(),
+                            inspectedMembers,
                             requireCanExecuteMatch );
                     }
                     else if ( canExecuteMethodMatch?.Outcome == MemberMatchOutcome.Invalid || canExecutePropertyMatch?.Outcome == MemberMatchOutcome.Invalid )
@@ -99,6 +104,7 @@ internal static class CommandNamingConventionMatcher
                             commandPropertyName,
                             commandPropertyConflictMatch,
                             MemberMatch<IMember, DefaultMatchKind>.Invalid(),
+                            inspectedMembers,
                             requireCanExecuteMatch );
                     }
                     else
@@ -108,6 +114,7 @@ internal static class CommandNamingConventionMatcher
                             commandPropertyName,
                             commandPropertyConflictMatch,
                             MemberMatch<IMember, DefaultMatchKind>.NotFound( matchCanExecuteNamePredicate.Candidates ),
+                            inspectedMembers,
                             requireCanExecuteMatch );
                     }
                 }

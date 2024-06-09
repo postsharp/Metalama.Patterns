@@ -13,14 +13,13 @@ internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPro
 
     public string Name => "default";
 
-    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, Action<InspectedMember> addInspectedMember )
+    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty )
     {
         var propertyName = targetProperty.Name;
 
         return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
-            addInspectedMember,
             propertyName,
             GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate( GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),

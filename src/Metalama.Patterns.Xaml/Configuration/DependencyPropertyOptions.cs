@@ -51,9 +51,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
         => new DependencyPropertyOptions
         {
-            IsReadOnly = false,
-            InitializerProvidesDefaultValue = true,
-            NamingConventionRegistrations = DefaultNamingConventionRegistrations()
+            IsReadOnly = false, InitializerProvidesDefaultValue = true, NamingConventionRegistrations = DefaultNamingConventionRegistrations()
         };
 
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
@@ -61,7 +59,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
             new NamingConventionRegistration<IDependencyPropertyNamingConvention>(
                 DefaultCommandNamingConvention.RegistrationKey,
                 new DefaultDependencyPropertyNamingConvention(),
-                1000 ) );
+                int.MaxValue ) );
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {

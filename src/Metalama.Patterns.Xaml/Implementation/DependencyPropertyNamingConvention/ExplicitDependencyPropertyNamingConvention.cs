@@ -28,14 +28,13 @@ internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPr
 
     public string Name => "explicitly-configured";
 
-    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty, Action<InspectedMember> addInspectedMember )
+    public DependencyPropertyNamingConventionMatch Match( IProperty targetProperty )
     {
         var propertyName = targetProperty.Name;
 
         return DependencyPropertyNamingConventionMatcher.Match(
             this,
             targetProperty,
-            addInspectedMember,
             propertyName,
             this._registrationFieldName ?? DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate(

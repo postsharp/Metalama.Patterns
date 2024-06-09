@@ -15,7 +15,7 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
     public string Name => "default";
 
-    public CommandNamingConventionMatch Match( IMethod executeMethod, Action<InspectedMember> addInspectedMember )
+    public CommandNamingConventionMatch Match( IMethod executeMethod )
     {
         var commandName = GetCommandNameFromExecuteMethodName( executeMethod.Name );
 
@@ -26,29 +26,37 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
         return CommandNamingConventionMatcher.Match(
             this,
             executeMethod,
-            addInspectedMember,
             commandPropertyName,
             new StringNameMatchPredicate( canExecuteName ) );
     }
 
     public static string GetCommandNameFromExecuteMethodName( string name )
     {
-        var useName = name;
+        var nameWithoutTrivialPrefix = name;
+        TrimStart( ref nameWithoutTrivialPrefix, "_", StringComparison.OrdinalIgnoreCase );
+        TrimStart( ref nameWithoutTrivialPrefix, "m_", StringComparison.OrdinalIgnoreCase );
 
-        TrimStart( ref useName, "_", StringComparison.OrdinalIgnoreCase );
-        TrimStart( ref useName, "m_", StringComparison.OrdinalIgnoreCase );
+        var useName = nameWithoutTrivialPrefix;
+
         TrimStart( ref useName, "execute", StringComparison.OrdinalIgnoreCase );
         TrimStart( ref useName, "_", StringComparison.OrdinalIgnoreCase );
 
         _ = TrimEnd( ref useName, "_command", StringComparison.OrdinalIgnoreCase )
-            || TrimEnd( ref useName, "Command", StringComparison.Ordinal );
+            || TrimEnd( ref useName, "command", StringComparison.OrdinalIgnoreCase );
 
         if ( string.IsNullOrEmpty( useName ) )
         {
             // It's an unusual name comprised of expected prefixes and/or suffixes.
             // Just use it as-is.
 
-            return name;
+            if ( !string.IsNullOrEmpty( nameWithoutTrivialPrefix ) )
+            {
+                return nameWithoutTrivialPrefix;
+            }
+            else
+            {
+                return name;
+            }
         }
 
         if ( char.IsLower( useName[0] ) )
@@ -61,5 +69,6 @@ internal sealed class DefaultCommandNamingConvention : ICommandNamingConvention
 
     public static string GetCommandPropertyNameFromCommandName( string commandName ) => $"{commandName}Command";
 
-    public static ImmutableArray<string> GetCanExecuteNameFromCommandName( string commandName ) => ImmutableArray.Create( $"CanExecute{commandName}", $"Can{commandName}", $"Is{commandName}Enabled" );
+    public static ImmutableArray<string> GetCanExecuteNameFromCommandName( string commandName )
+        => ImmutableArray.Create( $"CanExecute{commandName}", $"Can{commandName}", $"Is{commandName}Enabled" );
 }
