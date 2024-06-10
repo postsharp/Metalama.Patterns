@@ -32,7 +32,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
 
         [Template]
         internal static void InitializeDependencyProperty(
+            [CompileTime] bool isReadOnly,
             [CompileTime] IField dependencyPropertyField,
+            [CompileTime] IField? dependencyPropertyKeyField,
             [CompileTime] DependencyPropertyOptions options,
             [CompileTime] string propertyName,
             [CompileTime] INamedType propertyType,
@@ -182,14 +184,15 @@ internal sealed partial class DependencyPropertyAspectBuilder
                         break;
                 }
 
-                if ( options.IsReadOnly == true )
+                if ( isReadOnly )
                 {
-                    dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
-                            propertyName,
-                            propertyType.ToTypeOfExpression().Value,
-                            declaringType.ToTypeOfExpression().Value,
-                            metadataExpr.Value )
-                        .DependencyProperty;
+                    dependencyPropertyKeyField!.Value = DependencyProperty.RegisterReadOnly(
+                        propertyName,
+                        propertyType.ToTypeOfExpression().Value,
+                        declaringType.ToTypeOfExpression().Value,
+                        metadataExpr.Value );
+
+                    dependencyPropertyField.Value = dependencyPropertyKeyField.Value.DependencyProperty;
                 }
                 else
                 {
@@ -202,14 +205,15 @@ internal sealed partial class DependencyPropertyAspectBuilder
             }
             else
             {
-                if ( options.IsReadOnly == true )
+                if ( isReadOnly )
                 {
-                    dependencyPropertyField.Value = DependencyProperty.RegisterReadOnly(
-                            propertyName,
-                            propertyType.ToTypeOfExpression().Value,
-                            declaringType.ToTypeOfExpression().Value,
-                            null )
-                        .DependencyProperty;
+                    dependencyPropertyKeyField!.Value = DependencyProperty.RegisterReadOnly(
+                        propertyName,
+                        propertyType.ToTypeOfExpression().Value,
+                        declaringType.ToTypeOfExpression().Value,
+                        null );
+
+                    dependencyPropertyField.Value = dependencyPropertyKeyField.Value.DependencyProperty;
                 }
                 else
                 {

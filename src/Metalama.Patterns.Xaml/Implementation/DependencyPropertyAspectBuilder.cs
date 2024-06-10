@@ -38,6 +38,10 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var declaringType = target.DeclaringType;
         var options = target.Enhancements().GetOptions<DependencyPropertyOptions>();
 
+        var isReadOnly = options.IsReadOnly ?? (this._builder.Target.SetMethod == null || this._builder.Target.Writeability < Writeability.All
+                                                                                       || this._builder.Target.SetMethod.Accessibility.IsSubsetOf(
+                                                                                           this._builder.Target.GetMethod!.Accessibility ));
+
         var hasExplicitNaming = this._attribute.PropertyChangedMethod != null
                                 || this._attribute.ValidateMethod != null;
 
@@ -62,6 +66,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         // NB: WPF convention requires a specific field name, so we don't try to find an unused name.
 
         IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
+        IIntroductionAdviceResult<IField>? introduceRegistrationKeyFieldResult = null;
 
         if ( match?.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
         {
@@ -77,6 +82,22 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     b.Accessibility = MetalamaAccessibility.Public;
                     b.Writeability = Writeability.ConstructorOnly;
                 } );
+
+            if ( isReadOnly )
+            {
+                introduceRegistrationKeyFieldResult = this._builder.Advice.IntroduceField(
+                    declaringType,
+                    match.RegistrationFieldName! + "Key",
+                    typeof(DependencyPropertyKey),
+                    IntroductionScope.Static,
+                    OverrideStrategy.Fail,
+                    b =>
+                    {
+                        // ReSharper disable once RedundantNameQualifier
+                        b.Accessibility = MetalamaAccessibility.Private;
+                        b.Writeability = Writeability.ConstructorOnly;
+                    } );
+            }
         }
 
         var onChangedMethod = match?.PropertyChangedMatch.Member;
@@ -138,22 +159,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
             ContractAspect.RedirectContracts( this._builder, target, applyContractsMethod.Parameters[0] );
         }
 
-        /* Regarding setting the initial value, the PostSharp implementation takes care to:
-         *
-         * - Only set the initial value when definitely supplied via an initializer and not when supplied via the DefaultValue property of the aspect.
-         * - Set the initial value using DependencyObject.SetCurrentValue ("otherwise we override value coming from templates").
-         * - Suspend enforcement of contracts and explicit validation around that call.
-         *
-         * See also https://tp.postsharp.net/entity/26136-dependencyproperty-values-are-not-set-when
-         *
-         * TG: My understanding from a Metalama perspective is that we have easy access and control of the initializer expression, and it can be used
-         * to provide the PropertyMetadata.DefaultValue. PostSharp could not do this, so it provided the DefaultValue attribute property as a
-         * compromised alternative (only constant default values can be provided that way). So in ML, we should not need the Start/StopIgnoringContracts
-         * concept. By default (according to DependencyPropertyOptions), we will use the initializer to set PropertyMetadata.DefaultValue
-         * (controlled by DependencyPropertyOptions.InitializerProvidesDefaultValue), and we will *not* call DependencyObject.SetValue (controlled by
-         * DependencyPropertyOptions.InitializerProvidesInitialValue).
-         */
-
         this._builder.Advice.WithTemplateProvider( Templates.Provider )
             .AddInitializer(
                 declaringType,
@@ -161,7 +166,9 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 InitializerKind.BeforeTypeConstructor,
                 args: new
                 {
+                    isReadOnly,
                     dependencyPropertyField = introduceRegistrationFieldResult.Declaration,
+                    dependencyPropertyKeyField = introduceRegistrationKeyFieldResult?.Declaration,
                     options = this._options,
                     propertyName = match.DependencyPropertyName,
                     propertyType,
@@ -186,7 +193,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 .OverrideAccessors(
                     this._builder.Target,
                     setTemplate: nameof(Templates.OverrideSetter),
-                    args: new { dependencyPropertyField = introduceRegistrationFieldResult.Declaration } );
+                    args: new { dependencyPropertyField = introduceRegistrationKeyFieldResult?.Declaration ?? introduceRegistrationFieldResult.Declaration } );
         }
 
         // Here we avoid the temptation to generate a static field to store the result of the initializer expression

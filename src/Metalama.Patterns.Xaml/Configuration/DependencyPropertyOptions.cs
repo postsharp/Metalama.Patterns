@@ -49,10 +49,7 @@ internal sealed record DependencyPropertyOptions : IHierarchicalOptions<ICompila
     }
 
     IHierarchicalOptions IHierarchicalOptions.GetDefaultOptions( OptionsInitializationContext context )
-        => new DependencyPropertyOptions
-        {
-            IsReadOnly = false, InitializerProvidesDefaultValue = true, NamingConventionRegistrations = DefaultNamingConventionRegistrations()
-        };
+        => new DependencyPropertyOptions { InitializerProvidesDefaultValue = true, NamingConventionRegistrations = DefaultNamingConventionRegistrations() };
 
     internal static IncrementalKeyedCollection<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>> DefaultNamingConventionRegistrations()
         => IncrementalKeyedCollection.AddOrApplyChanges<string, NamingConventionRegistration<IDependencyPropertyNamingConvention>>(
