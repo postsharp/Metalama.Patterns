@@ -9,20 +9,20 @@ public partial class InstanceValidateDependencyPropertyAndValue : DependencyObje
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private bool ValidateFoo( DependencyProperty d, int value ) => true;
+    private void ValidateFoo( DependencyProperty d, int value ) => throw new ArgumentException();
 
     [DependencyProperty]
     public List<int> AcceptAssignable { get; set; }
 
-    private bool ValidateAcceptAssignable( DependencyProperty d, IEnumerable<int> value ) => true;
+    private void ValidateAcceptAssignable( DependencyProperty d, IEnumerable<int> value ) => throw new ArgumentException();
 
     [DependencyProperty]
     public int AcceptGeneric { get; set; }
 
-    private bool ValidateAcceptGeneric<T>( DependencyProperty d, T value ) => true;
+    private void ValidateAcceptGeneric<T>( DependencyProperty d, T value ) => throw new ArgumentException();
 
     [DependencyProperty]
     public int AcceptObject { get; set; }
 
-    private bool ValidateAcceptObject( DependencyProperty d, object value ) => true;
+    private void ValidateAcceptObject( DependencyProperty d, object value ) => throw new ArgumentException();
 }

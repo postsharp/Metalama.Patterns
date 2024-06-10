@@ -14,7 +14,7 @@ public partial class InstanceValidateValue : DependencyObject
       this.SetValue(FooProperty, value);
     }
   }
-  private bool ValidateFoo(int value) => true;
+  private void ValidateFoo(int value) => throw new ArgumentException();
   [DependencyProperty]
   public List<int> AcceptAssignable
   {
@@ -27,7 +27,7 @@ public partial class InstanceValidateValue : DependencyObject
       this.SetValue(AcceptAssignableProperty, value);
     }
   }
-  private bool ValidateAcceptAssignable(IEnumerable<int> value) => true;
+  private void ValidateAcceptAssignable(IEnumerable<int> value) => throw new ArgumentException();
   [DependencyProperty]
   public int AcceptGeneric
   {
@@ -40,7 +40,7 @@ public partial class InstanceValidateValue : DependencyObject
       this.SetValue(AcceptGenericProperty, value);
     }
   }
-  private bool ValidateAcceptGeneric<T>(T value) => true;
+  private void ValidateAcceptGeneric<T>(T value) => throw new ArgumentException();
   [DependencyProperty]
   public int AcceptObject
   {
@@ -53,7 +53,7 @@ public partial class InstanceValidateValue : DependencyObject
       this.SetValue(AcceptObjectProperty, value);
     }
   }
-  private bool ValidateAcceptObject(object value) => true;
+  private void ValidateAcceptObject(object value) => throw new ArgumentException();
   public static readonly DependencyProperty AcceptAssignableProperty;
   public static readonly DependencyProperty AcceptGenericProperty;
   public static readonly DependencyProperty AcceptObjectProperty;
@@ -62,34 +62,22 @@ public partial class InstanceValidateValue : DependencyObject
   {
     FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceValidateValue), new PropertyMetadata() { CoerceValueCallback = (d, value_1) =>
     {
-      if (!((InstanceValidateValue)d).ValidateFoo((int)value_1))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateValue)d).ValidateFoo((int)value_1);
       return value_1;
     } });
     AcceptAssignableProperty = DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceValidateValue), new PropertyMetadata() { CoerceValueCallback = (d_1, value_2) =>
     {
-      if (!((InstanceValidateValue)d_1).ValidateAcceptAssignable((List<int>)value_2))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateValue)d_1).ValidateAcceptAssignable((List<int>)value_2);
       return value_2;
     } });
     AcceptGenericProperty = DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceValidateValue), new PropertyMetadata() { CoerceValueCallback = (d_2, value_3) =>
     {
-      if (!((InstanceValidateValue)d_2).ValidateAcceptGeneric((int)value_3))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateValue)d_2).ValidateAcceptGeneric((int)value_3);
       return value_3;
     } });
     AcceptObjectProperty = DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceValidateValue), new PropertyMetadata() { CoerceValueCallback = (d_3, value_4) =>
     {
-      if (!((InstanceValidateValue)d_3).ValidateAcceptObject(value_4))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateValue)d_3).ValidateAcceptObject(value_4);
       return value_4;
     } });
   }

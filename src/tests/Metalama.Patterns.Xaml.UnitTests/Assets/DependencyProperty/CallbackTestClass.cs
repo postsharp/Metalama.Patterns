@@ -36,11 +36,14 @@ public sealed partial class CallbackTestClass : DependencyObject
         ThreadContext.Current.Log.Add( suffix == null ? name! : $"{name}|{suffix}" );
     }
 
-    private static bool Validate( int value )
+    private static void Validate( int value )
     {
         var f = ThreadContext.Current.OnValidate;
 
-        return f == null || f( value );
+        if ( !(f == null || f( value )) )
+        {
+            throw new ArgumentOutOfRangeException();
+        }
     }
 
     #region OnChanging and OnChanged
@@ -157,12 +160,12 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitInstanceValidateDependencyPropertyAndValue { get; set; }
 
-    private bool ValidateImplicitInstanceValidateDependencyPropertyAndValue( DependencyProperty dependencyProperty, int value )
+    private void ValidateImplicitInstanceValidateDependencyPropertyAndValue( DependencyProperty dependencyProperty, int value )
     {
         LogCall( $"{value}" );
         dependencyProperty.Should().BeSameAs( ImplicitInstanceValidateDependencyPropertyAndValueProperty );
 
-        return Validate( value );
+        Validate( value );
     }
 
     private void OnImplicitInstanceValidateDependencyPropertyAndValueChanging()
@@ -178,11 +181,11 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitInstanceValidateValue { get; set; }
 
-    private bool ValidateImplicitInstanceValidateValue( int value )
+    private void ValidateImplicitInstanceValidateValue( int value )
     {
         LogCall( $"{value}" );
 
-        return Validate( value );
+        Validate( value );
     }
 
     private void OnImplicitInstanceValidateValueChanging()
@@ -198,7 +201,7 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitStaticValidateDependencyPropertyAndInstanceAndValue { get; set; }
 
-    private static bool ValidateImplicitStaticValidateDependencyPropertyAndInstanceAndValue(
+    private static void ValidateImplicitStaticValidateDependencyPropertyAndInstanceAndValue(
         DependencyProperty dependencyProperty,
         CallbackTestClass instance,
         int value )
@@ -206,7 +209,7 @@ public sealed partial class CallbackTestClass : DependencyObject
         LogCall( $"{instance.Id}|{value}" );
         dependencyProperty.Should().BeSameAs( ImplicitStaticValidateDependencyPropertyAndInstanceAndValueProperty );
 
-        return Validate( value );
+        Validate( value );
     }
 
     private void OnImplicitStaticValidateDependencyPropertyAndInstanceAndValueChanging()
@@ -222,12 +225,12 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitStaticValidateDependencyPropertyAndValue { get; set; }
 
-    private static bool ValidateImplicitStaticValidateDependencyPropertyAndValue( DependencyProperty dependencyProperty, int value )
+    private static void ValidateImplicitStaticValidateDependencyPropertyAndValue( DependencyProperty dependencyProperty, int value )
     {
         LogCall( $"{value}" );
         dependencyProperty.Should().BeSameAs( ImplicitStaticValidateDependencyPropertyAndValueProperty );
 
-        return Validate( value );
+        Validate( value );
     }
 
     private void OnImplicitStaticValidateDependencyPropertyAndValueChanging()
@@ -243,11 +246,11 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitStaticValidateValue { get; set; }
 
-    private bool ValidateImplicitStaticValidateValue( int value )
+    private void ValidateImplicitStaticValidateValue( int value )
     {
         LogCall( $"{value}" );
 
-        return Validate( value );
+        Validate( value );
     }
 
     private void OnImplicitStaticValidateValueChanging()

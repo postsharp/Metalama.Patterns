@@ -33,7 +33,7 @@ internal class Regex : DependencyObject
 
     private void OnFooChanged() { }
 
-    private bool ValidateFoo( int v ) => true;
+    private void ValidateFoo( int v ) { }
 
     [DependencyProperty]
     public string YodaFoo { get; set; }
@@ -42,5 +42,5 @@ internal class Regex : DependencyObject
 
     private void MakeFooChanged( string a, string b ) { }
 
-    private bool IsFooValid( string s ) => true;
+    private void IsFooValid( string s ) { }
 }

@@ -16,17 +16,20 @@ internal class WithValidateMethod : DependencyObject
       this.SetValue(NameProperty, value);
     }
   }
-  private bool ValidateName(string name) => name.Length > 3;
+  private void ValidateName(string name)
+  {
+    if (name.Length > 3)
+    {
+      throw new ArgumentOutOfRangeException();
+    }
+  }
   public static readonly DependencyProperty NameProperty;
   static WithValidateMethod()
   {
     NameProperty = DependencyProperty.Register("Name", typeof(string), typeof(WithValidateMethod), new PropertyMetadata() { CoerceValueCallback = (d, value) =>
     {
       value = ApplyNameContracts((string)value);
-      if (!((WithValidateMethod)d).ValidateName((string)value))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((WithValidateMethod)d).ValidateName((string)value);
       return value;
     } });
   }

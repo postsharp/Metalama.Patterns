@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
@@ -150,13 +151,14 @@ internal static class DependencyPropertyNamingConventionMatcher
         IProperty targetProperty,
         DependencyPropertyAssets assets )
     {
+        Debugger.Break();
+
         var declaringType = targetProperty.DeclaringType;
         var propertyType = targetProperty.Type;
 
         var p = method.Parameters;
 
-        if ( method.ReturnType.SpecialType != SpecialType.Boolean
-             || method.ReturnParameter.RefKind != RefKind.None
+        if ( method.ReturnType.SpecialType != SpecialType.Void
              || p.Count > 3
              || p.Any( parameter => parameter.RefKind is not (RefKind.None or RefKind.In) ) )
         {

@@ -258,67 +258,47 @@ internal sealed partial class DependencyPropertyAspectBuilder
             switch ( signatureKind )
             {
                 case ValidationHandlerSignatureKind.InstanceValue:
-                    if ( !method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
-                            .Invoke(
-                                method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
-                    {
-                        throw new ArgumentException( "Invalid property value.", "value" );
-                    }
+                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
+                        .Invoke( method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
 
                     break;
 
                 case ValidationHandlerSignatureKind.InstanceDependencyPropertyAndValue:
-                    if ( !method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
-                            .Invoke(
-                                dependencyPropertyField.Value,
-                                method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
-                    {
-                        throw new ArgumentException( "Invalid property value.", "value" );
-                    }
+                    method.With( (IExpression) meta.Cast( declaringType, instanceExpr.Value ) )
+                        .Invoke(
+                            dependencyPropertyField.Value,
+                            method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
 
                     break;
 
                 case ValidationHandlerSignatureKind.StaticValue:
-                    if ( !method.Invoke(
-                            method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
-                    {
-                        throw new ArgumentException( "Invalid property value.", "value" );
-                    }
+                    method.Invoke( method.Parameters[0].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
 
                     break;
 
                 case ValidationHandlerSignatureKind.StaticDependencyPropertyAndValue:
-                    if ( !method.Invoke(
-                            dependencyPropertyField.Value,
-                            method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
-                    {
-                        throw new ArgumentException( "Invalid property value.", "value" );
-                    }
+                    method.Invoke(
+                        dependencyPropertyField.Value,
+                        method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
 
                     break;
 
                 case ValidationHandlerSignatureKind.StaticDependencyPropertyAndInstanceAndValue:
-                    if ( !method.Invoke(
-                            dependencyPropertyField.Value,
-                            instanceExpr.Type.Is( method.Parameters[1].Type, ConversionKind.Reference )
-                                ? instanceExpr.Value
-                                : meta.Cast( declaringType, instanceExpr.Value ),
-                            method.Parameters[2].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
-                    {
-                        throw new ArgumentException( "Invalid property value.", "value" );
-                    }
+                    method.Invoke(
+                        dependencyPropertyField.Value,
+                        instanceExpr.Type.Is( method.Parameters[1].Type, ConversionKind.Reference )
+                            ? instanceExpr.Value
+                            : meta.Cast( declaringType, instanceExpr.Value ),
+                        method.Parameters[2].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
 
                     break;
 
                 case ValidationHandlerSignatureKind.StaticInstanceAndValue:
-                    if ( !method.Invoke(
-                            instanceExpr.Type.Is( method.Parameters[0].Type, ConversionKind.Reference )
-                                ? instanceExpr.Value
-                                : meta.Cast( declaringType, instanceExpr.Value ),
-                            method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) ) )
-                    {
-                        throw new ArgumentException( "Invalid property value.", "value" );
-                    }
+                    method.Invoke(
+                        instanceExpr.Type.Is( method.Parameters[0].Type, ConversionKind.Reference )
+                            ? instanceExpr.Value
+                            : meta.Cast( declaringType, instanceExpr.Value ),
+                        method.Parameters[1].Type.SpecialType == SpecialType.Object ? valueExpr.Value : meta.Cast( propertyType, valueExpr.Value ) );
 
                     break;
             }

@@ -9,36 +9,33 @@ public partial class StaticValidateDependencyPropertyAndInstanceAndValue : Depen
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private static bool ValidateFoo( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, int value ) => true;
+    private static void ValidateFoo( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, int value ) { }
 
     [DependencyProperty]
     public List<int> AcceptsAssignableForValue { get; set; }
 
-    private static bool ValidateAcceptsAssignableForValue(
+    private static void ValidateAcceptsAssignableForValue(
         DependencyProperty d,
         StaticValidateDependencyPropertyAndInstanceAndValue instance,
-        IEnumerable<int> value )
-        => true;
+        IEnumerable<int> value ) { }
 
     [DependencyProperty]
     public int AcceptsGenericForValue { get; set; }
 
-    private static bool ValidateAcceptsGenericForValue<T>( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, T value )
-        => true;
+    private static void ValidateAcceptsGenericForValue<T>( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, T value ) { }
 
     [DependencyProperty]
     public int AcceptsObjectForValue { get; set; }
 
-    private static bool ValidateAcceptsObjectForValue( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, object value )
-        => true;
+    private static void ValidateAcceptsObjectForValue( DependencyProperty d, StaticValidateDependencyPropertyAndInstanceAndValue instance, object value ) { }
 
     [DependencyProperty]
     public int AcceptsDependencyObjectForInstance { get; set; }
 
-    private static bool ValidateAcceptsDependencyObjectForInstance( DependencyProperty d, DependencyObject instance, int value ) => true;
+    private static void ValidateAcceptsDependencyObjectForInstance( DependencyProperty d, DependencyObject instance, int value ) { }
 
     [DependencyProperty]
     public int AcceptsObjectForInstance { get; set; }
 
-    private static bool ValidateAcceptsObjectForInstance( DependencyProperty d, object instance, int value ) => true;
+    private static void ValidateAcceptsObjectForInstance( DependencyProperty d, object instance, int value ) { }
 }

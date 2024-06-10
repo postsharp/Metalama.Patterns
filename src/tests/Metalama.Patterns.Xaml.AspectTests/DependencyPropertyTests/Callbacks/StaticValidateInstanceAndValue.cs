@@ -9,30 +9,30 @@ public partial class StaticValidateInstanceAndValue : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private static bool ValidateFoo( StaticValidateInstanceAndValue instance, int value ) => true;
+    private static void ValidateFoo( StaticValidateInstanceAndValue instance, int value ) { }
 
     [DependencyProperty]
     public List<int> AcceptsAssignableForValue { get; set; }
 
-    private static bool ValidateAcceptsAssignableForValue( StaticValidateInstanceAndValue instance, IEnumerable<int> value ) => true;
+    private static void ValidateAcceptsAssignableForValue( StaticValidateInstanceAndValue instance, IEnumerable<int> value ) { }
 
     [DependencyProperty]
     public int AcceptsGenericForValue { get; set; }
 
-    private static bool ValidateAcceptsGenericForValue<T>( StaticValidateInstanceAndValue instance, T value ) => true;
+    private static void ValidateAcceptsGenericForValue<T>( StaticValidateInstanceAndValue instance, T value ) { }
 
     [DependencyProperty]
     public int AcceptsObjectForValue { get; set; }
 
-    private static bool ValidateAcceptsObjectForValue( StaticValidateInstanceAndValue instance, object value ) => true;
+    private static void ValidateAcceptsObjectForValue( StaticValidateInstanceAndValue instance, object value ) { }
 
     [DependencyProperty]
     public int AcceptsDependencyObjectForInstance { get; set; }
 
-    private static bool ValidateAcceptsDependencyObjectForInstance( DependencyObject instance, int value ) => true;
+    private static void ValidateAcceptsDependencyObjectForInstance( DependencyObject instance, int value ) { }
 
     [DependencyProperty]
     public int AcceptsObjectForInstance { get; set; }
 
-    private static bool ValidateAcceptsObjectForInstance( object instance, int value ) => true;
+    private static void ValidateAcceptsObjectForInstance( object instance, int value ) { }
 }

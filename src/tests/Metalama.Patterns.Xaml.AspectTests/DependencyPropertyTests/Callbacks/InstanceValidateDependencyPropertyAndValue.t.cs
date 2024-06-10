@@ -14,7 +14,7 @@ public partial class InstanceValidateDependencyPropertyAndValue : DependencyObje
       this.SetValue(FooProperty, value);
     }
   }
-  private bool ValidateFoo(DependencyProperty d, int value) => true;
+  private void ValidateFoo(DependencyProperty d, int value) => throw new ArgumentException();
   [DependencyProperty]
   public List<int> AcceptAssignable
   {
@@ -27,7 +27,7 @@ public partial class InstanceValidateDependencyPropertyAndValue : DependencyObje
       this.SetValue(AcceptAssignableProperty, value);
     }
   }
-  private bool ValidateAcceptAssignable(DependencyProperty d, IEnumerable<int> value) => true;
+  private void ValidateAcceptAssignable(DependencyProperty d, IEnumerable<int> value) => throw new ArgumentException();
   [DependencyProperty]
   public int AcceptGeneric
   {
@@ -40,7 +40,7 @@ public partial class InstanceValidateDependencyPropertyAndValue : DependencyObje
       this.SetValue(AcceptGenericProperty, value);
     }
   }
-  private bool ValidateAcceptGeneric<T>(DependencyProperty d, T value) => true;
+  private void ValidateAcceptGeneric<T>(DependencyProperty d, T value) => throw new ArgumentException();
   [DependencyProperty]
   public int AcceptObject
   {
@@ -53,7 +53,7 @@ public partial class InstanceValidateDependencyPropertyAndValue : DependencyObje
       this.SetValue(AcceptObjectProperty, value);
     }
   }
-  private bool ValidateAcceptObject(DependencyProperty d, object value) => true;
+  private void ValidateAcceptObject(DependencyProperty d, object value) => throw new ArgumentException();
   public static readonly DependencyProperty AcceptAssignableProperty;
   public static readonly DependencyProperty AcceptGenericProperty;
   public static readonly DependencyProperty AcceptObjectProperty;
@@ -62,34 +62,22 @@ public partial class InstanceValidateDependencyPropertyAndValue : DependencyObje
   {
     FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(InstanceValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_1, value_1) =>
     {
-      if (!((InstanceValidateDependencyPropertyAndValue)d_1).ValidateFoo(FooProperty, (int)value_1))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateDependencyPropertyAndValue)d_1).ValidateFoo(FooProperty, (int)value_1);
       return value_1;
     } });
     AcceptAssignableProperty = DependencyProperty.Register("AcceptAssignable", typeof(List<int>), typeof(InstanceValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_2, value_2) =>
     {
-      if (!((InstanceValidateDependencyPropertyAndValue)d_2).ValidateAcceptAssignable(AcceptAssignableProperty, (List<int>)value_2))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateDependencyPropertyAndValue)d_2).ValidateAcceptAssignable(AcceptAssignableProperty, (List<int>)value_2);
       return value_2;
     } });
     AcceptGenericProperty = DependencyProperty.Register("AcceptGeneric", typeof(int), typeof(InstanceValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_3, value_3) =>
     {
-      if (!((InstanceValidateDependencyPropertyAndValue)d_3).ValidateAcceptGeneric(AcceptGenericProperty, (int)value_3))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateDependencyPropertyAndValue)d_3).ValidateAcceptGeneric(AcceptGenericProperty, (int)value_3);
       return value_3;
     } });
     AcceptObjectProperty = DependencyProperty.Register("AcceptObject", typeof(int), typeof(InstanceValidateDependencyPropertyAndValue), new PropertyMetadata() { CoerceValueCallback = (d_4, value_4) =>
     {
-      if (!((InstanceValidateDependencyPropertyAndValue)d_4).ValidateAcceptObject(AcceptObjectProperty, value_4))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ((InstanceValidateDependencyPropertyAndValue)d_4).ValidateAcceptObject(AcceptObjectProperty, value_4);
       return value_4;
     } });
   }
