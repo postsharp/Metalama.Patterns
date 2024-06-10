@@ -51,12 +51,6 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitInstanceDependencyProperty { get; set; }
 
-    private void OnImplicitInstanceDependencyPropertyChanging( DependencyProperty dependencyProperty )
-    {
-        LogCall();
-        dependencyProperty.Should().BeSameAs( ImplicitInstanceDependencyPropertyProperty );
-    }
-
     private void OnImplicitInstanceDependencyPropertyChanged( DependencyProperty dependencyProperty )
     {
         LogCall();
@@ -66,11 +60,6 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitInstanceNoParameters { get; set; }
 
-    private void OnImplicitInstanceNoParametersChanging()
-    {
-        LogCall();
-    }
-
     private void OnImplicitInstanceNoParametersChanged()
     {
         LogCall();
@@ -78,11 +67,6 @@ public sealed partial class CallbackTestClass : DependencyObject
 
     [DependencyProperty]
     public int ImplicitInstanceValue { get; set; }
-
-    private void OnImplicitInstanceValueChanging( int value )
-    {
-        LogCall( $"{value}" );
-    }
 
     private void OnImplicitInstanceValueChanged( int value )
     {
@@ -100,12 +84,6 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitStaticDependencyProperty { get; set; }
 
-    private static void OnImplicitStaticDependencyPropertyChanging( DependencyProperty dependencyProperty )
-    {
-        LogCall();
-        dependencyProperty.Should().BeSameAs( ImplicitStaticDependencyPropertyProperty );
-    }
-
     private static void OnImplicitStaticDependencyPropertyChanged( DependencyProperty dependencyProperty )
     {
         LogCall();
@@ -115,12 +93,6 @@ public sealed partial class CallbackTestClass : DependencyObject
     [DependencyProperty]
     public int ImplicitStaticDependencyPropertyAndInstance { get; set; }
 
-    private static void OnImplicitStaticDependencyPropertyAndInstanceChanging( DependencyProperty dependencyProperty, CallbackTestClass instance )
-    {
-        LogCall( instance.Id );
-        dependencyProperty.Should().BeSameAs( ImplicitStaticDependencyPropertyAndInstanceProperty );
-    }
-
     private static void OnImplicitStaticDependencyPropertyAndInstanceChanged( DependencyProperty dependencyProperty, CallbackTestClass instance )
     {
         LogCall( instance.Id );
@@ -129,11 +101,6 @@ public sealed partial class CallbackTestClass : DependencyObject
 
     [DependencyProperty]
     public int ImplicitStaticInstance { get; set; }
-
-    private static void OnImplicitStaticInstanceChanging( CallbackTestClass instance )
-    {
-        LogCall( instance.Id );
-    }
 
     private static void OnImplicitStaticInstanceChanged( CallbackTestClass instance )
     {
@@ -168,11 +135,6 @@ public sealed partial class CallbackTestClass : DependencyObject
         Validate( value );
     }
 
-    private void OnImplicitInstanceValidateDependencyPropertyAndValueChanging()
-    {
-        LogCall();
-    }
-
     private void OnImplicitInstanceValidateDependencyPropertyAndValueChanged()
     {
         LogCall();
@@ -186,11 +148,6 @@ public sealed partial class CallbackTestClass : DependencyObject
         LogCall( $"{value}" );
 
         Validate( value );
-    }
-
-    private void OnImplicitInstanceValidateValueChanging()
-    {
-        LogCall();
     }
 
     private void OnImplicitInstanceValidateValueChanged()
@@ -212,11 +169,6 @@ public sealed partial class CallbackTestClass : DependencyObject
         Validate( value );
     }
 
-    private void OnImplicitStaticValidateDependencyPropertyAndInstanceAndValueChanging()
-    {
-        LogCall();
-    }
-
     private void OnImplicitStaticValidateDependencyPropertyAndInstanceAndValueChanged()
     {
         LogCall();
@@ -233,11 +185,6 @@ public sealed partial class CallbackTestClass : DependencyObject
         Validate( value );
     }
 
-    private void OnImplicitStaticValidateDependencyPropertyAndValueChanging()
-    {
-        LogCall();
-    }
-
     private void OnImplicitStaticValidateDependencyPropertyAndValueChanged()
     {
         LogCall();
@@ -251,11 +198,6 @@ public sealed partial class CallbackTestClass : DependencyObject
         LogCall( $"{value}" );
 
         Validate( value );
-    }
-
-    private void OnImplicitStaticValidateValueChanging()
-    {
-        LogCall();
     }
 
     private void OnImplicitStaticValidateValueChanged()

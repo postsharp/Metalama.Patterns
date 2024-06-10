@@ -13,11 +13,9 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     string? DependencyPropertyName,
     string? RegistrationFieldName,
     MemberMatch<IMemberOrNamedType, DefaultMatchKind> RegistrationFieldConflictMatch,
-    MemberMatch<IMethod, ChangeHandlerSignatureKind> PropertyChangingMatch,
     MemberMatch<IMethod, ChangeHandlerSignatureKind> PropertyChangedMatch,
     MemberMatch<IMethod, ValidationHandlerSignatureKind> ValidateMatch,
     IReadOnlyList<InspectedMember> InspectedMembers,
-    bool RequirePropertyChangingMatch = false,
     bool RequirePropertyChangedMatch = false,
     bool RequireValidateMatch = false ) : NamingConventionMatch( NamingConvention, InspectedMembers )
 {
@@ -32,8 +30,6 @@ internal sealed record DependencyPropertyNamingConventionMatch(
             }
 
             if ( this.RegistrationFieldConflictMatch.Outcome != MemberMatchOutcome.Success
-                 || (this.PropertyChangingMatch.Outcome != MemberMatchOutcome.Success
-                     && (this.RequirePropertyChangingMatch || this.PropertyChangingMatch.Outcome != MemberMatchOutcome.NotFound))
                  || (this.PropertyChangedMatch.Outcome != MemberMatchOutcome.Success
                      && (this.RequirePropertyChangedMatch || this.PropertyChangedMatch.Outcome != MemberMatchOutcome.NotFound))
                  || (this.ValidateMatch.Outcome != MemberMatchOutcome.Success
@@ -49,15 +45,11 @@ internal sealed record DependencyPropertyNamingConventionMatch(
     protected override ImmutableArray<MemberMatchDiagnosticInfo> GetMemberDiagnostics()
         => ImmutableArray.Create(
             new MemberMatchDiagnosticInfo( this.RegistrationFieldConflictMatch, true, _registrationFieldCategories ),
-            new MemberMatchDiagnosticInfo( this.PropertyChangingMatch, this.RequirePropertyChangingMatch, _propertyChangingCategories ),
             new MemberMatchDiagnosticInfo( this.PropertyChangedMatch, this.RequirePropertyChangedMatch, _propertyChangedCategories ),
             new MemberMatchDiagnosticInfo( this.ValidateMatch, this.RequireValidateMatch, _validateCategories ) );
 
     private static readonly ImmutableArray<string> _registrationFieldCategories =
         ImmutableArray.Create( DependencyPropertyAspectBuilder.RegistrationFieldCategory );
-
-    private static readonly ImmutableArray<string> _propertyChangingCategories =
-        ImmutableArray.Create( DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
 
     private static readonly ImmutableArray<string> _propertyChangedCategories =
         ImmutableArray.Create( DependencyPropertyAspectBuilder.PropertyChangedMethodCategory );

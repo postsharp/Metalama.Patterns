@@ -23,8 +23,6 @@ public partial class ContractsIntegrationTestClass : DependencyObject
     [NotNull]
     public string Name { get; set; }
 
-    private void OnNameChanging( string value ) => this.Log( value );
-
     private void OnNameChanged( string oldValue, string newValue ) => this.Log( $"{oldValue}|{newValue}" );
 
     private void ValidateName( string value )

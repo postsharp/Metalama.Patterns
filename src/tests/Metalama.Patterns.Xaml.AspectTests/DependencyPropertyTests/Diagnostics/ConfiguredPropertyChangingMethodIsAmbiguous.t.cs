@@ -1,2 +1,0 @@
-// Error LAMA5205 on `Changing`: `Ambiguous match while identifying the property-changed method for [DependencyProperty] property 'ConfiguredPropertyChangingMethodIsAmbiguous.Foo' as required by the 'explicitly-configured' naming convention.`
-// Error LAMA5205 on `Changing`: `Ambiguous match while identifying the property-changed method for [DependencyProperty] property 'ConfiguredPropertyChangingMethodIsAmbiguous.Foo' as required by the 'explicitly-configured' naming convention.`

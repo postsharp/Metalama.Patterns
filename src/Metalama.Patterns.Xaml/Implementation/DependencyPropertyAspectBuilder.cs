@@ -16,7 +16,6 @@ namespace Metalama.Patterns.Xaml.Implementation;
 internal sealed partial class DependencyPropertyAspectBuilder
 {
     internal const string RegistrationFieldCategory = "registration field";
-    internal const string PropertyChangingMethodCategory = "property-changing method";
     internal const string PropertyChangedMethodCategory = "property-changed method";
     internal const string ValidateMethodCategory = "validate method";
 
@@ -39,15 +38,14 @@ internal sealed partial class DependencyPropertyAspectBuilder
         var declaringType = target.DeclaringType;
         var options = target.Enhancements().GetOptions<DependencyPropertyOptions>();
 
-        var hasExplicitNaming = this._attribute.PropertyChangingMethod != null || this._attribute.PropertyChangedMethod != null
-                                                                               || this._attribute.ValidateMethod != null;
+        var hasExplicitNaming = this._attribute.PropertyChangedMethod != null
+                                || this._attribute.ValidateMethod != null;
 
         var namingConventions = hasExplicitNaming
             ?
             [
                 new ExplicitDependencyPropertyNamingConvention(
                     this._attribute.RegistrationField,
-                    this._attribute.PropertyChangingMethod,
                     this._attribute.PropertyChangedMethod,
                     this._attribute.ValidateMethod )
             ]
@@ -81,17 +79,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 } );
         }
 
-        var onChangingMethod = match?.PropertyChangingMatch.Member;
         var onChangedMethod = match?.PropertyChangedMatch.Member;
         var validateMethod = match?.ValidateMatch.Member;
 
         if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
-            if ( onChangingMethod != null )
-            {
-                this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, onChangingMethod );
-            }
-
             if ( onChangedMethod != null )
             {
                 this._builder.Diagnostics.Suppress( Suppressions.SuppressRemoveUnusedPrivateMembersIDE0051, onChangedMethod );
@@ -175,8 +167,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
                     propertyType,
                     declaringType,
                     defaultValueExpr = this._builder.Target.InitializerExpression,
-                    onChangingMethod,
-                    onChangingSignatureKind = match.PropertyChangingMatch.Kind,
                     onChangedMethod,
                     onChangedSignatureKind = match.PropertyChangedMatch.Kind,
                     validateMethod,

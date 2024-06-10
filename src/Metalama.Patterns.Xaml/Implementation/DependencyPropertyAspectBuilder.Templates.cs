@@ -38,8 +38,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
             [CompileTime] INamedType propertyType,
             [CompileTime] INamedType declaringType,
             [CompileTime] IExpression? defaultValueExpr,
-            [CompileTime] IMethod? onChangingMethod,
-            [CompileTime] ChangeHandlerSignatureKind onChangingSignatureKind,
             [CompileTime] IMethod? onChangedMethod,
             [CompileTime] ChangeHandlerSignatureKind onChangedSignatureKind,
             [CompileTime] IMethod? validateMethod,
@@ -59,11 +57,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
                 defaultValueExpr = null;
             }
 
-            if ( onChangingMethod != null || onChangedMethod != null || validateMethod != null || defaultValueExpr != null || applyContractsMethod != null )
+            if ( onChangedMethod != null || validateMethod != null || defaultValueExpr != null || applyContractsMethod != null )
             {
                 IExpression? coerceValueCallbackExpr = null;
 
-                if ( onChangingMethod != null || validateMethod != null || applyContractsMethod != null )
+                if ( validateMethod != null || applyContractsMethod != null )
                 {
                     // As per PostSharp implementation, this callback is used for validation and notifying "changing".
 
@@ -87,23 +85,6 @@ internal sealed partial class DependencyPropertyAspectBuilder
                                         propertyType,
                                         declaringType,
                                         ExpressionFactory.Capture( d ),
-                                        ExpressionFactory.Capture( value ) );
-                                }
-
-                                if ( onChangingMethod != null )
-                                {
-                                    // This could be a false positive if applyContractsMethod coerces value to be
-                                    // the same as the current value. We don't have the current value to hand, so
-                                    // we don't check.
-
-                                    InvokeChangeMethod(
-                                        dependencyPropertyField,
-                                        onChangingMethod,
-                                        onChangingSignatureKind,
-                                        propertyType,
-                                        declaringType,
-                                        ExpressionFactory.Capture( d ),
-                                        null,
                                         ExpressionFactory.Capture( value ) );
                                 }
 

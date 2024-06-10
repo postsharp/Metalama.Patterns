@@ -1,1 +1,0 @@
-// Error LAMA5204 on `OnFooChanging`: `The 'DefaultPropertyChangingMethodIsInvalid.OnFooChanging(DBNull)' method has an invalid signature and cannot be used as a property-changing method for [DependencyProperty] property 'DefaultPropertyChangingMethodIsInvalid.Foo' by the 'default' naming convention. Refer to documentation for supported method signatures.`

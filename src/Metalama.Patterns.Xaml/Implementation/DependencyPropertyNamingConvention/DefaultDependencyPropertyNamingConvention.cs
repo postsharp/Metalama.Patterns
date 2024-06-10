@@ -22,14 +22,11 @@ internal sealed class DefaultDependencyPropertyNamingConvention : IDependencyPro
             targetProperty,
             propertyName,
             GetRegistrationFieldNameFromPropertyName( propertyName ),
-            new StringNameMatchPredicate( GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),
             new StringNameMatchPredicate( GetPropertyChangedMethodNameFromPropertyName( propertyName ) ),
             new StringNameMatchPredicate( GetValidateMethodNameFromPropertyName( propertyName ) ) );
     }
 
     internal static string GetRegistrationFieldNameFromPropertyName( string propertyName ) => $"{propertyName}Property";
-
-    internal static string GetPropertyChangingMethodNameFromPropertyName( string propertyName ) => $"On{propertyName}Changing";
 
     internal static string GetPropertyChangedMethodNameFromPropertyName( string propertyName ) => $"On{propertyName}Changed";
 

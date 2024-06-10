@@ -16,19 +16,19 @@ internal class NsFabric : NamespaceFabric
                 b.AddNamingConvention(
                     new DependencyPropertyNamingConvention( "rx1" )
                     {
-                        OnPropertyChangedPattern = "{Name}" + "Rx1Ed", OnPropertyChangingPattern = "{Name}" + "Rx1Ing"
+                        PropertyNamePattern = "(?<PropertyName>.*)Rx1", OnPropertyChangedPattern = "{PropertyName}Rx1Ed"
                     } );
 
                 b.AddNamingConvention(
                     new DependencyPropertyNamingConvention( "rx2" )
                     {
-                        OnPropertyChangedPattern = "{Name}" + "Rx2Ed", OnPropertyChangingPattern = "{Name}" + "Rx2Ing"
+                        PropertyNamePattern = "(?<PropertyName>.*)Rx1", OnPropertyChangedPattern = "{PropertyName}Rx2Ed"
                     } );
 
                 b.AddNamingConvention(
                     new DependencyPropertyNamingConvention( "rx3" )
                     {
-                        OnPropertyChangedPattern = "{Name}" + "Rx3Ed", OnPropertyChangingPattern = "{Name}" + "Rx3Ing"
+                        PropertyNamePattern = "(?<PropertyName>.*)Rx1", OnPropertyChangedPattern = "{PropertyName}Rx3Ed"
                     } );
 
                 b.RemoveNamingConvention( CommandOptionsBuilder.DefaultNamingConventionName );

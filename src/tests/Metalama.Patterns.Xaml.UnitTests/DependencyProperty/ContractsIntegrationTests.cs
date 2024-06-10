@@ -18,12 +18,12 @@ public sealed class ContractsIntegrationTests
 
         t.Name = "Tom";
 
-        t.Operations.Should().Equal( "ValidateName|Tom", "OnNameChanging|Tom", "OnNameChanged||Tom" );
+        t.Operations.Should().Equal( "ValidateName|Tom", "OnNameChanged||Tom" );
         t.Name.Should().Be( "Tom" );
         t.Operations.Clear();
 
         t.Name = "  gael  ";
-        t.Operations.Should().Equal( "ValidateName|gael", "OnNameChanging|gael", "OnNameChanged|Tom|gael" );
+        t.Operations.Should().Equal( "ValidateName|gael", "OnNameChanged|Tom|gael" );
         t.Name.Should().Be( "gael" );
         t.Operations.Clear();
 

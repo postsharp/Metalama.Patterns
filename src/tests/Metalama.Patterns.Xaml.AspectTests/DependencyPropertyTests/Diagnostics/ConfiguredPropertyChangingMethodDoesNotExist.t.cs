@@ -1,1 +1,0 @@
-// Error LAMA5206 on `Foo`: `No property-changing method matching the dependency property 'DoesNotExist' was found for 'ConfiguredPropertyChangingMethodDoesNotExist.Foo'.`

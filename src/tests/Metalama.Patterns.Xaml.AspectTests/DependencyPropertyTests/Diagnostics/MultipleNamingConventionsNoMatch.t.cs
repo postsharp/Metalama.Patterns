@@ -1,2 +1,1 @@
-// Error LAMA5205 on `FooRx1Ing`: `Ambiguous match while identifying the property-changing method for [DependencyProperty] property 'MultipleNamingConventionsNoMatch.Foo' as required by the 'rx1' naming convention.`
-// Error LAMA5205 on `FooRx1Ing`: `Ambiguous match while identifying the property-changing method for [DependencyProperty] property 'MultipleNamingConventionsNoMatch.Foo' as required by the 'rx1' naming convention.`
+// Error LAMA5207 on `Foo`: `No dependency property naming conventioned matched 'MultipleNamingConventionsNoMatch.Foo'.`
