@@ -15,10 +15,9 @@ internal class NsFabric : NamespaceFabric
                 new DependencyPropertyNamingConvention( "rx1" )
                 {
                     PropertyNamePattern = "^Yoda(?<Name>.+)$",
-                    OnPropertyChangingPattern = "^(Do|Make){Name}Changing$",
-                    OnPropertyChangedPattern = "^(Do|Make){Name}Changed$",
-                    ValidatePattern = "^Is{Name}Valid",
-                    RegistrationFieldName = "The{Name}PropertyItIs"
+                    OnPropertyChangedPattern = "^(Do|Make){PropertyName}Changed$",
+                    ValidatePattern = "^Is{PropertyName}Valid",
+                    RegistrationFieldName = "The{PropertyName}PropertyItIs"
                 } ) );
     }
 }
@@ -29,16 +28,12 @@ internal class Regex : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private void OnFooChanging() { }
-
     private void OnFooChanged() { }
 
     private void ValidateFoo( int v ) { }
 
     [DependencyProperty]
     public string YodaFoo { get; set; }
-
-    private void DoFooChanging() { }
 
     private void MakeFooChanged( string a, string b ) { }
 

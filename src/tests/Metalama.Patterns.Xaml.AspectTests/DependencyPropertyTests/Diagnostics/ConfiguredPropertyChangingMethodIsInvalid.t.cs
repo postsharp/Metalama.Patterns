@@ -1,1 +1,0 @@
-// Error LAMA5204 on `Changing`: `The 'ConfiguredPropertyChangingMethodIsInvalid.Changing(DBNull)' method has an invalid signature and cannot be used as a property-changing method for [DependencyProperty] property 'ConfiguredPropertyChangingMethodIsInvalid.Foo' as required by the 'explicitly-configured' naming convention. Refer to documentation for supported method signatures.`

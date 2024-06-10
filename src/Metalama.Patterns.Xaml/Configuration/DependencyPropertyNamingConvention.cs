@@ -29,37 +29,24 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
     public string? PropertyNamePattern { get; init; }
 
     /// <summary>
-    /// Gets or sets the name of the registration field to be introduced. The substring <c>{Name}</c> will be replaced with
-    /// the name as determined according to <see cref="PropertyNamePattern"/>. The default value is  <c>{Name}Property</c>.
+    /// Gets or sets the name of the registration field to be introduced. The substring <c>{PropertyName}</c> will be replaced with
+    /// the name as determined according to <see cref="PropertyNamePattern"/>. The default value is  <c>{PropertyName}Property</c>.
     /// </summary>
     public string? RegistrationFieldName { get; init; }
 
     /// <summary>
-    /// Gets or sets a regular expression pattern used to identify a method invoked <i>before</i> the property is changed. 
-    /// All occurrences of the substring <c>{Name}</c> will be replaced with the name
-    /// determined according to <see cref="PropertyNamePattern"/> before the expression is evaluated. The default value is <c>On{Name}Changing</c>.
-    /// </summary>
-    public string? OnPropertyChangingPattern { get; init; }
-
-    /// <summary>
     /// Gets or sets a regular expression pattern used to identify a method invoked <i>after</i> the property has changed. 
-    /// All occurrences of the substring <c>{Name}</c> will be replaced with the name
-    /// determined according to <see cref="PropertyNamePattern"/> before the expression is evaluated. The default value is <c>On{Name}Changed</c>.
+    /// All occurrences of the substring <c>{PropertyName}</c> will be replaced with the name
+    /// determined according to <see cref="PropertyNamePattern"/> before the expression is evaluated. The default value is <c>On{PropertyName}Changed</c>.
     /// </summary>
     public string? OnPropertyChangedPattern { get; init; }
 
     /// <summary>
     /// Gets or sets a regular expression used to identify the method called before the property is changed to perform validation. 
-    /// All occurrences of the substring <c>{Name}</c>  will be replaced with the name
-    /// determined according to <see cref="PropertyNamePattern"/> before the expression is evaluated. The default value is <c>^Validate{Name}$</c>.
+    /// All occurrences of the substring <c>{PropertyName}</c>  will be replaced with the name
+    /// determined according to <see cref="PropertyNamePattern"/> before the expression is evaluated. The default value is <c>^Validate{PropertyName}$</c>.
     /// </summary>
     public string? ValidatePattern { get; init; }
-
-    /// <summary>
-    /// Gets or sets a value indicating whether the <c>OChanging</c> method is required. The default value of this property
-    /// is <c>true</c> if a value is provided for <see cref="OnPropertyChangingPattern"/>, otherwise <c>false</c>.
-    /// </summary>
-    public bool? IsOnPropertyChangingRequired { get; init; }
 
     /// <summary>
     /// Gets or sets a value indicating whether the <c>OnChanged</c> method is required. The default value of this property
@@ -116,10 +103,8 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
                 null,
                 MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Invalid(),
                 MemberMatch<IMethod, ChangeHandlerSignatureKind>.NotFound(),
-                MemberMatch<IMethod, ChangeHandlerSignatureKind>.NotFound(),
                 MemberMatch<IMethod, ValidationHandlerSignatureKind>.NotFound(),
                 [],
-                this.IsOnPropertyChangingRequired.GetValueOrDefault( this.OnPropertyChangingPattern != null ),
                 this.IsOnPropertyChangedRequired.GetValueOrDefault( this.OnPropertyChangedPattern != null ),
                 this.IsValidateRequired.GetValueOrDefault( this.ValidatePattern != null ) );
         }
@@ -128,22 +113,15 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
 #pragma warning disable CA1307 // Specify StringComparison for clarity
 #endif
         var registrationFieldName = this.RegistrationFieldName != null
-            ? this.RegistrationFieldName.Replace( "{Name}", propertyName )
+            ? this.RegistrationFieldName.Replace( "{PropertyName}", propertyName )
             : DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName );
 
-        var matchPropertyChanging = this.OnPropertyChangingPattern?.Replace( "{Name}", propertyName );
+        var matchPropertyChanged = this.OnPropertyChangedPattern?.Replace( "{PropertyName}", propertyName );
 
-        var matchPropertyChanged = this.OnPropertyChangedPattern?.Replace( "{Name}", propertyName );
-
-        var matchValidate = this.ValidatePattern?.Replace( "{Name}", propertyName );
+        var matchValidate = this.ValidatePattern?.Replace( "{PropertyName}", propertyName );
 #if NETCOREAPP
 #pragma warning restore CA1307 // Specify StringComparison for clarity
 #endif
-
-        var propertyChangingPredicate = matchPropertyChanging == null
-            ? (INameMatchPredicate) new StringNameMatchPredicate(
-                DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) )
-            : new RegexNameMatchPredicate( new Regex( matchPropertyChanging ) );
 
         var propertyChangedPredicate = matchPropertyChanged == null
             ? (INameMatchPredicate) new StringNameMatchPredicate(
@@ -160,10 +138,8 @@ public sealed record DependencyPropertyNamingConvention : IDependencyPropertyNam
             targetProperty,
             propertyName,
             registrationFieldName,
-            propertyChangingPredicate,
             propertyChangedPredicate,
             validatePredicate,
-            this.IsOnPropertyChangingRequired.GetValueOrDefault( this.OnPropertyChangingPattern != null ),
             this.IsOnPropertyChangedRequired.GetValueOrDefault( this.OnPropertyChangedPattern != null ),
             this.IsValidateRequired.GetValueOrDefault( this.ValidatePattern != null ) );
     }

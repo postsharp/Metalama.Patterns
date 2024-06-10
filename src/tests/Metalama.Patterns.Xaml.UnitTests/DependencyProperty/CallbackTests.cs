@@ -48,21 +48,21 @@ public sealed class CallbackTests
     public void ImplicitInstanceDependencyProperty()
     {
         this.Instance.ImplicitInstanceDependencyProperty = 42;
-        this.Log.Should().Equal( "OnImplicitInstanceDependencyPropertyChanging", "OnImplicitInstanceDependencyPropertyChanged" );
+        this.Log.Should().Equal( "OnImplicitInstanceDependencyPropertyChanged" );
     }
 
     [Fact]
     public void ImplicitInstanceNoParameters()
     {
         this.Instance.ImplicitInstanceNoParameters = 42;
-        this.Log.Should().Equal( "OnImplicitInstanceNoParametersChanging", "OnImplicitInstanceNoParametersChanged" );
+        this.Log.Should().Equal( "OnImplicitInstanceNoParametersChanged" );
     }
 
     [Fact]
     public void ImplicitInstanceValue()
     {
         this.Instance.ImplicitInstanceValue = 42;
-        this.Log.Should().Equal( "OnImplicitInstanceValueChanging|42", "OnImplicitInstanceValueChanged|42" );
+        this.Log.Should().Equal( "OnImplicitInstanceValueChanged|42" );
     }
 
     [Fact]
@@ -76,7 +76,7 @@ public sealed class CallbackTests
     public void ImplicitStaticDependencyProperty()
     {
         this.Instance.ImplicitStaticDependencyProperty = 42;
-        this.Log.Should().Equal( "OnImplicitStaticDependencyPropertyChanging", "OnImplicitStaticDependencyPropertyChanged" );
+        this.Log.Should().Equal( "OnImplicitStaticDependencyPropertyChanged" );
     }
 
     [Fact]
@@ -85,9 +85,7 @@ public sealed class CallbackTests
         this.Instance.ImplicitStaticDependencyPropertyAndInstance = 42;
 
         this.Log.Should()
-            .Equal(
-                $"OnImplicitStaticDependencyPropertyAndInstanceChanging|{this.Instance.Id}",
-                $"OnImplicitStaticDependencyPropertyAndInstanceChanged|{this.Instance.Id}" );
+            .Equal( $"OnImplicitStaticDependencyPropertyAndInstanceChanged|{this.Instance.Id}" );
     }
 
     [Fact]
@@ -96,16 +94,14 @@ public sealed class CallbackTests
         this.Instance.ImplicitStaticInstance = 42;
 
         this.Log.Should()
-            .Equal(
-                $"OnImplicitStaticInstanceChanging|{this.Instance.Id}",
-                $"OnImplicitStaticInstanceChanged|{this.Instance.Id}" );
+            .Equal( $"OnImplicitStaticInstanceChanged|{this.Instance.Id}" );
     }
 
     [Fact]
     public void ImplicitStaticNoParameters()
     {
         this.Instance.ImplicitStaticNoParameters = 42;
-        this.Log.Should().Equal( "OnImplicitStaticNoParametersChanging", "OnImplicitStaticNoParametersChanged" );
+        this.Log.Should().Equal( "OnImplicitStaticNoParametersChanged" );
     }
 
     [Fact]
@@ -117,7 +113,6 @@ public sealed class CallbackTests
         this.Log.Should()
             .Equal(
                 "ValidateImplicitInstanceValidateDependencyPropertyAndValue|42",
-                "OnImplicitInstanceValidateDependencyPropertyAndValueChanging",
                 "OnImplicitInstanceValidateDependencyPropertyAndValueChanged" );
 
         this.Instance.Invoking( t => t.ImplicitInstanceValidateDependencyPropertyAndValue = 99 )
@@ -134,7 +129,6 @@ public sealed class CallbackTests
         this.Log.Should()
             .Equal(
                 "ValidateImplicitInstanceValidateValue|42",
-                "OnImplicitInstanceValidateValueChanging",
                 "OnImplicitInstanceValidateValueChanged" );
 
         this.Instance.Invoking( t => t.ImplicitInstanceValidateValue = 99 )
@@ -151,7 +145,6 @@ public sealed class CallbackTests
         this.Log.Should()
             .Equal(
                 $"ValidateImplicitStaticValidateDependencyPropertyAndInstanceAndValue|{this.Instance.Id}|42",
-                "OnImplicitStaticValidateDependencyPropertyAndInstanceAndValueChanging",
                 "OnImplicitStaticValidateDependencyPropertyAndInstanceAndValueChanged" );
 
         this.Instance.Invoking( t => t.ImplicitStaticValidateDependencyPropertyAndInstanceAndValue = 99 )
@@ -168,7 +161,6 @@ public sealed class CallbackTests
         this.Log.Should()
             .Equal(
                 "ValidateImplicitStaticValidateDependencyPropertyAndValue|42",
-                "OnImplicitStaticValidateDependencyPropertyAndValueChanging",
                 "OnImplicitStaticValidateDependencyPropertyAndValueChanged" );
 
         this.Instance.Invoking( t => t.ImplicitStaticValidateDependencyPropertyAndValue = 99 )
@@ -185,7 +177,6 @@ public sealed class CallbackTests
         this.Log.Should()
             .Equal(
                 "ValidateImplicitStaticValidateValue|42",
-                "OnImplicitStaticValidateValueChanging",
                 "OnImplicitStaticValidateValueChanged" );
 
         this.Instance.Invoking( t => t.ImplicitStaticValidateValue = 99 )

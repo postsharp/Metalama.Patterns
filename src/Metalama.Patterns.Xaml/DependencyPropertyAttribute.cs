@@ -25,7 +25,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
         get => this._isReadOnly ?? false;
         set => this._isReadOnly = value;
     }
-    
+
     private bool? _initializerProvidesDefaultValue;
 
     /// <summary>
@@ -39,14 +39,7 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
     }
 
     IEnumerable<IHierarchicalOptions> IHierarchicalOptionsProvider.GetOptions( in OptionsProviderContext context )
-        => new[]
-        {
-            new DependencyPropertyOptions()
-            {
-                IsReadOnly = this._isReadOnly,
-                InitializerProvidesDefaultValue = this._initializerProvidesDefaultValue
-            }
-        };
+        => new[] { new DependencyPropertyOptions() { IsReadOnly = this._isReadOnly, InitializerProvidesDefaultValue = this._initializerProvidesDefaultValue } };
 
     // TODO: Document the valid signatures of PropertyChangedMethod, PropertyChangingMethod and ValidateMethod, see project README.md.
 
@@ -62,19 +55,6 @@ public sealed class DependencyPropertyAttribute : Attribute, IAspect<IProperty>,
     /// </para>
     /// </remarks>
     public string? PropertyChangedMethod { get; set; }
-
-    /// <summary>
-    /// Gets or sets the name of the method that will be called when the property value is about to change.
-    /// </summary>
-    /// <remarks>
-    /// <para>
-    /// The method must be declared in the same class as the target property.
-    /// </para>
-    /// <para>
-    /// If this property is not set then the default <c>OnFooChanging</c> value is used, where <c>Foo</c> is the name of the target property.
-    /// </para>
-    /// </remarks>
-    public string? PropertyChangingMethod { get; set; }
 
     /// <summary>
     /// Gets or sets the name of the method that validates the value of the property.

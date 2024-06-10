@@ -15,10 +15,8 @@ internal static class DependencyPropertyNamingConventionMatcher
         IProperty targetProperty,
         string dependencyPropertyName,
         string registrationFieldName,
-        INameMatchPredicate matchPropertyChangingPredicate,
         INameMatchPredicate matchPropertyChangedPredicate,
         INameMatchPredicate matchValidateNamePredicate,
-        bool requirePropertyChangingMatch = false,
         bool requirePropertyChangedMatch = false,
         bool requireValidateMatch = false )
     {
@@ -42,12 +40,6 @@ internal static class DependencyPropertyNamingConventionMatcher
             registrationFieldMatch = MemberMatch<IMemberOrNamedType, DefaultMatchKind>.Success( DefaultMatchKind.Default );
         }
 
-        var findPropertyChangingResult = declaringType.Methods.FindMatchingMembers(
-            matchPropertyChangingPredicate,
-            m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
-            inspectedMembers.Add,
-            DependencyPropertyAspectBuilder.PropertyChangingMethodCategory );
-
         var findPropertyChangedResult = declaringType.Methods.FindMatchingMembers(
             matchPropertyChangedPredicate,
             m => GetChangeHandlerSignature( m, targetProperty, assets, true ),
@@ -65,11 +57,9 @@ internal static class DependencyPropertyNamingConventionMatcher
             dependencyPropertyName,
             registrationFieldName,
             registrationFieldMatch,
-            findPropertyChangingResult,
             findPropertyChangedResult,
             findValidateResult,
             inspectedMembers,
-            requirePropertyChangingMatch,
             requirePropertyChangedMatch,
             requireValidateMatch );
     }

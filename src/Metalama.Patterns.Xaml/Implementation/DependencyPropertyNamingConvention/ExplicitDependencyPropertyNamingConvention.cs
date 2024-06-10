@@ -10,18 +10,15 @@ namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConventi
 internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPropertyNamingConvention
 {
     private readonly string? _registrationFieldName;
-    private readonly string? _propertyChangingMethodName;
     private readonly string? _propertyChangedMethodName;
     private readonly string? _validateMethodName;
 
     public ExplicitDependencyPropertyNamingConvention(
         string? registrationFieldName,
-        string? propertyChangingMethodName,
         string? propertyChangedMethodName,
         string? validateMethodName )
     {
         this._registrationFieldName = registrationFieldName;
-        this._propertyChangingMethodName = propertyChangingMethodName;
         this._propertyChangedMethodName = propertyChangedMethodName;
         this._validateMethodName = validateMethodName;
     }
@@ -38,12 +35,9 @@ internal sealed class ExplicitDependencyPropertyNamingConvention : IDependencyPr
             propertyName,
             this._registrationFieldName ?? DefaultDependencyPropertyNamingConvention.GetRegistrationFieldNameFromPropertyName( propertyName ),
             new StringNameMatchPredicate(
-                this._propertyChangingMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangingMethodNameFromPropertyName( propertyName ) ),
-            new StringNameMatchPredicate(
                 this._propertyChangedMethodName ?? DefaultDependencyPropertyNamingConvention.GetPropertyChangedMethodNameFromPropertyName( propertyName ) ),
             new StringNameMatchPredicate(
                 this._validateMethodName ?? DefaultDependencyPropertyNamingConvention.GetValidateMethodNameFromPropertyName( propertyName ) ),
-            requirePropertyChangingMatch: this._propertyChangingMethodName != null,
             requirePropertyChangedMatch: this._propertyChangedMethodName != null,
             requireValidateMatch: this._validateMethodName != null );
     }
