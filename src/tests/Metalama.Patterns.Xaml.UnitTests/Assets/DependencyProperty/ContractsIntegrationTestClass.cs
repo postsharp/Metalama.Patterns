@@ -27,10 +27,8 @@ public partial class ContractsIntegrationTestClass : DependencyObject
 
     private void OnNameChanged( string oldValue, string newValue ) => this.Log( $"{oldValue}|{newValue}" );
 
-    private bool ValidateName( string value )
+    private void ValidateName( string value )
     {
         this.Log( value );
-
-        return true;
     }
 }

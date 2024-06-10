@@ -14,5 +14,11 @@ internal class WithValidateMethod : DependencyObject
     [Trim]
     public string Name { get; set; }
 
-    private bool ValidateName( string name ) => name.Length > 3;
+    private void ValidateName( string name )
+    {
+        if ( name.Length > 3 )
+        {
+            throw new ArgumentOutOfRangeException();
+        }
+    }
 }

@@ -14,7 +14,9 @@ public partial class StaticValidateValue : DependencyObject
       this.SetValue(FooProperty, value);
     }
   }
-  private static bool ValidateFoo(int value) => true;
+  private static void ValidateFoo(int value)
+  {
+  }
   [DependencyProperty]
   public List<int> AcceptsAssignable
   {
@@ -27,7 +29,9 @@ public partial class StaticValidateValue : DependencyObject
       this.SetValue(AcceptsAssignableProperty, value);
     }
   }
-  private static bool ValidateAcceptsAssignable(IEnumerable<int> value) => true;
+  private static void ValidateAcceptsAssignable(IEnumerable<int> value)
+  {
+  }
   [DependencyProperty]
   public int AcceptsGeneric
   {
@@ -40,7 +44,9 @@ public partial class StaticValidateValue : DependencyObject
       this.SetValue(AcceptsGenericProperty, value);
     }
   }
-  private static bool ValidateAcceptsGeneric<T>(T value) => true;
+  private static void ValidateAcceptsGeneric<T>(T value)
+  {
+  }
   [DependencyProperty]
   public int AcceptsObject
   {
@@ -53,7 +59,9 @@ public partial class StaticValidateValue : DependencyObject
       this.SetValue(AcceptsObjectProperty, value);
     }
   }
-  private static bool ValidateAcceptsObject(object value) => true;
+  private static void ValidateAcceptsObject(object value)
+  {
+  }
   public static readonly DependencyProperty AcceptsAssignableProperty;
   public static readonly DependencyProperty AcceptsGenericProperty;
   public static readonly DependencyProperty AcceptsObjectProperty;
@@ -62,34 +70,22 @@ public partial class StaticValidateValue : DependencyObject
   {
     FooProperty = DependencyProperty.Register("Foo", typeof(int), typeof(StaticValidateValue), new PropertyMetadata() { CoerceValueCallback = (d, value_1) =>
     {
-      if (!ValidateFoo((int)value_1))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ValidateFoo((int)value_1);
       return value_1;
     } });
     AcceptsAssignableProperty = DependencyProperty.Register("AcceptsAssignable", typeof(List<int>), typeof(StaticValidateValue), new PropertyMetadata() { CoerceValueCallback = (d_1, value_2) =>
     {
-      if (!ValidateAcceptsAssignable((List<int>)value_2))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ValidateAcceptsAssignable((List<int>)value_2);
       return value_2;
     } });
     AcceptsGenericProperty = DependencyProperty.Register("AcceptsGeneric", typeof(int), typeof(StaticValidateValue), new PropertyMetadata() { CoerceValueCallback = (d_2, value_3) =>
     {
-      if (!ValidateAcceptsGeneric((int)value_3))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ValidateAcceptsGeneric((int)value_3);
       return value_3;
     } });
     AcceptsObjectProperty = DependencyProperty.Register("AcceptsObject", typeof(int), typeof(StaticValidateValue), new PropertyMetadata() { CoerceValueCallback = (d_3, value_4) =>
     {
-      if (!ValidateAcceptsObject(value_4))
-      {
-        throw new ArgumentException("Invalid property value.", "value");
-      }
+      ValidateAcceptsObject(value_4);
       return value_4;
     } });
   }

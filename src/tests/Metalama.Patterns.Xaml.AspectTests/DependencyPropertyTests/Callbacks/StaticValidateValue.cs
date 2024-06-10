@@ -9,20 +9,20 @@ public partial class StaticValidateValue : DependencyObject
     [DependencyProperty]
     public int Foo { get; set; }
 
-    private static bool ValidateFoo( int value ) => true;
+    private static void ValidateFoo( int value ) { }
 
     [DependencyProperty]
     public List<int> AcceptsAssignable { get; set; }
 
-    private static bool ValidateAcceptsAssignable( IEnumerable<int> value ) => true;
+    private static void ValidateAcceptsAssignable( IEnumerable<int> value ) { }
 
     [DependencyProperty]
     public int AcceptsGeneric { get; set; }
 
-    private static bool ValidateAcceptsGeneric<T>( T value ) => true;
+    private static void ValidateAcceptsGeneric<T>( T value ) { }
 
     [DependencyProperty]
     public int AcceptsObject { get; set; }
 
-    private static bool ValidateAcceptsObject( object value ) => true;
+    private static void ValidateAcceptsObject( object value ) { }
 }
