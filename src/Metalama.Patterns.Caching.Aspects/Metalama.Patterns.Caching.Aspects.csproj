@@ -15,7 +15,7 @@
     </ItemGroup>    
 
     <ItemGroup>
-        <PackageReference Include="Metalama.Extensions.DependencyInjection" Version="$(MetalamaExtensionsVersion)" />
+        <PackageReference Include="Metalama.Extensions.DependencyInjection" />
         <!-- We need a non-private reference to Metalama.Patterns.Contracts because it is required by Metalama.-->
         <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
         <ProjectReference Include="..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />
