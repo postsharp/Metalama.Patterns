@@ -9,15 +9,15 @@
     <PackageVersion Include="Metalama.Testing.UnitTesting" Version="$(MetalamaVersion)" />
     <PackageVersion Include="Microsoft.Extensions.DependencyInjection" Version="7.0.0" />
     <PackageVersion Include="Microsoft.Extensions.Logging" Version="7.0.0" />
-    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.0.0" />
-    <PackageVersion Include="xunit" Version="2.5.1" />
+    <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.0.2" />
+    <PackageVersion Include="xunit" Version="2.5.3" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.assemblyfixture" Condition="'$(TargetFramework)'!='net471'" Version="2.2.0" />
     <PackageVersion Include="xunit.assemblyfixture" Condition="'$(TargetFramework)'=='net471'" Version="2.0.3" />
-    <PackageVersion Include="xunit.assert" Version="2.5.1" />
-    <PackageVersion Include="xunit.extensibility.core" Version="2.5.1" />
-    <PackageVersion Include="xunit.extensibility.execution" Version="2.5.1" />
-    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.1" />
+    <PackageVersion Include="xunit.assert" Version="2.5.3" />
+    <PackageVersion Include="xunit.extensibility.core" Version="2.5.3" />
+    <PackageVersion Include="xunit.extensibility.execution" Version="2.5.3" />
+    <PackageVersion Include="xunit.runner.visualstudio" Version="2.5.8" />
     <PackageVersion Include="Xunit.SkippableFact" Version="1.4.13" />
   </ItemGroup>
 </Project>
