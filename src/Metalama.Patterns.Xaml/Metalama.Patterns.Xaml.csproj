@@ -15,8 +15,8 @@
   <ItemGroup>
     <InternalsVisibleTo Include="Metalama.Patterns.Xaml.CompileTimeTests" />
     <Using Remove="System.Net.Http" />
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-    <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)" PrivateAssets="all" />
+    <PackageReference Include="Metalama.Framework" />
+    <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">

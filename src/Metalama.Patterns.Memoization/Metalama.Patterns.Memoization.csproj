@@ -15,8 +15,8 @@
   </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-        <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)" PrivateAssets="all" />
+        <PackageReference Include="Metalama.Framework" />
+        <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
     </ItemGroup>
     <Import Sdk="PostSharp.Engineering.Sdk" Project="SystemTypes.props" />
 </Project>

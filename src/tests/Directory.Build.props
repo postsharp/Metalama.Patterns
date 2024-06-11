@@ -10,6 +10,9 @@
         <Deterministic>False</Deterministic>
 
         <AddAssemblyMetadataAttributes>False</AddAssemblyMetadataAttributes>
+
+        <!-- TODO: Enable CS1998 and fix async without await warnings. -->
+        <NoWarn>$(NoWarn);CS1998</NoWarn>
     </PropertyGroup>
 
 </Project>

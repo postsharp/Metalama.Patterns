@@ -14,9 +14,9 @@
   </ItemGroup>
 
   <ItemGroup>
-    <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)" PrivateAssets="all" />
-    <PackageReference Include="Azure.Messaging.ServiceBus" Version="7.16.1"/>
-    <PackageReference Include="Azure.Identity" Version="1.10.2" />
+    <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
+    <PackageReference Include="Azure.Messaging.ServiceBus"/>
+    <PackageReference Include="Azure.Identity" />
   </ItemGroup>
 
   <ItemGroup>
