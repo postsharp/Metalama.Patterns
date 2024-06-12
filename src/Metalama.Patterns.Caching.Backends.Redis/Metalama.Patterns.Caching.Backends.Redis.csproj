@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>
+      Redis back-end for Metalama.Patterns.Caching. Implements both caching and cache invalidation over Redis Pub/Sub
+    </PackageDescription>
+    <PackageTags>Metalama PostSharp caching cache redis pub sub</PackageTags>
   </PropertyGroup>
   
   <ItemGroup>
