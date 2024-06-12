@@ -8,6 +8,11 @@
         <Configurations>Debug;Release;LamaDebug</Configurations>
         <TransformOnBuild>true</TransformOnBuild>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageDescription>
+            A set of aspects that simplify the caching: [Cache] to cache a method result as a function of its parameters, 
+            [InvalidateCache] to invalidate the cache, or [CacheKey] to mark a cache key in a class.
+          </PackageDescription>
+        <PackageTags>Metalama PostSharp caching cache</PackageTags>        
     </PropertyGroup>
 
     <ItemGroup>
