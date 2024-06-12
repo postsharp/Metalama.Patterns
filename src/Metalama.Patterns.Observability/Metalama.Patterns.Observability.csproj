@@ -9,6 +9,11 @@
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
     <Version Condition="'$(MetalamaPatternsObservabilityVersion)'!=''">$(MetalamaPatternsObservabilityVersion)</Version>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>
+      Implements the Observable pattern and the INotifyPropertyChanged interface with a single [Observable] attribute
+      thanks to Metalama. Supports both automatic and explicit properties and child objects.
+    </PackageDescription>
+    <PackageTags>Metalama PostSharp observable observability INotifyPropertyChanged INPC PropertyChanged OnPropertyChanged</PackageTags>    
   </PropertyGroup>
 
   

@@ -6,6 +6,8 @@
         <Nullable>enable</Nullable>
 	    <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
       <PackageReadmeFile>README.md</PackageReadmeFile>
+      <PackageDescription>Implements fast and pluggable string formatters. Used by Metalama.Patterns.Caching.</PackageDescription>
+      <PackageTags>Metalama PostSharp AOP caching</PackageTags>
     </PropertyGroup>
 
   <ItemGroup>

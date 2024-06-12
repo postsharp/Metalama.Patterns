@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
   <PropertyGroup>
     <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
@@ -7,6 +7,10 @@
     <Nullable>enable</Nullable>
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>
+      Synchronizes the invalidation of distributed Metalama.Patterns.Caching caches over Azure Service Bus.
+    </PackageDescription>
+    <PackageTags>Metalama PostSharp caching cache azure service bus</PackageTags>
   </PropertyGroup>
   
   <ItemGroup>
