@@ -23,9 +23,9 @@
 
   <ItemGroup>
     <Using Remove="System.Net.Http" />
-    <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-    <PackageReference Include="Metalama.Framework.Sdk" Version="$(MetalamaVersion)" PrivateAssets="all" />
-    <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)" PrivateAssets="all" />
+    <PackageReference Include="Metalama.Framework" />
+    <PackageReference Include="Metalama.Framework.Sdk" PrivateAssets="all" />
+    <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
     <InternalsVisibleTo Include="Metalama.Patterns.Observability.CompileTimeTests" />
   </ItemGroup>
 

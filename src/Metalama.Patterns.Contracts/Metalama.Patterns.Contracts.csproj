@@ -19,10 +19,9 @@
     </ItemGroup>
 
     <ItemGroup>
-        <PackageReference Include="Metalama.Framework" Version="$(MetalamaVersion)" />
-        <PackageReference Include="JetBrains.Annotations" Version="$(JetBrainsAnnotationsVersion)"
-            PrivateAssets="all" />
-        <InternalsVisibleTo Include="Metalama.Patterns.Contracts.UnitTests" />
+        <PackageReference Include="Metalama.Framework" />
+		    <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
+		    <InternalsVisibleTo Include="Metalama.Patterns.Contracts.UnitTests" />
     </ItemGroup>
 
 

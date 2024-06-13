@@ -10,14 +10,14 @@ using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Defin
 
 var product = new Product( MetalamaDependencies.MetalamaPatterns )
 {
-    Solutions = new Solution[] 
-    { 
+    Solutions =
+    [
         new DotNetSolution( "Metalama.Patterns.sln" )
         { 
             CanFormatCode = true,
             FormatExclusions = new[] { "src\\tests\\*AspectTests\\**\\*" },
         },
-    },
+    ],
     PublicArtifacts = Pattern.Create(
         "Metalama.Patterns.Caching.$(PackageVersion).nupkg",
         "Metalama.Patterns.Caching.Aspects.$(PackageVersion).nupkg",
@@ -33,7 +33,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         "Metalama.Patterns.Xaml.$(PackageVersion).nupkg",
         "Flashtrace.$(PackageVersion).nupkg",
         "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
-    Dependencies = new[] { DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions },
+    Dependencies = [DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions],
     MainVersionDependency = MetalamaDependencies.Metalama,
     Configurations = Product.DefaultConfigurations.WithValue(
         BuildConfiguration.Public,

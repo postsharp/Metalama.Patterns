@@ -8,7 +8,9 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61d49c8d-47c1-4f86-a0c9-487ba53ff573" name="Changes" comment="">
-      <change afterPath="$PROJECT_DIR$/.idea/.idea.BuildMetalamaPatterns/.idea/workspace.xml" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/BuildMetalamaPatterns.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BuildMetalamaPatterns.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../global.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../global.json" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -22,9 +24,9 @@
     <setting file="mock://C:/src/Metalama.Patterns/eng/src/Program.cs" root0="SKIP_HIGHLIGHTING" />
   </component>
   <component name="MetaFilesCheckinStateConfiguration" checkMetaFiles="true" />
-  <component name="ProjectColorInfo"><![CDATA[{
-  "associatedIndex": 2
-}]]></component>
+  <component name="ProjectColorInfo">{
+  &quot;associatedIndex&quot;: 2
+}</component>
   <component name="ProjectId" id="2UTP6VaOMkmzfEZiAoS3G2Y8vP2" />
   <component name="ProjectViewState">
     <option name="hideEmptyMiddlePackages" value="true" />
@@ -35,18 +37,19 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "topic/2023.3/porting-caching-2",
+    "git-widget-placeholder": "develop/2024.0",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
     "node.js.selected.package.tslint": "(autodetect)",
+    "nodejs_package_manager_path": "npm",
     "vue.rearranger.settings.migration": "true"
   },
   "keyToStringList": {
     "rider.external.source.directories": [
-      "C:\\Users\\GaelFraiteur.AzureAD\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\DecompilerCache",
-      "C:\\Users\\GaelFraiteur.AzureAD\\AppData\\Roaming\\JetBrains\\Rider2023.2\\resharper-host\\SourcesCache",
-      "C:\\Users\\GaelFraiteur.AzureAD\\AppData\\Local\\Symbols\\src"
+      "C:\\Users\\AntoninProchazka\\AppData\\Roaming\\JetBrains\\Rider2024.1\\resharper-host\\DecompilerCache",
+      "C:\\Users\\AntoninProchazka\\AppData\\Roaming\\JetBrains\\Rider2024.1\\resharper-host\\SourcesCache",
+      "C:\\Users\\AntoninProchazka\\AppData\\Local\\Symbols\\src"
     ]
   }
 }]]></component>
@@ -79,6 +82,7 @@
       <option name="presentableId" value="Default" />
       <updated>1692960421703</updated>
       <workItem from="1692960422839" duration="458000" />
+      <workItem from="1718086352555" duration="67000" />
     </task>
     <task id="LOCAL-00001" summary="Updated build script.">
       <option name="closed" value="true" />
@@ -95,6 +99,7 @@
     <option name="version" value="3" />
   </component>
   <component name="UnityCheckinConfiguration" checkUnsavedScenes="true" />
+  <component name="UnityProjectConfiguration" hasMinimizedUI="false" />
   <component name="VcsManagerConfiguration">
     <option name="CLEAR_INITIAL_COMMIT_MESSAGE" value="true" />
     <MESSAGE value="Updated build script." />
