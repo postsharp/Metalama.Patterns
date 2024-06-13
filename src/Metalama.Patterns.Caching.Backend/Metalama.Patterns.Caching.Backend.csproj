@@ -16,23 +16,23 @@
     </ItemGroup>    
 
     <ItemGroup>
-        <PackageReference Include="JetBrains.Annotations" Version="2022.3.1" PrivateAssets="all" />
-        <PackageReference Include="Microsoft.Extensions.Caching.Memory" Version="$(MicrosoftExtensionsCachingMemoryVersion)" />
-        <PackageReference Include="System.Collections.Immutable" Version="$(SystemCollectionsImmutableVersion)" />
-        <PackageReference Include="System.Text.Json" Version="7.0.3" />
+        <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
+        <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
+        <PackageReference Include="System.Collections.Immutable" />
+        <PackageReference Include="System.Text.Json" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
-        <PackageReference Include="System.Runtime.Serialization.Xml" Version="$(SystemRuntimeSerializationXmlVersion)" />
-        <PackageReference Include="System.Threading" Version="$(SystemThreadingVersion)" />
-        <PackageReference Include="System.Threading.Thread" Version="$(SystemThreadingThreadVersion)" />
-        <PackageReference Include="System.Threading.ThreadPool" Version="$(SystemThreadingThreadPoolVersion)" />
-        <PackageReference Include="System.Text.RegularExpressions" Version="$(SystemTextRegularExpressionsVersion)" />
-        <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" />
+        <PackageReference Include="System.Runtime.Serialization.Xml" />
+        <PackageReference Include="System.Threading" />
+        <PackageReference Include="System.Threading.Thread" />
+        <PackageReference Include="System.Threading.ThreadPool" />
+        <PackageReference Include="System.Text.RegularExpressions" />
+        <PackageReference Include="System.Threading.Tasks.Extensions" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0'">
-        <PackageReference Include="System.Threading.Tasks.Extensions" Version="$(SystemThreadingTasksExtensionsVersion)" />
+        <PackageReference Include="System.Threading.Tasks.Extensions" />
     </ItemGroup>
 
     <ItemGroup>
