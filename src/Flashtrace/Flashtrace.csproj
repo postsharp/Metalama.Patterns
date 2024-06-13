@@ -6,6 +6,8 @@
     <Nullable>enable</Nullable>
     <AllowUnsafeBlocks>true</AllowUnsafeBlocks>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>A helper package implementing a logging front-end for Metalama.Patterns.Caching.</PackageDescription>
+    <PackageTags>Metalama logging tracing</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

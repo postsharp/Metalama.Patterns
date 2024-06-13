@@ -6,7 +6,6 @@
     <PropertyGroup>
         <Authors>PostSharp Technologies</Authors>
         <PackageProjectUrl>https://github.com/postsharp/Metalama.Patterns</PackageProjectUrl>
-        <PackageTags></PackageTags>
         <PackageRequireLicenseAcceptance>false</PackageRequireLicenseAcceptance>
         <PackageIcon>metalama.png</PackageIcon>
         <PackageLicenseFile>LICENSE.md</PackageLicenseFile>
