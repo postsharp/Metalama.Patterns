@@ -8,6 +8,11 @@
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <TransformOnBuild>true</TransformOnBuild>
     <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>
+      A caching front-end that can be plugged different backends and helps with building the cache key, coping with special return
+      types, invalidating the cache (directory or with dependencies). This package does not require the Metalama Aspect Framework.
+    </PackageDescription>
+    <PackageTags>Metalama PostSharp caching cache</PackageTags>
   </PropertyGroup>
 
   <ItemGroup>

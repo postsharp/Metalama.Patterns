@@ -9,7 +9,11 @@
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
     <Version Condition="'$(MetalamaPatternsXamlVersion)'!=''">$(MetalamaPatternsXamlVersion)</Version>
-    <PackageReadmeFile>README.md</PackageReadmeFile>
+    <PackageDescription>
+      Provides custom
+    </PackageDescription>
+    <PackageTags>Metalama PostSharp observable observability INotifyPropertyChanged INPC PropertyChanged OnPropertyChanged</PackageTags>    
+
   </PropertyGroup>
 
   <ItemGroup>

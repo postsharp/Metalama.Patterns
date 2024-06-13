@@ -8,6 +8,12 @@
         <!-- Support unit testing -->
         <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
         <PackageReadmeFile>README.md</PackageReadmeFile>
+        <PackageDescription>
+            Represents the concept of Immutable Type so that it can be used by other packages like Metalama.Patterns.Observability.
+        </PackageDescription>
+        <PackageTags>
+            Metalama PostSharp threading immutable immutability
+        </PackageTags>
     </PropertyGroup>
 
 
