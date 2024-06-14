@@ -17,10 +17,10 @@ namespace Metalama.Patterns.Contracts;
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
-public class NegativeOrZeroAttribute : LessThanOrEqualToAttribute
+public class NonPositiveAttribute : LessThanOrEqualToAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="NegativeOrZeroAttribute"/> class.
+    /// Initializes a new instance of the <see cref="NonPositiveAttribute"/> class.
     /// </summary>
-    public NegativeOrZeroAttribute() : base( 0 ) { }
+    public NonPositiveAttribute() : base( 0 ) { }
 }

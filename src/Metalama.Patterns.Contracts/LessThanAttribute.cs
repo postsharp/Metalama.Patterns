@@ -13,12 +13,16 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentOutOfRangeException"/> if the target is assigned a value that
-/// is greater than a given value.
+/// is greater than a given bound. The behavior when the target is exactly assigned to the bound depends
+/// on the <see cref="ContractOptions.DefaultInequalityStrictness"/> option. If this option
+/// is not specified, a warning is reported.
 /// </summary>
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.</para>
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
+/// <seealso cref="StrictlyLessThanAttribute"/>
+/// <seealso cref="LessThanOrEqualToAttribute"/>
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 public class LessThanAttribute : RangeAttribute

@@ -4,9 +4,9 @@ namespace Metalama.Patterns.Contracts.AspectTests;
 
 public sealed class RangeOnlyTestsRequiredBounds
 {
-    public void Negative( [NegativeOrZero] int x ) { }
+    public void Negative( [NonPositive] int x ) { }
 
-    public void Positive( [PositiveOrZero] int x ) { }
+    public void Positive( [NonNegative] int x ) { }
 
     public void StrictlyNegative( [StrictlyNegative] int x ) { }
 
