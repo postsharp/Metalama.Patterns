@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Contracts.Numeric;
 #pragma warning disable SA1124
 
 [RunTimeOrCompileTime]
-internal sealed class UInt64Bound : NumericBound
+internal sealed record UInt64Bound : NumericBound
 {
     private readonly ulong _value;
 

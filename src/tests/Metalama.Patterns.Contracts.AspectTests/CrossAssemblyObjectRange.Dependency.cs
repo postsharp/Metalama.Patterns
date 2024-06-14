@@ -5,5 +5,5 @@ namespace Metalama.Patterns.Contracts.AspectTests.CrossAssemblyObjectRange;
 public interface IValidated
 {
     [return: StrictlyPositive]
-    public object M( [Positive] object a, [Range( 0, 100 )] object b, [LessThan( 100 )] out object c );
+    public object M( [PositiveOrZero] object a, [Range( 0, 100 )] object b, [LessThanOrEqualTo( 100 )] out object c );
 }

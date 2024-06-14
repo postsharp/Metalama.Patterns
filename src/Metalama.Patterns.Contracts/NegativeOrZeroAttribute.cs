@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Custom attribute that, when added to a field, property or parameter, throws
 /// an <see cref="ArgumentOutOfRangeException"/> if the target is assigned a value
-/// smaller than zero.
+/// greater than zero.
 /// </summary>
 /// <remarks>
 ///     <para>Null values are accepted and do not throw an exception.
@@ -17,16 +17,10 @@ namespace Metalama.Patterns.Contracts;
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
-public class PositiveAttribute : GreaterThanAttribute
+public class NegativeOrZeroAttribute : LessThanOrEqualToAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PositiveAttribute"/> class.
+    /// Initializes a new instance of the <see cref="NegativeOrZeroAttribute"/> class.
     /// </summary>
-    public PositiveAttribute() : base( 0 ) { }
-
-    private protected override InequalityAmbiguity? Ambiguity
-        => new(
-            InequatilyStrictness.NonStrict,
-            nameof(PositiveOrZeroAttribute),
-            nameof(StrictlyPositiveAttribute) );
+    public NegativeOrZeroAttribute() : base( 0 ) { }
 }

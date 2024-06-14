@@ -60,7 +60,8 @@ public sealed class NotNullAttribute : ContractBaseAttribute
     {
         if ( value == null! )
         {
-            meta.Target.GetContractOptions().Templates!.OnNotNullContractViolated( value );
+            var context = new ContractContext( meta.Target );
+            context.Options.Templates!.OnNotNullContractViolated( value, context );
         }
     }
 }

@@ -110,8 +110,8 @@ public class StrictlyGreaterThanAttribute : RangeAttribute
     public StrictlyGreaterThanAttribute( float min )
         : base( NumericBound.Create( min, false ), null ) { }
 
-    protected override void OnContractViolated( dynamic? value )
+    protected override void OnContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnStrictlyGreaterThanContractViolated( value, this.Range.MinValue!.ObjectValue );
+        context.Options.Templates!.OnStrictlyGreaterThanContractViolated( value, range.MinValue!.ObjectValue, context );
     }
 }

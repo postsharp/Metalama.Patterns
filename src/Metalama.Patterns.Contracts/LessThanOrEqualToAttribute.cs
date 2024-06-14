@@ -21,110 +21,93 @@ namespace Metalama.Patterns.Contracts;
 /// </remarks>
 /// <seealso href="@contract-types"/>
 [PublicAPI]
-public class LessThanAttribute : RangeAttribute
+public class LessThanOrEqualToAttribute : RangeAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="long"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="long"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="max"/> number as <see cref="decimal"/> instead
     /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="max"/> is set to 1234 and <paramref name="decimalPlaces"/>
     /// is set to 3, the <paramref name="max"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
-    public LessThanAttribute( long max, int decimalPlaces = 0 )
+    public LessThanOrEqualToAttribute( long max, int decimalPlaces = 0 )
         : base( default, NumericBound.Create( max, decimalPlaces: decimalPlaces ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="int"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
     /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="max"/> number as <see cref="decimal"/> instead
     /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="max"/> is set to 1234 and <paramref name="decimalPlaces"/>
     /// is set to 3, the <paramref name="max"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
-    public LessThanAttribute( int max, int decimalPlaces = 0 )
+    public LessThanOrEqualToAttribute( int max, int decimalPlaces = 0 )
         : base( default, NumericBound.Create( max, decimalPlaces: decimalPlaces ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="short"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="short"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( short max )
+    public LessThanOrEqualToAttribute( short max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="sbyte"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="sbyte"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( sbyte max )
+    public LessThanOrEqualToAttribute( sbyte max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="ulong"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="ulong"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( ulong max )
+    public LessThanOrEqualToAttribute( ulong max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="uint"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="uint"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( uint max )
+    public LessThanOrEqualToAttribute( uint max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="ushort"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="ushort"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( ushort max )
+    public LessThanOrEqualToAttribute( ushort max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="byte"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="byte"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( byte max )
+    public LessThanOrEqualToAttribute( byte max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="double"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="double"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( double max )
+    public LessThanOrEqualToAttribute( double max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="float"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="float"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( float max )
+    public LessThanOrEqualToAttribute( float max )
         : base( default, NumericBound.Create( max ) ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="LessThanAttribute"/> class specifying a maximum value of type <see cref="decimal"/>.
+    /// Initializes a new instance of the <see cref="LessThanOrEqualToAttribute"/> class specifying a maximum value of type <see cref="decimal"/>.
     /// </summary>
     /// <param name="max">The maximum allowed value.</param>
-    public LessThanAttribute( decimal max )
+    public LessThanOrEqualToAttribute( decimal max )
         : base( default, NumericBound.Create( max ) ) { }
 
     protected override void OnContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        var templates = context.Options.Templates!;
-
-        // Choose the template according to how the ambiguity has been resolved in BuildAspect.
-
-        if ( range.MaxValue!.IsAllowed )
-        {
-            templates.OnLessThanOrEqualToContractViolated( value, range.MaxValue!.ObjectValue, context );
-        }
-        else
-        {
-            templates.OnStrictlyLessThanContractViolated( value, range.MaxValue!.ObjectValue, context );
-        }
+        context.Options.Templates!.OnLessThanOrEqualToContractViolated( value, range.MaxValue!.ObjectValue, context );
     }
-
-    private protected override InequalityAmbiguity? Ambiguity
-        => new(
-            InequatilyStrictness.NonStrict,
-            nameof(LessThanOrEqualToAttribute),
-            nameof(StrictlyLessThanAttribute) );
 }

@@ -1,6 +1,5 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
-using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.TestHelpers;
 using Xunit;
 using Xunit.Abstractions;
@@ -1827,12 +1826,12 @@ namespace Metalama.Patterns.Caching.Tests
             Assert.Equal( 1, testClass.GetValue( 2 ) );
             Assert.Equal( 0, testClass.GetValue( 1 ) );
 
-            testClass.ResetValue( new(), 2 );
+            testClass.ResetValue( new object(), 2 );
 
             Assert.Equal( 0, testClass.GetValue( 1 ) );
             Assert.Equal( 2, testClass.GetValue( 2 ) );
 
-            testClass.ResetValue( new(), 1 );
+            testClass.ResetValue( new object(), 1 );
 
             Assert.Equal( 3, testClass.GetValue( 1 ) );
             Assert.Equal( 2, testClass.GetValue( 2 ) );

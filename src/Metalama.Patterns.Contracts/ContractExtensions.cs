@@ -120,6 +120,7 @@ public static class ContractExtensions
     /// </summary>
     /// <param name="target">The value of <c>meta.Target</c>.</param>
     /// <seealso href="@configuring-contracts"/>
+    [Obsolete( "Use ContractContext.Options" )]
     public static ContractOptions GetContractOptions( this IMetaTarget target ) => target.Declaration.GetContractOptions();
 
     /// <summary>

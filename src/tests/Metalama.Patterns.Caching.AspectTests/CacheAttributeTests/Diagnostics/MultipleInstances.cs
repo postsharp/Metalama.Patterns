@@ -5,7 +5,6 @@
 #endif
 
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Caching.Aspects;
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.Diagnostics;
 

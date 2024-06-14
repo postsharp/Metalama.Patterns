@@ -4,7 +4,6 @@
 // @RemoveOutputCode
 #endif
 
-using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.TestHelpers;
 
 namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.Diagnostics;

@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -27,8 +26,8 @@ public sealed class PhoneAttribute : RegularExpressionBaseAttribute
         return builder.ToExpression();
     }
 
-    protected override void OnContractViolated( dynamic? value, dynamic regex )
+    protected override void OnContractViolated( dynamic? value, dynamic regex, ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnPhoneContractViolated( value );
+        context.Options.Templates!.OnPhoneContractViolated( value, context );
     }
 }

@@ -2,8 +2,6 @@
 
 using Metalama.Framework.Code;
 using Metalama.Framework.Fabrics;
-using Metalama.Patterns.Caching.Aspects;
-using Metalama.Patterns.Caching.Aspects.Configuration;
 
 namespace Metalama.Patterns.Caching.AspectTests.CacheAttributeTests.ParameterFilter_Error;
 

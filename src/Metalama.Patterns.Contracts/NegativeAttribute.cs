@@ -23,4 +23,10 @@ public class NegativeAttribute : LessThanAttribute
     /// Initializes a new instance of the <see cref="NegativeAttribute"/> class.
     /// </summary>
     public NegativeAttribute() : base( 0 ) { }
+
+    private protected override InequalityAmbiguity? Ambiguity
+        => new(
+            InequatilyStrictness.NonStrict,
+            nameof(NegativeOrZeroAttribute),
+            nameof(StrictlyNegativeAttribute) );
 }

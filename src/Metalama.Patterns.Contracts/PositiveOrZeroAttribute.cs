@@ -17,16 +17,10 @@ namespace Metalama.Patterns.Contracts;
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
-public class PositiveAttribute : GreaterThanAttribute
+public class PositiveOrZeroAttribute : GreaterThanOrEqualToAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="PositiveAttribute"/> class.
+    /// Initializes a new instance of the <see cref="PositiveOrZeroAttribute"/> class.
     /// </summary>
-    public PositiveAttribute() : base( 0 ) { }
-
-    private protected override InequalityAmbiguity? Ambiguity
-        => new(
-            InequatilyStrictness.NonStrict,
-            nameof(PositiveOrZeroAttribute),
-            nameof(StrictlyPositiveAttribute) );
+    public PositiveOrZeroAttribute() : base( 0 ) { }
 }

@@ -21,35 +21,6 @@ internal static class CompileTimeHelpers
         return expressionBuilder.ToExpression();
     }
 
-    public static string GetTargetDisplayName( this IMetaTarget target )
-    {
-        return target.Declaration.DeclarationKind switch
-        {
-            DeclarationKind.Parameter when target.Parameter.IsReturnParameter => "return value",
-            DeclarationKind.Parameter => $"'{target.Parameter.Name}' parameter",
-            DeclarationKind.Property => $"'{target.Property.Name}' property",
-            DeclarationKind.Field => $"'{target.Field.Name}' field",
-            DeclarationKind.Indexer => "indexer",
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(target) + "." + nameof(target.Declaration) + "." +
-                nameof(target.Declaration.DeclarationKind) )
-        };
-    }
-
-    public static string GetTargetParameterName( this IMetaTarget target )
-    {
-        return target.Declaration.DeclarationKind switch
-        {
-            DeclarationKind.Parameter => target.Parameter.Name,
-            DeclarationKind.Property or DeclarationKind.Field or DeclarationKind.Indexer => "value",
-            _ => throw new ArgumentOutOfRangeException(
-                nameof(target) + "." + nameof(target.Declaration) + "." +
-                nameof(target.Declaration.DeclarationKind) )
-        };
-    }
-
-    public static IType GetTargetType( this IMetaTarget target ) => ((IHasType) target.Declaration).Type;
-
     public static IEnumerable<INamedType> GetSelfAndAllImplementedInterfaces( this INamedType type )
     {
         if ( type == null )

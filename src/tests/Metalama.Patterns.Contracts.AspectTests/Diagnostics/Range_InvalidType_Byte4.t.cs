@@ -1,1 +1,2 @@
+// Warning LAMA5007 on `GreaterThan( 256.0 )`: `The meaning of the [GreaterThanAttribute] attribute on Range_InvalidType_Byte4.field is ambiguous because of a bug in a previous version of PostSharp and Metalama. Use either [GreaterThanOrEqualToAttribute] or [StrictlyGreaterThanAttribute] or specify the NamingConvention contract option.`
 // Error LAMA5001 on `field`: `The [GreaterThan] contract cannot be applied to 'Range_InvalidType_Byte4.field' because the value range [256, ∞] cannot be satisfied by the type Byte.`

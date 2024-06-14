@@ -8,7 +8,6 @@
 // @IgnoredDiagnostic(CS8602)
 #endif
 
-using Metalama.Patterns.Caching.Aspects;
 using Metalama.Patterns.Caching.TestHelpers;
 
 // ReSharper disable once CheckNamespace

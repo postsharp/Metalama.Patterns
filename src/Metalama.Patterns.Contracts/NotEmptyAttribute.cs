@@ -41,7 +41,11 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetType = meta.Target.GetTargetType();
+        var context = new ContractContext( meta.Target );
+        var options = context.Options;
+        var templates = options.Templates!;
+
+        var targetType = context.TargetType;
         var requiresNullCheck = targetType.IsNullable != false;
 
         if ( targetType.Equals( SpecialType.String ) || targetType is IArrayType )
@@ -50,14 +54,14 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
             {
                 if ( value != null && value!.Length <= 0 )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                    templates.OnNotEmptyContractViolated( value, context );
                 }
             }
             else
             {
                 if ( value!.Length <= 0 )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                    templates.OnNotEmptyContractViolated( value, context );
                 }
             }
         }
@@ -67,7 +71,7 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
             {
                 if ( !value!.IsDefault && value.IsEmpty )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                    templates.OnNotEmptyContractViolated( value, context );
                 }
             }
             else if ( TryGetCompatibleTargetInterface( namedType, out var interfaceType, out var requiresCast ) )
@@ -78,14 +82,14 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
                     {
                         if ( value != null && meta.Cast( interfaceType, value )!.Count <= 0 )
                         {
-                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                            templates.OnNotEmptyContractViolated( value, context );
                         }
                     }
                     else
                     {
                         if ( meta.Cast( interfaceType, value )!.Count <= 0 )
                         {
-                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                            templates.OnNotEmptyContractViolated( value, context );
                         }
                     }
                 }
@@ -95,14 +99,14 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
                     {
                         if ( value != null && value!.Count <= 0 )
                         {
-                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                            templates.OnNotEmptyContractViolated( value, context );
                         }
                     }
                     else
                     {
                         if ( value!.Count <= 0 )
                         {
-                            meta.Target.GetContractOptions().Templates!.OnNotEmptyContractViolated( value );
+                            templates.OnNotEmptyContractViolated( value, context );
                         }
                     }
                 }

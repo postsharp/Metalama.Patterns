@@ -4,5 +4,5 @@ namespace Metalama.Patterns.Contracts.AspectTests.Diagnostics;
 
 public class Range_LongGreaterThanUlong
 {
-    private void MethodWithLongGreaterThanUlong( [GreaterThan( (ulong) long.MaxValue + 1 )] long? a ) { }
+    private void MethodWithLongGreaterThanUlong( [GreaterThanOrEqualTo( (ulong) long.MaxValue + 1 )] long? a ) { }
 }

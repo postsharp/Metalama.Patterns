@@ -26,7 +26,7 @@ namespace Metalama.Patterns.Contracts;
 [PublicAPI]
 public class RangeAttribute : ContractBaseAttribute
 {
-    protected NumericRange Range { get; private set; }
+    protected NumericRange Range { get; }
 
     internal RangeAttribute(
         NumericBound? minValue,
@@ -179,8 +179,34 @@ public class RangeAttribute : ContractBaseAttribute
             _ => false
         };
 
+    private void ReportAmbiguity( IAspectBuilder builder )
+    {
+        // If the attribute has an ambiguous meaning for historical reasons, report a warning unless
+        // the user has specified how to resolve the ambiguity.
+        var ambiguity = this.Ambiguity;
+
+        if ( ambiguity != null )
+        {
+            var defaultStrictness = builder.Target.GetContractOptions().DefaultInequalityStrictness;
+
+            if ( defaultStrictness == null )
+            {
+                var attribute = builder.AspectInstance.Predecessors[0].Instance as IAttribute;
+
+                builder.Diagnostics.Report(
+                    ContractDiagnostics.AttributeMeaningIsAmbiguous.WithArguments(
+                        (builder.Target,
+                         this.GetType().Name,
+                         ambiguity.NewName1, ambiguity.NewName2) ),
+                    attribute ?? builder.Target );
+            }
+        }
+    }
+
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
+        this.ReportAmbiguity( builder );
+
         var basicType = (INamedType) targetType.ToNonNullableType();
 
         switch ( this.Range.IsTypeSupported( basicType ) )
@@ -230,15 +256,24 @@ public class RangeAttribute : ContractBaseAttribute
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var type = meta.Target.GetTargetType();
         var expressionBuilder = new ExpressionBuilder();
         var expression = (IExpression) value!;
+
+        var range = this.Range;
+        var context = new ContractContext( meta.Target );
+        var type = context.TargetType;
+        var options = context.Options;
+
+        if ( this.Ambiguity != null && options.DefaultInequalityStrictness != null )
+        {
+            range = this.Range.WithStrictness( options.DefaultInequalityStrictness.Value );
+        }
 
         if ( this.Range.GeneratePattern( type, expressionBuilder, expression ) )
         {
             if ( expressionBuilder.ToValue() )
             {
-                this.OnContractViolated( value );
+                this.OnContractViolated( value, range, context );
             }
         }
         else
@@ -248,8 +283,10 @@ public class RangeAttribute : ContractBaseAttribute
     }
 
     [Template]
-    protected virtual void OnContractViolated( dynamic? value )
+    protected virtual void OnContractViolated( dynamic? value, [CompileTime] NumericRange range, [CompileTime] ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnRangeContractViolated( value, this.Range );
+        context.Options.Templates!.OnRangeContractViolated( value, range, context );
     }
+
+    private protected virtual InequalityAmbiguity? Ambiguity => null;
 }

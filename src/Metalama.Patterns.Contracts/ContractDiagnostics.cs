@@ -57,4 +57,13 @@ internal static class ContractDiagnostics
             "The [{2}] contract is redundant on '{0}' because the value range {3} is always satisfied by the type {1}.",
             $"The Range contract is redundant because the range is always satisfied by the type of the target declaration.",
             "Metalama.Patterns.Contracts" );
+
+    public static DiagnosticDefinition<(IDeclaration Declaration, string OldName, string NewName1, string NewName2)> AttributeMeaningIsAmbiguous { get; }
+        = new(
+            "LAMA5007",
+            Severity.Warning,
+            "The meaning of the [{1}] attribute on {0} is ambiguous because of a bug in a previous version of PostSharp and Metalama. " +
+            "Use either [{2}] or [{3}] or specify the NamingConvention contract option.",
+            $"The meaning of the attribute is ambiguous.",
+            "Metalama.Patterns.Contracts" );
 }

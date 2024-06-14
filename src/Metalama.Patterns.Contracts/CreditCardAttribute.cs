@@ -41,7 +41,9 @@ public sealed class CreditCardAttribute : ContractBaseAttribute
     {
         if ( !ContractHelpers.IsValidCreditCardNumber( value ) )
         {
-            meta.Target.GetContractOptions().Templates!.OnCreditCardContractViolated( value );
+            var context = new ContractContext( meta.Target );
+
+            context.Options.Templates!.OnCreditCardContractViolated( value, context );
         }
     }
 }

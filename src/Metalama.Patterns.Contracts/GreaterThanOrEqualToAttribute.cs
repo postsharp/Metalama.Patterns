@@ -21,110 +21,93 @@ namespace Metalama.Patterns.Contracts;
 /// </remarks>
 /// <seealso href="@contract-types"/>
 [PublicAPI]
-public class GreaterThanAttribute : RangeAttribute
+public class GreaterThanOrEqualToAttribute : RangeAttribute
 {
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="long"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="long"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number as <see cref="decimal"/> instead
     /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
     /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
-    public GreaterThanAttribute( long min, int decimalPlaces = 0 )
+    public GreaterThanOrEqualToAttribute( long min, int decimalPlaces = 0 )
         : base( NumericBound.Create( min, decimalPlaces: decimalPlaces ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="int"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="int"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
     /// <param name="decimalPlaces">When non-zero, interprets the <paramref name="min"/> number as <see cref="decimal"/> instead
     /// of <see cref="long"/> by adding a decimal point at the specified position. For instance, if <paramref name="min"/> is set to 1234 and <paramref name="decimalPlaces"/>
     /// is set to 3, the <paramref name="min"/> parameter will be reinterpreted as <c>1.234m</c>.</param> 
-    public GreaterThanAttribute( int min, int decimalPlaces = 0 )
+    public GreaterThanOrEqualToAttribute( int min, int decimalPlaces = 0 )
         : base( NumericBound.Create( min, decimalPlaces: decimalPlaces ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="short"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="short"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( short min )
+    public GreaterThanOrEqualToAttribute( short min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="sbyte"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="sbyte"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( sbyte min )
+    public GreaterThanOrEqualToAttribute( sbyte min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="ulong"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="ulong"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( ulong min )
+    public GreaterThanOrEqualToAttribute( ulong min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="uint"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="uint"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( uint min )
+    public GreaterThanOrEqualToAttribute( uint min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="ushort"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="ushort"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( ushort min )
+    public GreaterThanOrEqualToAttribute( ushort min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="byte"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="byte"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( byte min )
+    public GreaterThanOrEqualToAttribute( byte min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="double"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="double"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( double min )
+    public GreaterThanOrEqualToAttribute( double min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="float"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="float"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( float min )
+    public GreaterThanOrEqualToAttribute( float min )
         : base( NumericBound.Create( min ), default ) { }
 
     /// <summary>
-    /// Initializes a new instance of the <see cref="GreaterThanAttribute"/> class specifying a minimum value of type <see cref="decimal"/>.
+    /// Initializes a new instance of the <see cref="GreaterThanOrEqualToAttribute"/> class specifying a minimum value of type <see cref="decimal"/>.
     /// </summary>
     /// <param name="min">The minimum allowed value.</param>
-    public GreaterThanAttribute( decimal min )
+    public GreaterThanOrEqualToAttribute( decimal min )
         : base( NumericBound.Create( min ), default ) { }
 
     protected override void OnContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        var templates = context.Options.Templates!;
-
-        // Choose the template according to how the ambiguity has been resolved in BuildAspect.
-
-        if ( range.MinValue!.IsAllowed )
-        {
-            templates.OnGreaterThanOrEqualToContractViolated( value, range.MinValue!.ObjectValue, context );
-        }
-        else
-        {
-            templates.OnStrictlyGreaterThanContractViolated( value, range.MinValue!.ObjectValue, context );
-        }
+        context.Options.Templates!.OnGreaterThanOrEqualToContractViolated( value, range.MinValue!.ObjectValue, context );
     }
-
-    private protected override InequalityAmbiguity? Ambiguity
-        => new(
-            InequatilyStrictness.NonStrict,
-            nameof(GreaterThanOrEqualToAttribute),
-            nameof(StrictlyGreaterThanAttribute) );
 }
