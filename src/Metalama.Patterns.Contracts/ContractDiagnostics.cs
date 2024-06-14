@@ -58,12 +58,15 @@ internal static class ContractDiagnostics
             $"The Range contract is redundant because the range is always satisfied by the type of the target declaration.",
             "Metalama.Patterns.Contracts" );
 
-    public static DiagnosticDefinition<(IDeclaration Declaration, string OldName, string NewName1, string NewName2)> AttributeMeaningIsAmbiguous { get; }
+    public static DiagnosticDefinition<(IDeclaration Declaration, string OldName, string NewName1, string NewName2, InequatilyStrictness Strictness)>
+        AttributeMeaningIsAmbiguous { get; }
         = new(
             "LAMA5007",
             Severity.Warning,
-            "The meaning of the [{1}] attribute on {0} is ambiguous because of a bug in a previous version of PostSharp and Metalama. " +
-            "Use either [{2}] or [{3}] or specify the NamingConvention contract option.",
-            $"The meaning of the attribute is ambiguous.",
+            "The meaning of the [{1}] attribute on {0} is ambiguous because the inequality strictness is not specified. " +
+            "It is now interpreset as {4}, which is non-standard, and this behabior might be changed in the future. " +
+            $"Use either [{{2}}] or [{{3}}] or specify the {nameof(ContractOptions.DefaultInequalityStrictness)} property in {nameof(ContractOptions)} " +
+            $"using the {nameof(ContractConfigurationExtensions.ConfigureContracts)} fabric extension method.",
+            $"The meaning of the inequality contract is ambiguous.",
             "Metalama.Patterns.Contracts" );
 }

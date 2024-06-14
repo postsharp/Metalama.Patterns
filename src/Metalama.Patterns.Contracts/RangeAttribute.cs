@@ -197,7 +197,7 @@ public class RangeAttribute : ContractBaseAttribute
                     ContractDiagnostics.AttributeMeaningIsAmbiguous.WithArguments(
                         (builder.Target,
                          this.GetType().Name,
-                         ambiguity.NewName1, ambiguity.NewName2) ),
+                         ambiguity.NewName1, ambiguity.NewName2, ambiguity.DefaultStrictness) ),
                     attribute ?? builder.Target );
             }
         }
