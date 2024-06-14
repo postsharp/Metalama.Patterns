@@ -45,7 +45,7 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
         var options = context.Options;
         var templates = options.Templates!;
 
-        var targetType = context.TargetType;
+        var targetType = context.Type;
         var requiresNullCheck = targetType.IsNullable != false;
 
         if ( targetType.Equals( SpecialType.String ) || targetType is IArrayType )

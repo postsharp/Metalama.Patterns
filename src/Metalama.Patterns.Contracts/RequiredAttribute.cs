@@ -66,7 +66,7 @@ public sealed class RequiredAttribute : ContractBaseAttribute
     public override void Validate( dynamic? value )
     {
         var context = new ContractContext( meta.Target );
-        var targetType = context.TargetType;
+        var targetType = context.Type;
 
         var templates = context.Options.Templates!;
 

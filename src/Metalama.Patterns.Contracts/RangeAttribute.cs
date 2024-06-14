@@ -261,7 +261,7 @@ public class RangeAttribute : ContractBaseAttribute
 
         var range = this.Range;
         var context = new ContractContext( meta.Target );
-        var type = context.TargetType;
+        var type = context.Type;
         var options = context.Options;
 
         if ( this.Ambiguity != null && options.DefaultInequalityStrictness != null )

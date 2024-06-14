@@ -55,12 +55,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         if ( meta.Target.ContractDirection == ContractDirection.Input )
         {
             throw new ArgumentException(
-                $"The {context.TargetDisplayName} must be a valid {context.TargetType.ToDisplayString()}.",
+                $"The {context.TargetDisplayName} must be a valid {context.Type.ToDisplayString()}.",
                 context.TargetParameterName );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be a valid {context.TargetType.ToDisplayString()}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be a valid {context.Type.ToDisplayString()}." );
         }
     }
 

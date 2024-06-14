@@ -69,7 +69,7 @@ public sealed class StringLengthAttribute : ContractBaseAttribute
         // TODO: We assume that min and max are sensible (eg, non-negative) here. This should be validated ideally at compile time. See comment at head of class.
 
         var context = new ContractContext( meta.Target );
-        var targetType = context.TargetType;
+        var targetType = context.Type;
         var requiresNullCheck = targetType.IsNullable != false;
 
         var templates = context.Options.Templates!;

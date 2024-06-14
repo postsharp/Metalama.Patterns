@@ -12,6 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Options for all aspects of the <c>Metalama.Patterns.Contracts</c> namespace.
 /// </summary>
+/// <seealso cref="ContractConfigurationExtensions"/>
 [PublicAPI]
 public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
                                       IHierarchicalOptions<IFieldOrPropertyOrIndexer>,

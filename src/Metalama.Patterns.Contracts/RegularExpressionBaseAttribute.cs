@@ -36,7 +36,7 @@ public abstract class RegularExpressionBaseAttribute : ContractBaseAttribute
         var regex = (Regex) this.GetRegex().Value!;
         var context = new ContractContext( meta.Target );
 
-        var targetType = context.TargetType;
+        var targetType = context.Type;
         var requiresNullCheck = targetType.IsNullable != false;
 
         if ( requiresNullCheck )
