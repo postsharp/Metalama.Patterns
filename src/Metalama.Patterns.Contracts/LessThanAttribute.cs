@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Contracts;
 /// <para>Error message can use additional argument <value>{4}</value> to refer to the minimum value used.</para>
 /// </remarks>
 /// <seealso cref="StrictlyLessThanAttribute"/>
-/// <seealso cref="LessThanOrEqualToAttribute"/>
+/// <seealso cref="LessThanOrEqualAttribute"/>
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 public class LessThanAttribute : RangeAttribute
@@ -129,6 +129,6 @@ public class LessThanAttribute : RangeAttribute
     private protected override InequalityAmbiguity? Ambiguity
         => new(
             InequatilyStrictness.NonStrict,
-            nameof(LessThanOrEqualToAttribute),
+            nameof(LessThanOrEqualAttribute),
             nameof(StrictlyLessThanAttribute) );
 }

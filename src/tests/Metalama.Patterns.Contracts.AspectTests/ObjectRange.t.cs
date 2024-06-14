@@ -3,7 +3,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.ObjectRange;
 internal class C
 {
   [return: StrictlyPositive]
-  public object M([PositiveOrZero] object a, [Range(0, 100)] object b, [LessThanOrEqualTo(101, decimalPlaces: 2)] out object c)
+  public object M([NonNegative] object a, [Range(0, 100)] object b, [LessThanOrEqual(101, decimalPlaces: 2)] out object c)
   {
     if (global::Metalama.Patterns.Contracts.Numeric.NumberComparer.IsStrictlySmallerThan(a, 0) == true)
     {

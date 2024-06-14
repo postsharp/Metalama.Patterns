@@ -22,7 +22,7 @@ namespace Metalama.Patterns.Contracts;
 /// </para>
 /// </remarks>
 /// <seealso cref="StrictlyGreaterThanAttribute"/>
-/// <seealso cref="GreaterThanOrEqualToAttribute"/>
+/// <seealso cref="GreaterThanOrEqualAttribute"/>
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 public class GreaterThanAttribute : RangeAttribute
@@ -129,6 +129,6 @@ public class GreaterThanAttribute : RangeAttribute
     private protected override InequalityAmbiguity? Ambiguity
         => new(
             InequatilyStrictness.NonStrict,
-            nameof(GreaterThanOrEqualToAttribute),
+            nameof(GreaterThanOrEqualAttribute),
             nameof(StrictlyGreaterThanAttribute) );
 }

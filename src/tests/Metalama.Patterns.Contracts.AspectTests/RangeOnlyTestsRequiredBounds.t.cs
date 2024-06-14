@@ -2,14 +2,14 @@ using System;
 namespace Metalama.Patterns.Contracts.AspectTests;
 public sealed class RangeOnlyTestsRequiredBounds
 {
-  public void Negative([NegativeOrZero] int x)
+  public void Negative([NonPositive] int x)
   {
     if (x is> 0)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 0.");
     }
   }
-  public void Positive([PositiveOrZero] int x)
+  public void Positive([NonNegative] int x)
   {
     if (x is < 0)
     {
@@ -30,14 +30,14 @@ public sealed class RangeOnlyTestsRequiredBounds
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly greater than 0.");
     }
   }
-  public void LessThanInt([LessThanOrEqualTo(42)] int x)
+  public void LessThanInt([LessThanOrEqual(42)] int x)
   {
     if (x is> 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 42.");
     }
   }
-  public void GreaterThanInt([GreaterThanOrEqualTo(42)] int x)
+  public void GreaterThanInt([GreaterThanOrEqual(42)] int x)
   {
     if (x is < 42)
     {
@@ -72,14 +72,14 @@ public sealed class RangeOnlyTestsRequiredBounds
       throw new ArgumentOutOfRangeException("The 'x' parameter must be strictly in the range ]10, 20[.", "x");
     }
   }
-  public void LessThanDouble([LessThanOrEqualTo(42.0)] int x)
+  public void LessThanDouble([LessThanOrEqual(42.0)] int x)
   {
     if (x is> 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 42.");
     }
   }
-  public void GreaterThanDouble([GreaterThanOrEqualTo(42.0)] int x)
+  public void GreaterThanDouble([GreaterThanOrEqual(42.0)] int x)
   {
     if (x is < 42)
     {
@@ -114,14 +114,14 @@ public sealed class RangeOnlyTestsRequiredBounds
       throw new ArgumentOutOfRangeException("The 'x' parameter must be strictly in the range ]10, 20[.", "x");
     }
   }
-  public void LessThanUnsigned([LessThanOrEqualTo(42ul)] int x)
+  public void LessThanUnsigned([LessThanOrEqual(42ul)] int x)
   {
     if (x is> 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 42.");
     }
   }
-  public void GreaterThanUnsigned([GreaterThanOrEqualTo(42ul)] int x)
+  public void GreaterThanUnsigned([GreaterThanOrEqual(42ul)] int x)
   {
     if (x is < 42)
     {

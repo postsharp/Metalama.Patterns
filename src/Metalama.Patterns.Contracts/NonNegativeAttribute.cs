@@ -17,7 +17,7 @@ namespace Metalama.Patterns.Contracts;
 /// <seealso href="@contract-types"/>
 [PublicAPI]
 [RunTimeOrCompileTime]
-public class NonNegativeAttribute : GreaterThanOrEqualToAttribute
+public class NonNegativeAttribute : GreaterThanOrEqualAttribute
 {
     /// <summary>
     /// Initializes a new instance of the <see cref="NonNegativeAttribute"/> class.

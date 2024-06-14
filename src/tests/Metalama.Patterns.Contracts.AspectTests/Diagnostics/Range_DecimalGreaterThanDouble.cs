@@ -4,5 +4,5 @@ namespace Metalama.Patterns.Contracts.AspectTests.Diagnostics;
 
 public class Range_DecimalGreaterThanDouble
 {
-    public void MethodWithDecimalGreaterThanDouble( [GreaterThanOrEqualTo( (double) decimal.MaxValue + ((double) decimal.MaxValue * 1e-6) )] decimal? a ) { }
+    public void MethodWithDecimalGreaterThanDouble( [GreaterThanOrEqual( (double) decimal.MaxValue + ((double) decimal.MaxValue * 1e-6) )] decimal? a ) { }
 }
