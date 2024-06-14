@@ -64,7 +64,7 @@ internal static class ContractDiagnostics
             "LAMA5007",
             Severity.Warning,
             "The meaning of the [{1}] attribute on {0} is ambiguous because the inequality strictness is not specified. " +
-            "It is now interpreset as {4}, which is non-standard, and this behabior might be changed in the future. " +
+            "It is now interpreted as {4}, which is non-standard, and this behavior might be changed in the future. " +
             $"Use either [{{2}}] or [{{3}}] or specify the {nameof(ContractOptions.DefaultInequalityStrictness)} property in {nameof(ContractOptions)} " +
             $"using the {nameof(ContractConfigurationExtensions.ConfigureContracts)} fabric extension method.",
             $"The meaning of the inequality contract is ambiguous.",
