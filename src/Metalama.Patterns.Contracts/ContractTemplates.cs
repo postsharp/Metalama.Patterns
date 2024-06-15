@@ -20,7 +20,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     /// Gets the name of the target parameter.
     /// </summary>
     [CompileTime]
-    [Obsolete( "Use context.context.TargetParameterName" )]
+    [Obsolete( "Use context.TargetParameterName" )]
     protected static string TargetParameterName => new ContractContext( meta.Target ).TargetParameterName;
 
     /// <summary>
