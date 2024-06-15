@@ -9,7 +9,7 @@ public class C
     [Positive]
     public int A { get; set; }
 
-    [Positive]
+    [Negative]
     public int B { get; set; }
 
     [GreaterThan( 5 )]

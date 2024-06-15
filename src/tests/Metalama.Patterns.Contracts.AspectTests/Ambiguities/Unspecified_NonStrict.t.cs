@@ -21,7 +21,7 @@ public class C
     }
   }
   private int _b;
-  [Positive]
+  [Negative]
   public int B
   {
     get
@@ -30,9 +30,9 @@ public class C
     }
     set
     {
-      if (value is < 0)
+      if (value is> 0)
       {
-        throw new ArgumentOutOfRangeException("value", "The 'B' property must be greater than or equal to 0.");
+        throw new ArgumentOutOfRangeException("value", "The 'B' property must be less than or equal to 0.");
       }
       _b = value;
     }

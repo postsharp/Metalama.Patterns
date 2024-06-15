@@ -1,5 +1,5 @@
 // Warning LAMA5007 on `Positive`: `The meaning of the [PositiveAttribute] attribute on C.A is ambiguous because the inequality strictness is not specified. It is now interpreted as NonStrict, which is non-standard, and this behavior might be changed in the future. Use either [NonNegativeAttribute] or [StrictlyPositiveAttribute] or specify the DefaultInequalityStrictness property in ContractOptions using the ConfigureContracts fabric extension method.`
-// Warning LAMA5007 on `Positive`: `The meaning of the [PositiveAttribute] attribute on C.B is ambiguous because the inequality strictness is not specified. It is now interpreted as NonStrict, which is non-standard, and this behavior might be changed in the future. Use either [NonNegativeAttribute] or [StrictlyPositiveAttribute] or specify the DefaultInequalityStrictness property in ContractOptions using the ConfigureContracts fabric extension method.`
+// Warning LAMA5007 on `Negative`: `The meaning of the [NegativeAttribute] attribute on C.B is ambiguous because the inequality strictness is not specified. It is now interpreted as NonStrict, which is non-standard, and this behavior might be changed in the future. Use either [NonPositiveAttribute] or [StrictlyNegativeAttribute] or specify the DefaultInequalityStrictness property in ContractOptions using the ConfigureContracts fabric extension method.`
 // Warning LAMA5007 on `GreaterThan( 5 )`: `The meaning of the [GreaterThanAttribute] attribute on C.D is ambiguous because the inequality strictness is not specified. It is now interpreted as NonStrict, which is non-standard, and this behavior might be changed in the future. Use either [GreaterThanOrEqualAttribute] or [StrictlyGreaterThanAttribute] or specify the DefaultInequalityStrictness property in ContractOptions using the ConfigureContracts fabric extension method.`
 // Warning LAMA5007 on `LessThan( 5 )`: `The meaning of the [LessThanAttribute] attribute on C.E is ambiguous because the inequality strictness is not specified. It is now interpreted as NonStrict, which is non-standard, and this behavior might be changed in the future. Use either [LessThanOrEqualAttribute] or [StrictlyLessThanAttribute] or specify the DefaultInequalityStrictness property in ContractOptions using the ConfigureContracts fabric extension method.`
 using System;
@@ -24,7 +24,7 @@ public class C
     }
   }
   private int _b;
-  [Positive]
+  [Negative]
   public int B
   {
     get
@@ -33,9 +33,9 @@ public class C
     }
     set
     {
-      if (value is < 0)
+      if (value is> 0)
       {
-        throw new ArgumentOutOfRangeException("value", "The 'B' property must be greater than or equal to 0.");
+        throw new ArgumentOutOfRangeException("value", "The 'B' property must be less than or equal to 0.");
       }
       _b = value;
     }
