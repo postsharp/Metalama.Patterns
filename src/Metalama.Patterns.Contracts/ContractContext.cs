@@ -14,18 +14,18 @@ namespace Metalama.Patterns.Contracts;
 [PublicAPI]
 public sealed class ContractContext
 {
-    private readonly IMetaTarget _target;
+    public ContractContext( IMetaTarget target ) : this( target.Declaration ) { }
 
-    public ContractContext( IMetaTarget target )
+    public ContractContext( IDeclaration target )
     {
-        this._target = target;
-        this.Options = target.Declaration.GetContractOptions();
+        this.TargetDeclaration = target;
+        this.Options = target.GetContractOptions();
     }
 
     /// <summary>
     /// Gets the declaration (parameter, field or property) validated by the contract.
     /// </summary>
-    public IHasType TargetDeclaration => (IHasType) this._target.Declaration;
+    public IDeclaration TargetDeclaration { get; }
 
     /// <summary>
     /// Gets the application options.
@@ -35,34 +35,34 @@ public sealed class ContractContext
     /// <summary>
     /// Gets the type of the <see cref="TargetDeclaration"/>.
     /// </summary>
-    public IType Type => this.TargetDeclaration.Type;
+    public IType Type => ((IHasType) this.TargetDeclaration).Type;
 
     /// <summary>
     /// Gets the display name of the <see cref="TargetDeclaration"/>.
     /// </summary>
     public string TargetDisplayName
-        => this._target.Declaration.DeclarationKind switch
+        => this.TargetDeclaration.DeclarationKind switch
         {
-            DeclarationKind.Parameter when this._target.Parameter.IsReturnParameter => "return value",
-            DeclarationKind.Parameter => $"'{this._target.Parameter.Name}' parameter",
-            DeclarationKind.Property => $"'{this._target.Property.Name}' property",
-            DeclarationKind.Field => $"'{this._target.Field.Name}' field",
+            DeclarationKind.Parameter when ((IParameter) this.TargetDeclaration).IsReturnParameter => "return value",
+            DeclarationKind.Parameter => $"'{((IParameter) this.TargetDeclaration).Name}' parameter",
+            DeclarationKind.Property => $"'{((IProperty) this.TargetDeclaration).Name}' property",
+            DeclarationKind.Field => $"'{((IField) this.TargetDeclaration).Name}' field",
             DeclarationKind.Indexer => "indexer",
             _ => throw new ArgumentOutOfRangeException(
-                nameof(this._target) + "." + nameof(this._target.Declaration) + "." +
-                nameof(this._target.Declaration.DeclarationKind) )
+                nameof(this.TargetDeclaration) + "." + nameof(this.TargetDeclaration) + "." +
+                nameof(this.TargetDeclaration.DeclarationKind) )
         };
 
     /// <summary>
     /// Gets the name of the target parameter, or <c>value</c> if the target declaration is a property.
     /// </summary>
     public string TargetParameterName
-        => this._target.Declaration.DeclarationKind switch
+        => this.TargetDeclaration.DeclarationKind switch
         {
-            DeclarationKind.Parameter => this._target.Parameter.Name,
+            DeclarationKind.Parameter => ((IParameter) this.TargetDeclaration).Name,
             DeclarationKind.Property or DeclarationKind.Field or DeclarationKind.Indexer => "value",
             _ => throw new ArgumentOutOfRangeException(
-                nameof(this._target) + "." + nameof(this._target.Declaration) + "." +
-                nameof(this._target.Declaration.DeclarationKind) )
+                nameof(this.TargetDeclaration) + "." + nameof(this.TargetDeclaration) + "." +
+                nameof(this.TargetDeclaration.DeclarationKind) )
         };
 }

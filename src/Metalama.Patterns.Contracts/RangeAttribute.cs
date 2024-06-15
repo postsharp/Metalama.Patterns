@@ -7,6 +7,7 @@ using JetBrains.Annotations;
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
+using Metalama.Framework.Diagnostics;
 using Metalama.Framework.Eligibility;
 using Metalama.Patterns.Contracts.Numeric;
 
@@ -179,7 +180,7 @@ public class RangeAttribute : ContractBaseAttribute
             _ => false
         };
 
-    private void ReportAmbiguity( IAspectBuilder builder )
+    private (NumericRange Range, InequalityAmbiguity? Ambiguity) ResolveRange( ContractContext context )
     {
         // If the attribute has an ambiguous meaning for historical reasons, report a warning unless
         // the user has specified how to resolve the ambiguity.
@@ -187,25 +188,38 @@ public class RangeAttribute : ContractBaseAttribute
 
         if ( ambiguity != null )
         {
-            var defaultStrictness = builder.Target.GetContractOptions().DefaultInequalityStrictness;
+            var defaultStrictness = context.TargetDeclaration.GetContractOptions().DefaultInequalityStrictness;
 
-            if ( defaultStrictness == null )
+            if ( defaultStrictness != null )
             {
-                var attribute = builder.AspectInstance.Predecessors[0].Instance as IAttribute;
+                // The ambiguity is resolved.
+                ambiguity = null;
+            }
 
-                builder.Diagnostics.Report(
-                    ContractDiagnostics.AttributeMeaningIsAmbiguous.WithArguments(
-                        (builder.Target,
-                         this.GetType().Name,
-                         ambiguity.NewName1, ambiguity.NewName2, ambiguity.DefaultStrictness) ),
-                    attribute ?? builder.Target );
+            if ( this.Ambiguity != null && context.Options.DefaultInequalityStrictness != null )
+            {
+                return (this.Range.WithStrictness( context.Options.DefaultInequalityStrictness.Value ), ambiguity);
             }
         }
+
+        return (this.Range, ambiguity);
     }
 
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
-        this.ReportAmbiguity( builder );
+        var resolvedRange = this.ResolveRange( new ContractContext( builder.Target ) );
+
+        if ( resolvedRange.Ambiguity != null )
+        {
+            var attribute = builder.AspectInstance.Predecessors[0].Instance as IAttribute;
+
+            builder.Diagnostics.Report(
+                ContractDiagnostics.AttributeMeaningIsAmbiguous.WithArguments(
+                    (builder.Target,
+                     this.GetType().Name,
+                     resolvedRange.Ambiguity.NewName1, resolvedRange.Ambiguity.NewName2, resolvedRange.Ambiguity.DefaultStrictness) ),
+                attribute ?? builder.Target );
+        }
 
         var basicType = (INamedType) targetType.ToNonNullableType();
 
@@ -218,7 +232,7 @@ public class RangeAttribute : ContractBaseAttribute
                             (builder.Target,
                              basicType.Name,
                              builder.AspectInstance.AspectClass.ShortName,
-                             this.Range) ) );
+                             resolvedRange.Range) ) );
 
                 builder.SkipAspect();
 
@@ -231,7 +245,7 @@ public class RangeAttribute : ContractBaseAttribute
                             (builder.Target,
                              basicType.Name,
                              builder.AspectInstance.AspectClass.ShortName,
-                             this.Range) ) );
+                             resolvedRange.Range) ) );
 
                 builder.SkipAspect();
 
@@ -259,17 +273,11 @@ public class RangeAttribute : ContractBaseAttribute
         var expressionBuilder = new ExpressionBuilder();
         var expression = (IExpression) value!;
 
-        var range = this.Range;
         var context = new ContractContext( meta.Target );
+        var range = this.ResolveRange( context ).Range;
         var type = context.Type;
-        var options = context.Options;
 
-        if ( this.Ambiguity != null && options.DefaultInequalityStrictness != null )
-        {
-            range = this.Range.WithStrictness( options.DefaultInequalityStrictness.Value );
-        }
-
-        if ( this.Range.GeneratePattern( type, expressionBuilder, expression ) )
+        if ( range.GeneratePattern( type, expressionBuilder, expression ) )
         {
             if ( expressionBuilder.ToValue() )
             {
@@ -278,7 +286,7 @@ public class RangeAttribute : ContractBaseAttribute
         }
         else
         {
-            meta.InsertComment( $"The {this.Range} validation on {expression} is fully redundant and has been skipped." );
+            meta.InsertComment( $"The {range} validation on {expression} is fully redundant and has been skipped." );
         }
     }
 
