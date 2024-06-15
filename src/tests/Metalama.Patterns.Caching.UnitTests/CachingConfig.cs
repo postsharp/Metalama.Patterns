@@ -2,4 +2,6 @@
 
 // Don't use dependency injection by default.
 
+using Metalama.Patterns.Caching.Aspects;
+
 [assembly: CachingConfiguration( UseDependencyInjection = false )]

@@ -1,5 +1,7 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Aspects;
+
 #pragma warning disable CS1998 // Async method lacks 'await' operators and will run synchronously
 
 namespace Metalama.Patterns.Caching.AspectTests.InvalidateCacheAttributeTests.ParameterMapping_Multiple;
