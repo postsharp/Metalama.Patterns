@@ -65,7 +65,10 @@ public sealed class RequiredAttribute : ContractBaseAttribute
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetType = meta.Target.GetTargetType();
+        var context = new ContractContext( meta.Target );
+        var targetType = context.Type;
+
+        var templates = context.Options.Templates!;
 
         if ( targetType.SpecialType == SpecialType.String )
         {
@@ -73,11 +76,11 @@ public sealed class RequiredAttribute : ContractBaseAttribute
             {
                 if ( value == null! )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnRequiredContractViolated( value );
+                    templates.OnRequiredContractViolated( value, context );
                 }
                 else
                 {
-                    meta.Target.GetContractOptions().Templates!.OnRequiredContractViolatedBecauseOfEmptyString( value );
+                    templates.OnRequiredContractViolatedBecauseOfEmptyString( value, context );
                 }
             }
         }
@@ -85,7 +88,7 @@ public sealed class RequiredAttribute : ContractBaseAttribute
         {
             if ( value == null! )
             {
-                meta.Target.GetContractOptions().Templates!.OnRequiredContractViolated( value );
+                templates.OnRequiredContractViolated( value, context );
             }
         }
     }

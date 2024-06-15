@@ -68,8 +68,11 @@ public sealed class StringLengthAttribute : ContractBaseAttribute
     {
         // TODO: We assume that min and max are sensible (eg, non-negative) here. This should be validated ideally at compile time. See comment at head of class.
 
-        var targetType = meta.Target.GetTargetType();
+        var context = new ContractContext( meta.Target );
+        var targetType = context.Type;
         var requiresNullCheck = targetType.IsNullable != false;
+
+        var templates = context.Options.Templates!;
 
         if ( this.MinimumLength == 0 && this.MaximumLength != int.MaxValue )
         {
@@ -77,14 +80,14 @@ public sealed class StringLengthAttribute : ContractBaseAttribute
             {
                 if ( value != null && value!.Length > this.MaximumLength )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                    templates.OnStringMaxLengthContractViolated( value, this.MaximumLength, context );
                 }
             }
             else
             {
                 if ( value!.Length > this.MaximumLength )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnStringMaxLengthContractViolated( value, this.MaximumLength );
+                    templates.OnStringMaxLengthContractViolated( value, this.MaximumLength, context );
                 }
             }
         }
@@ -94,14 +97,14 @@ public sealed class StringLengthAttribute : ContractBaseAttribute
             {
                 if ( value != null && value!.Length < this.MinimumLength )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                    templates.OnStringMinLengthContractViolated( value, this.MinimumLength, context );
                 }
             }
             else
             {
                 if ( value!.Length < this.MinimumLength )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnStringMinLengthContractViolated( value, this.MinimumLength );
+                    templates.OnStringMinLengthContractViolated( value, this.MinimumLength, context );
                 }
             }
         }
@@ -111,14 +114,14 @@ public sealed class StringLengthAttribute : ContractBaseAttribute
             {
                 if ( value != null && (value!.Length < this.MinimumLength || value.Length > this.MaximumLength) )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                    templates.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength, context );
                 }
             }
             else
             {
                 if ( value!.Length < this.MinimumLength || value.Length > this.MaximumLength )
                 {
-                    meta.Target.GetContractOptions().Templates!.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength );
+                    templates.OnStringLengthContractViolated( value, this.MinimumLength, this.MaximumLength, context );
                 }
             }
         }

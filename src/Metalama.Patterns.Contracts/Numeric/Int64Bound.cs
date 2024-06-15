@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Contracts.Numeric;
 #pragma warning disable SA1124
 
 [RunTimeOrCompileTime]
-internal sealed class Int64Bound : NumericBound
+internal sealed record Int64Bound : NumericBound
 {
     private readonly long _value;
 

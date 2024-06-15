@@ -76,14 +76,15 @@ public sealed class EnumDataTypeAttribute : ContractBaseAttribute
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetType = meta.Target.GetTargetType();
-        var templates = meta.Target.GetContractOptions().Templates!;
+        var context = new ContractContext( meta.Target );
+        var targetType = context.Type;
+        var templates = context.Options.Templates!;
 
         if ( targetType.SpecialType is SpecialType.String or SpecialType.Object )
         {
             if ( value != null! && !EnumDataTypeAttributeHelper.IsValidEnumValue( value, this.EnumType ) )
             {
-                templates.OnInvalidEnumValue( value );
+                templates.OnInvalidEnumValue( value, context );
             }
         }
         else if ( targetType.IsNullable == true )
@@ -95,7 +96,7 @@ public sealed class EnumDataTypeAttribute : ContractBaseAttribute
 
                 if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
                 {
-                    templates.OnInvalidEnumValue( value );
+                    templates.OnInvalidEnumValue( value, context );
                 }
             }
         }
@@ -106,7 +107,7 @@ public sealed class EnumDataTypeAttribute : ContractBaseAttribute
 
             if ( !EnumDataTypeAttributeHelper.IsValidEnumValue( enumValue, this.EnumType ) )
             {
-                templates.OnInvalidEnumValue( value );
+                templates.OnInvalidEnumValue( value, context );
             }
         }
     }

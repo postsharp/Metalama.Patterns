@@ -110,8 +110,8 @@ public class StrictlyLessThanAttribute : RangeAttribute
     public StrictlyLessThanAttribute( decimal max )
         : base( null, NumericBound.Create( max, false ) ) { }
 
-    protected override void OnContractViolated( dynamic? value )
+    protected override void OnContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnStrictlyLessThanContractViolated( value, this.Range.MaxValue!.ObjectValue );
+        context.Options.Templates!.OnStrictlyLessThanContractViolated( value, range.MaxValue!.ObjectValue, context );
     }
 }

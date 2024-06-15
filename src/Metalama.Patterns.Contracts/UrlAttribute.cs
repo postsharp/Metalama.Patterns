@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Framework.Code.SyntaxBuilders;
 
@@ -18,9 +17,9 @@ namespace Metalama.Patterns.Contracts;
 [PublicAPI]
 public sealed class UrlAttribute : RegularExpressionBaseAttribute
 {
-    protected override void OnContractViolated( dynamic? value, dynamic regex )
+    protected override void OnContractViolated( dynamic? value, dynamic regex, ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnUrlContractViolated( value );
+        context.Options.Templates!.OnUrlContractViolated( value, context );
     }
 
     protected override IExpression GetRegex()

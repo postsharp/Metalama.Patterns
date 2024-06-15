@@ -31,7 +31,7 @@ internal class Target
   }
   private async Task<ProtectedResource?> UpdateProtectedResourceAsync_Source(int x, int y, UpdateProtectedResource update)
   {
-    return new();
+    return new ProtectedResource();
   }
   [InvalidateCache(nameof(GetResourceName1))]
   [InvalidateCache(nameof(GetResourceName2))]
@@ -44,7 +44,7 @@ internal class Target
   }
   private async Task<ProtectedResource?> UpdateProtectedResource2Async_Source(UpdateProtectedResource update, int y, int x)
   {
-    return new();
+    return new ProtectedResource();
   }
   private static readonly CachedMethodMetadata _cacheRegistration_GetResourceName1;
   private static readonly CachedMethodMetadata _cacheRegistration_GetResourceName2;

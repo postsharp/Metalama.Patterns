@@ -33,30 +33,31 @@ public abstract class RegularExpressionBaseAttribute : ContractBaseAttribute
     /// <inheritdoc/>
     public override void Validate( dynamic? value )
     {
-        var targetType = meta.Target.GetTargetType();
-        var requiresNullCheck = targetType.IsNullable != false;
-
         var regex = (Regex) this.GetRegex().Value!;
+        var context = new ContractContext( meta.Target );
+
+        var targetType = context.Type;
+        var requiresNullCheck = targetType.IsNullable != false;
 
         if ( requiresNullCheck )
         {
             if ( value != null && !regex.IsMatch( (string) value! ) )
             {
-                this.OnContractViolated( value, regex );
+                this.OnContractViolated( value, regex, context );
             }
         }
         else
         {
             if ( !regex.IsMatch( (string) value! ) )
             {
-                this.OnContractViolated( value, regex );
+                this.OnContractViolated( value, regex, context );
             }
         }
     }
 
     [Template]
-    protected virtual void OnContractViolated( dynamic? value, dynamic regex )
+    protected virtual void OnContractViolated( dynamic? value, dynamic regex, ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnRegularExpressionContractViolated( value, regex );
+        context.Options.Templates!.OnRegularExpressionContractViolated( value, regex, context );
     }
 }

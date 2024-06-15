@@ -1827,12 +1827,12 @@ namespace Metalama.Patterns.Caching.Tests
             Assert.Equal( 1, testClass.GetValue( 2 ) );
             Assert.Equal( 0, testClass.GetValue( 1 ) );
 
-            testClass.ResetValue( new(), 2 );
+            testClass.ResetValue( new object(), 2 );
 
             Assert.Equal( 0, testClass.GetValue( 1 ) );
             Assert.Equal( 2, testClass.GetValue( 2 ) );
 
-            testClass.ResetValue( new(), 1 );
+            testClass.ResetValue( new object(), 1 );
 
             Assert.Equal( 3, testClass.GetValue( 1 ) );
             Assert.Equal( 2, testClass.GetValue( 2 ) );

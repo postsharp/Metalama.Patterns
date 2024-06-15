@@ -17,11 +17,11 @@ internal class Target
 
     [InvalidateCache( nameof(GetResourceName1) )]
     [InvalidateCache( nameof(GetResourceName2) )]
-    public async Task<ProtectedResource?> UpdateProtectedResourceAsync( int x, int y, UpdateProtectedResource update ) { return new(); }
+    public async Task<ProtectedResource?> UpdateProtectedResourceAsync( int x, int y, UpdateProtectedResource update ) { return new ProtectedResource(); }
 
     [InvalidateCache( nameof(GetResourceName1) )]
     [InvalidateCache( nameof(GetResourceName2) )]
-    public async Task<ProtectedResource?> UpdateProtectedResource2Async( UpdateProtectedResource update, int y, int x ) { return new(); }
+    public async Task<ProtectedResource?> UpdateProtectedResource2Async( UpdateProtectedResource update, int y, int x ) { return new ProtectedResource(); }
 }
 
 internal class ProtectedResource { }

@@ -22,7 +22,7 @@ internal class Target
   }
   private async Task<ProtectedResource?> UpdateProtectedResourceAsync_Source(Guid resourceId, UpdateProtectedResource update)
   {
-    return new();
+    return new ProtectedResource();
   }
   [InvalidateCache(nameof(GetResourceNameAsync))]
   public async Task<ProtectedResource?> UpdateProtectedResource2Async(UpdateProtectedResource update, Guid resourceId)
@@ -33,7 +33,7 @@ internal class Target
   }
   private async Task<ProtectedResource?> UpdateProtectedResource2Async_Source(UpdateProtectedResource update, Guid resourceId)
   {
-    return new();
+    return new ProtectedResource();
   }
   private static readonly CachedMethodMetadata _cacheRegistration_GetResourceNameAsync;
   private ICachingService _cachingService;

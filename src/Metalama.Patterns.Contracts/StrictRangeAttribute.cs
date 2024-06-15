@@ -119,8 +119,8 @@ public class StrictRangeAttribute : RangeAttribute
     public StrictRangeAttribute( decimal min, decimal max )
         : base( NumericBound.Create( min, false ), NumericBound.Create( max, false ) ) { }
 
-    protected override void OnContractViolated( dynamic? value )
+    protected override void OnContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        meta.Target.GetContractOptions().Templates!.OnStrictRangeContractViolated( value, this.Range );
+        context.Options.Templates!.OnStrictRangeContractViolated( value, range, context );
     }
 }

@@ -12,6 +12,7 @@ namespace Metalama.Patterns.Contracts;
 /// <summary>
 /// Options for all aspects of the <c>Metalama.Patterns.Contracts</c> namespace.
 /// </summary>
+/// <seealso cref="ContractConfigurationExtensions"/>
 [PublicAPI]
 public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHierarchicalOptions<INamespace>, IHierarchicalOptions<INamedType>,
                                       IHierarchicalOptions<IFieldOrPropertyOrIndexer>,
@@ -64,6 +65,12 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
     /// </summary>
     public bool? IsInvariantSuspensionSupported { get; init; }
 
+    /// <summary>
+    /// Gets or sets a value determining the meaning of inequalities whose strictness is not explicitly specified
+    /// i.e. <see cref="GreaterThanAttribute"/>, <see cref="LessThanAttribute"/>, <see cref="PositiveAttribute"/> and <see cref="NegativeAttribute"/>.
+    /// </summary>
+    public InequatilyStrictness? DefaultInequalityStrictness { get; init; }
+
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {
         var other = (ContractOptions) changes;
@@ -77,7 +84,8 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
             AreInvariantsEnabled = other.AreInvariantsEnabled ?? this.AreInvariantsEnabled,
             ArePostconditionsEnabled = other.ArePostconditionsEnabled ?? this.ArePostconditionsEnabled,
             ArePreconditionsEnabled = other.ArePreconditionsEnabled ?? this.ArePreconditionsEnabled,
-            IsInvariantSuspensionSupported = other.IsInvariantSuspensionSupported ?? this.IsInvariantSuspensionSupported
+            IsInvariantSuspensionSupported = other.IsInvariantSuspensionSupported ?? this.IsInvariantSuspensionSupported,
+            DefaultInequalityStrictness = other.DefaultInequalityStrictness ?? this.DefaultInequalityStrictness
         };
     }
 

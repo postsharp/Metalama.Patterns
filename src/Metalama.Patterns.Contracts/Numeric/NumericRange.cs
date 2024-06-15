@@ -38,6 +38,14 @@ public readonly struct NumericRange : ICompileTimeSerializable
     /// </summary>
     public NumericBound? MaxValue { get; }
 
+    internal NumericRange WithStrictness( InequatilyStrictness strictness )
+    {
+        var minValue = this.MinValue != null ? this.MinValue with { IsAllowed = strictness == InequatilyStrictness.NonStrict } : null;
+        var maxValue = this.MaxValue != null ? this.MaxValue with { IsAllowed = strictness == InequatilyStrictness.NonStrict } : null;
+
+        return new NumericRange( minValue, maxValue );
+    }
+
     /// <summary>
     /// Determines if a value of type <see cref="double"/> is in the current range.
     /// </summary>
@@ -394,15 +402,13 @@ public readonly struct NumericRange : ICompileTimeSerializable
             else if ( hasMinCheck )
             {
                 builder.AppendExpression( value );
-                builder.AppendVerbatim( " is " );
-
+             
                 AppendMin();
             }
             else
             {
                 builder.AppendExpression( value );
-                builder.AppendVerbatim( " is " );
-
+             
                 AppendMax();
             }
         }

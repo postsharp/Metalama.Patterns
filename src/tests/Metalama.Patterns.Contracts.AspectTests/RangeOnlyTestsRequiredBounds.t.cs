@@ -2,44 +2,44 @@ using System;
 namespace Metalama.Patterns.Contracts.AspectTests;
 public sealed class RangeOnlyTestsRequiredBounds
 {
-  public void Negative([Negative] int x)
+  public void Negative([NonPositive] int x)
   {
-    if (x is> 0)
+    if (x > 0)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 0.");
     }
   }
-  public void Positive([Positive] int x)
+  public void Positive([NonNegative] int x)
   {
-    if (x is < 0)
+    if (x < 0)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be greater than or equal to 0.");
     }
   }
   public void StrictlyNegative([StrictlyNegative] int x)
   {
-    if (x is >= 0)
+    if (x >= 0)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly less than 0.");
     }
   }
   public void StrictlyPositive([StrictlyPositive] int x)
   {
-    if (x is <= 0)
+    if (x <= 0)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly greater than 0.");
     }
   }
-  public void LessThanInt([LessThan(42)] int x)
+  public void LessThanInt([LessThanOrEqual(42)] int x)
   {
-    if (x is> 42)
+    if (x > 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 42.");
     }
   }
-  public void GreaterThanInt([GreaterThan(42)] int x)
+  public void GreaterThanInt([GreaterThanOrEqual(42)] int x)
   {
-    if (x is < 42)
+    if (x < 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be greater than or equal to 42.");
     }
@@ -53,14 +53,14 @@ public sealed class RangeOnlyTestsRequiredBounds
   }
   public void StrictlyGreaterThanInt([StrictlyGreaterThan(42)] int x)
   {
-    if (x is <= 42)
+    if (x <= 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly greater than 42.");
     }
   }
   public void StrictlyLessThanInt([StrictlyLessThan(42)] int x)
   {
-    if (x is >= 42)
+    if (x >= 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly less than 42.");
     }
@@ -72,16 +72,16 @@ public sealed class RangeOnlyTestsRequiredBounds
       throw new ArgumentOutOfRangeException("The 'x' parameter must be strictly in the range ]10, 20[.", "x");
     }
   }
-  public void LessThanDouble([LessThan(42.0)] int x)
+  public void LessThanDouble([LessThanOrEqual(42.0)] int x)
   {
-    if (x is> 42)
+    if (x > 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 42.");
     }
   }
-  public void GreaterThanDouble([GreaterThan(42.0)] int x)
+  public void GreaterThanDouble([GreaterThanOrEqual(42.0)] int x)
   {
-    if (x is < 42)
+    if (x < 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be greater than or equal to 42.");
     }
@@ -95,14 +95,14 @@ public sealed class RangeOnlyTestsRequiredBounds
   }
   public void StrictlyGreaterThanDouble([StrictlyGreaterThan(42.0)] int x)
   {
-    if (x is <= 42)
+    if (x <= 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly greater than 42.");
     }
   }
   public void StrictlyLessThanDouble([StrictlyLessThan(42.0)] int x)
   {
-    if (x is >= 42)
+    if (x >= 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly less than 42.");
     }
@@ -114,16 +114,16 @@ public sealed class RangeOnlyTestsRequiredBounds
       throw new ArgumentOutOfRangeException("The 'x' parameter must be strictly in the range ]10, 20[.", "x");
     }
   }
-  public void LessThanUnsigned([LessThan(42ul)] int x)
+  public void LessThanUnsigned([LessThanOrEqual(42ul)] int x)
   {
-    if (x is> 42)
+    if (x > 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be less than or equal to 42.");
     }
   }
-  public void GreaterThanUnsigned([GreaterThan(42ul)] int x)
+  public void GreaterThanUnsigned([GreaterThanOrEqual(42ul)] int x)
   {
-    if (x is < 42)
+    if (x < 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be greater than or equal to 42.");
     }
@@ -137,14 +137,14 @@ public sealed class RangeOnlyTestsRequiredBounds
   }
   public void StrictlyGreaterThanUnsigned([StrictlyGreaterThan(42ul)] int x)
   {
-    if (x is <= 42)
+    if (x <= 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly greater than 42.");
     }
   }
   public void StrictlyLessThanUnsigned([StrictlyLessThan(42ul)] int x)
   {
-    if (x is >= 42)
+    if (x >= 42)
     {
       throw new ArgumentOutOfRangeException("x", "The 'x' parameter must be strictly less than 42.");
     }

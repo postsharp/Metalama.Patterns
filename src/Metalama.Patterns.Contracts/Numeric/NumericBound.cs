@@ -13,7 +13,7 @@ namespace Metalama.Patterns.Contracts.Numeric;
 /// Represents a single bound of a <see cref="NumericRange"/>.
 /// </summary>
 [RunTimeOrCompileTime]
-public abstract class NumericBound : ICompileTimeSerializable
+public abstract record NumericBound : ICompileTimeSerializable
 {
     protected internal NumericBound( bool isAllowed )
     {
@@ -42,7 +42,7 @@ public abstract class NumericBound : ICompileTimeSerializable
     public static NumericBound Create( double value, bool isAllowed = true ) => new DoubleBound( value, isAllowed );
 
     [PublicAPI]
-    public bool IsAllowed { get; }
+    public bool IsAllowed { get; init; }
 
     [PublicAPI]
     public abstract object ObjectValue { get; }

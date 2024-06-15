@@ -8,7 +8,7 @@ namespace Metalama.Patterns.Contracts.Numeric;
 #pragma warning disable SA1124
 
 [RunTimeOrCompileTime]
-internal sealed class DecimalBound : NumericBound
+internal sealed record DecimalBound : NumericBound
 {
     private readonly decimal _value;
 
