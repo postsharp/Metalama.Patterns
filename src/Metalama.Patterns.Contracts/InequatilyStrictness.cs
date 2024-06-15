@@ -12,16 +12,16 @@ namespace Metalama.Patterns.Contracts;
 public enum InequatilyStrictness
 {
     /// <summary>
-    /// Inequalities of unspecified strictness are interpreted as strict, i.e. <see cref="GreaterThanAttribute"/> corresponds to <c>x &gt; 5</c>,
-    /// <see cref="LessThanAttribute"/> corresponds to <c>x &lt; 5</c>, <see cref="PositiveAttribute"/> corresponds to <c>x &gt; 0</c> and
-    /// <see cref="NegativeAttribute"/> corresponds to <c>x &lt; 0</c>. This is the default convention starting from Metalama 2024.2.
+    /// Inequalities of unspecified strictness are interpreted as strict, i.e. <c>[GreaterThan(5)]</c> corresponds to <c>x &gt; 5</c>,
+    /// <c>[LessThan(5)]</c> corresponds to <c>x &lt; 5</c>, <c>[Positive]</c> corresponds to <c>x &gt; 0</c> and
+    /// <c>[Negative]</c> corresponds to <c>x &lt; 0</c>. This is the default convention starting from Metalama 2024.2.
     /// </summary>
     Strict,
 
     /// <summary>
-    /// Inequalities of unspecified strictness are interpreted as non-strict, i.e. <see cref="GreaterThanAttribute"/> corresponds to <c>x &gt;= 5</c>,
-    /// <see cref="LessThanAttribute"/> corresponds to <c>x &lt;= 5</c>, <see cref="PositiveAttribute"/> corresponds to <c>x &gt;= 0</c> and
-    /// <see cref="NegativeAttribute"/> corresponds to <c>x &lt;= 0</c>. This was the default convention in PostSharp and in Metalama prior to version 2024.2.
+    /// Inequalities of unspecified strictness are interpreted as non-strict, i.e. <c>[GreaterThan(5)]</c> corresponds to <c>x &gt;= 5</c>,
+    /// <c>[LessThan(5)]</c> corresponds to <c>x &lt;= 5</c>, <c>[Positive]</c> corresponds to <c>x &gt;= 0</c> and
+    /// <c>[Negative]</c> corresponds to <c>x &lt;= 0</c>. This was the default convention in PostSharp and in Metalama prior to version 2024.2.
     /// </summary>
     NonStrict
 }
