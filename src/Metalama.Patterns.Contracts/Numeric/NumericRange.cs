@@ -402,15 +402,13 @@ public readonly struct NumericRange : ICompileTimeSerializable
             else if ( hasMinCheck )
             {
                 builder.AppendExpression( value );
-                builder.AppendVerbatim( " is " );
-
+             
                 AppendMin();
             }
             else
             {
                 builder.AppendExpression( value );
-                builder.AppendVerbatim( " is " );
-
+             
                 AppendMax();
             }
         }

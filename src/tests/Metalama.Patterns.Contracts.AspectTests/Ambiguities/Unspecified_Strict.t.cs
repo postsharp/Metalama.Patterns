@@ -13,7 +13,7 @@ public class C
     }
     set
     {
-      if (value is <= 0)
+      if (value <= 0)
       {
         throw new ArgumentOutOfRangeException("value", "The 'A' property must be strictly greater than 0.");
       }
@@ -30,7 +30,7 @@ public class C
     }
     set
     {
-      if (value is >= 0)
+      if (value >= 0)
       {
         throw new ArgumentOutOfRangeException("value", "The 'B' property must be strictly less than 0.");
       }
@@ -47,7 +47,7 @@ public class C
     }
     set
     {
-      if (value is <= 5)
+      if (value <= 5)
       {
         throw new ArgumentOutOfRangeException("value", "The 'D' property must be strictly greater than 5.");
       }
@@ -64,7 +64,7 @@ public class C
     }
     set
     {
-      if (value is >= 5)
+      if (value >= 5)
       {
         throw new ArgumentOutOfRangeException("value", "The 'E' property must be strictly less than 5.");
       }
