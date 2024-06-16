@@ -58,7 +58,7 @@ internal static class ContractDiagnostics
             $"The Range contract is redundant because the range is always satisfied by the type of the target declaration.",
             "Metalama.Patterns.Contracts" );
 
-    public static DiagnosticDefinition<(IDeclaration Declaration, string OldName, string NewName1, string NewName2, InequatilyStrictness Strictness)>
+    public static DiagnosticDefinition<(IDeclaration Declaration, string OldName, string NewName1, string NewName2, InequalityStrictness Strictness)>
         AttributeMeaningIsAmbiguous { get; }
         = new(
             "LAMA5007",

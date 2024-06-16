@@ -48,6 +48,7 @@ public sealed class CachingProfileRegistry : IReadOnlyCollection<CachingProfile>
         }
     }
 
+    // ReSharper disable once NotDisposedResourceIsReturned
     public IEnumerator<CachingProfile> GetEnumerator() => this._profiles.Values.GetEnumerator();
 
     IEnumerator IEnumerable.GetEnumerator() => this.GetEnumerator();

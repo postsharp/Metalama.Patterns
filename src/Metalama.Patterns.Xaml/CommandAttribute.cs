@@ -117,7 +117,7 @@ public sealed partial class CommandAttribute : Attribute, IAspect<IMethod>
             return;
         }
 
-        IProperty? commandProperty = null;
+        IProperty? commandProperty;
         IMethod? canExecuteMethod = null;
         IProperty? canExecuteProperty = null;
 

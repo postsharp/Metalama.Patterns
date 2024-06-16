@@ -38,10 +38,10 @@ public readonly struct NumericRange : ICompileTimeSerializable
     /// </summary>
     public NumericBound? MaxValue { get; }
 
-    internal NumericRange WithStrictness( InequatilyStrictness strictness )
+    internal NumericRange WithStrictness( InequalityStrictness strictness )
     {
-        var minValue = this.MinValue != null ? this.MinValue with { IsAllowed = strictness == InequatilyStrictness.NonStrict } : null;
-        var maxValue = this.MaxValue != null ? this.MaxValue with { IsAllowed = strictness == InequatilyStrictness.NonStrict } : null;
+        var minValue = this.MinValue != null ? this.MinValue with { IsAllowed = strictness == InequalityStrictness.NonStrict } : null;
+        var maxValue = this.MaxValue != null ? this.MaxValue with { IsAllowed = strictness == InequalityStrictness.NonStrict } : null;
 
         return new NumericRange( minValue, maxValue );
     }

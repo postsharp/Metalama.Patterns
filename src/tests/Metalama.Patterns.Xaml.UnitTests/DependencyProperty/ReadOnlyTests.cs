@@ -3,7 +3,7 @@
 using Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
 using Xunit;
 
-namespace Metalama.Patterns.Xaml.UnitTests.DependencyPropertyNS;
+namespace Metalama.Patterns.Xaml.UnitTests.DependencyProperty_;
 
 public sealed class ReadOnlyTests
 {

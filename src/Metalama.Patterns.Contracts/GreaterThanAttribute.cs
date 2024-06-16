@@ -128,7 +128,7 @@ public class GreaterThanAttribute : RangeAttribute
 
     private protected override InequalityAmbiguity? Ambiguity
         => new(
-            InequatilyStrictness.NonStrict,
+            InequalityStrictness.NonStrict,
             nameof(GreaterThanOrEqualAttribute),
             nameof(StrictlyGreaterThanAttribute) );
 }

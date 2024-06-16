@@ -5,4 +5,4 @@ using Metalama.Framework.Aspects;
 namespace Metalama.Patterns.Contracts;
 
 [CompileTime]
-internal record InequalityAmbiguity( InequatilyStrictness DefaultStrictness, string NewName1, string NewName2 );
+internal record InequalityAmbiguity( InequalityStrictness DefaultStrictness, string NewName1, string NewName2 );

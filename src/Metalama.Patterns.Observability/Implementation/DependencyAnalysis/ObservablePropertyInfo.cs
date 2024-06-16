@@ -38,5 +38,6 @@ internal class ObservablePropertyInfo
         this.RootReferenceNode = declaringTypeInfo.Builder.CreateExpression( this, null );
     }
 
+    // ReSharper disable once RedundantSuppressNullableWarningExpression
     public override string ToString() => this.FieldOrProperty.ToString()!;
 }

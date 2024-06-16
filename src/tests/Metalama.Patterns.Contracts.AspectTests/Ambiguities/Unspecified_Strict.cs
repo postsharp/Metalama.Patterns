@@ -22,5 +22,5 @@ public class C
 internal class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
-        => amender.ConfigureContracts( new ContractOptions() { DefaultInequalityStrictness = InequatilyStrictness.Strict } );
+        => amender.ConfigureContracts( new ContractOptions() { DefaultInequalityStrictness = InequalityStrictness.Strict } );
 }
