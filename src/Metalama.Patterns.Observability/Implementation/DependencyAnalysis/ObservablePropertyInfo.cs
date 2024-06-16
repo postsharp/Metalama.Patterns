@@ -38,5 +38,5 @@ internal class ObservablePropertyInfo
         this.RootReferenceNode = declaringTypeInfo.Builder.CreateExpression( this, null );
     }
 
-    public override string ToString() => this.FieldOrProperty.ToString()!;
+    public override string ToString() => this.FieldOrProperty.ToString();
 }

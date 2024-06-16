@@ -10,7 +10,9 @@ namespace Metalama.Patterns.Contracts;
 #pragma warning disable SA1623
 
 /// <summary>
-/// Options for all aspects of the <c>Metalama.Patterns.Contracts</c> namespace.
+/// Options for all aspects of the <c>Metalama.Patterns.Contracts</c> namespace. You can configure these options
+/// using the <see cref="ContractConfigurationExtensions.ConfigureContracts(Metalama.Framework.Aspects.IAspectReceiver{Metalama.Framework.Code.ICompilation},Metalama.Patterns.Contracts.ContractOptions)"/>
+/// method.
 /// </summary>
 /// <seealso cref="ContractConfigurationExtensions"/>
 [PublicAPI]
@@ -69,7 +71,7 @@ public sealed class ContractOptions : IHierarchicalOptions<ICompilation>, IHiera
     /// Gets or sets a value determining the meaning of inequalities whose strictness is not explicitly specified
     /// i.e. <see cref="GreaterThanAttribute"/>, <see cref="LessThanAttribute"/>, <see cref="PositiveAttribute"/> and <see cref="NegativeAttribute"/>.
     /// </summary>
-    public InequatilyStrictness? DefaultInequalityStrictness { get; init; }
+    public InequalityStrictness? DefaultInequalityStrictness { get; init; }
 
     object IIncrementalObject.ApplyChanges( object changes, in ApplyChangesContext context )
     {

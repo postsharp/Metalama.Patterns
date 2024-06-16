@@ -28,9 +28,9 @@ public class PositiveAttribute : GreaterThanAttribute
     /// </summary>
     public PositiveAttribute() : base( 0 ) { }
 
-    private protected override InequalityAmbiguity? Ambiguity
+    private protected override InequalityAmbiguity Ambiguity
         => new(
-            InequatilyStrictness.NonStrict,
+            InequalityStrictness.NonStrict,
             nameof(NonNegativeAttribute),
             nameof(StrictlyPositiveAttribute) );
 }

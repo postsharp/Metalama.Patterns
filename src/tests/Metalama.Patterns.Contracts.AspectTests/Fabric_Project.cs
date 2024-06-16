@@ -32,7 +32,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
 
         public string? PublicNullableField;
 
-        public string this[string key]
+        public string this[ string key ]
         {
             get => key;
             set { }

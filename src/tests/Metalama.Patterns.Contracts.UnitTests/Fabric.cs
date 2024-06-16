@@ -7,5 +7,5 @@ namespace Metalama.Patterns.Contracts.UnitTests;
 internal class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
-        => amender.ConfigureContracts( new ContractOptions { DefaultInequalityStrictness = InequatilyStrictness.NonStrict } );
+        => amender.ConfigureContracts( new ContractOptions { DefaultInequalityStrictness = InequalityStrictness.NonStrict } );
 }

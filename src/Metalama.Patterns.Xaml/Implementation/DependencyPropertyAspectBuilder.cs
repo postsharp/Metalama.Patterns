@@ -68,7 +68,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         IIntroductionAdviceResult<IField>? introduceRegistrationFieldResult = null;
         IIntroductionAdviceResult<IField>? introduceRegistrationKeyFieldResult = null;
 
-        if ( match?.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
+        if ( match.RegistrationFieldConflictMatch.Outcome == MemberMatchOutcome.Success )
         {
             introduceRegistrationFieldResult = this._builder.Advice.IntroduceField(
                 declaringType,
