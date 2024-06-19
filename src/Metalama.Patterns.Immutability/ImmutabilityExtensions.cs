@@ -21,8 +21,7 @@ public static class ImmutabilityExtensions
         if ( type is {
                 SpecialType: SpecialType.Boolean or
                 SpecialType.Byte or
-
-                // SpecialType.Char or
+                SpecialType.Char or
                 SpecialType.Decimal or
                 SpecialType.Double or
                 SpecialType.Int16 or
