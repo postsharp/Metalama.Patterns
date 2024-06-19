@@ -13,7 +13,7 @@ public enum ImmutabilityKind
     None,
 
     /// <summary>
-    /// The type itself is mutable, but some of its fields or properties may be assigned to a mutable object.
+    /// The type itself is immutable, but some of its fields or properties may contain mutable objects.
     /// </summary>
     Shallow,
 

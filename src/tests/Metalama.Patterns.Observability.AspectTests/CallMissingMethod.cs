@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.CallMissingMethod;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 [Observable]
 public class CallMissingMethod

@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.CallMethodOfNonExistentClass;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 [Observable]
 public class CallMethodOfNonExistentClass

@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.AccessPublicFieldOfTargetClass;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 [Observable]
 public class AccessPublicFieldOfTargetClass

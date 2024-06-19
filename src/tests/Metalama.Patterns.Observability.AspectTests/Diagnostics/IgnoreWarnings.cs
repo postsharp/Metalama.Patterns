@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.IgnoreWarnings;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 [Observable]
 public class AccessProtectedFieldOfTargetClass
