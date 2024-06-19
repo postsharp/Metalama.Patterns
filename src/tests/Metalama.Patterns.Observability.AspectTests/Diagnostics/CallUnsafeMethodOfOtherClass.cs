@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.CallUnsafeMethodOfOtherClass;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 public static class OtherClass
 {

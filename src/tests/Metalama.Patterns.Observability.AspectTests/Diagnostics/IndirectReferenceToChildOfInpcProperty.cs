@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.IndirectReferenceToChildOfInpcProperty;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 [Observable]
 public class A

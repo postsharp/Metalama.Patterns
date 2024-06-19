@@ -2,7 +2,9 @@
 
 namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.CallUnsafeMethodOfExternalClass;
 
+#if TEST_OPTIONS
 // @RemoveOutputCode
+#endif
 
 [Observable]
 public class CallUnsafeMethodOfExternalClass
