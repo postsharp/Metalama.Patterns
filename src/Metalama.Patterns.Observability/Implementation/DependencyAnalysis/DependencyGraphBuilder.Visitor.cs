@@ -159,11 +159,12 @@ internal partial class DependencyGraphBuilder
 
                 var isSafe =
 
-                    // Methods marked as constant are safe
+                    // Methods marked as constant are safe.
                     this._context.IsConstant( method ) ||
 
-                    // Static methods that have primitive arguments are safe.
-                    (method.IsStatic && method.Parameters.All( p => p.RefKind is RefKind.Out || this._context.IsDeeplyImmutable( p.Type ) )) ||
+                    // Methods that have only immutable arguments are safe.
+                    ((method.IsStatic || this._context.IsDeeplyImmutable( method.ContainingType ))
+                     && method.Parameters.All( p => p.RefKind is RefKind.Out || this._context.IsDeeplyImmutable( p.Type ) )) ||
 
                     // All methods that have no output are safe.
                     (method.ReturnsVoid && !method.Parameters.Any( p => p.RefKind is RefKind.Out or RefKind.Ref ));
