@@ -35,7 +35,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
         public string this[ string key ]
         {
             get => key;
-            set { }
+            set => _ = value;
         }
 
         public void PublicMethod( string nonNullableParam, string? nullableParam ) { }

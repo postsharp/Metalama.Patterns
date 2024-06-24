@@ -19,6 +19,7 @@ internal static class FormattingExtensions
     public static string PrettyList( this IEnumerable<string> words, string conjunction, char quote = default )
         => PrettyList( words, conjunction, out _, quote );
 
+    // ReSharper disable once OutParameterValueIsAlwaysDiscarded.Global
     public static string PrettyList( this IEnumerable<string> words, string conjunction, out int plurality, char quote = default )
     {
         using var iter = words.GetEnumerator();

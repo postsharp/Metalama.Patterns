@@ -4,11 +4,13 @@ using Metalama.Framework.Aspects;
 using Metalama.Framework.Fabrics;
 using System.Linq;
 
+// ReSharper disable UnusedType.Local
 namespace Metalama.Patterns.Immutability.AspectTests.AttributeAndWarnings.ClassificationTests;
 
 [Immutable( ImmutabilityKind.Deep )]
 internal class ClassMarkedDeeplyImmutable;
 
+// ReSharper disable once RedundantArgumentDefaultValue
 [Immutable( ImmutabilityKind.Shallow )]
 internal class ClassMarkedShallowlyImmutable;
 

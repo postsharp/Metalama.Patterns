@@ -7,10 +7,8 @@ using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal class ClassicDependencyGraphBuilder : DependencyGraphBuilder
+internal sealed class ClassicDependencyGraphBuilder : DependencyGraphBuilder
 {
-    public ICompilation Compilation => this.CurrentType.Compilation;
-
     public ClassicGraphBuildingContext Context { get; }
 
     public INamedType CurrentType { get; }

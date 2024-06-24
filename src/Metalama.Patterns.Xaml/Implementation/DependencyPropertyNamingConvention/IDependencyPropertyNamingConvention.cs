@@ -2,11 +2,10 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using Metalama.Framework.Serialization;
 using Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
 namespace Metalama.Patterns.Xaml.Implementation.DependencyPropertyNamingConvention;
 
 // ReSharper disable once RedundantTypeDeclarationBody
 [CompileTime]
-internal interface IDependencyPropertyNamingConvention : INamingConvention<IProperty, DependencyPropertyNamingConventionMatch>, ICompileTimeSerializable { }
+internal interface IDependencyPropertyNamingConvention : INamingConvention<IProperty, DependencyPropertyNamingConventionMatch> { }

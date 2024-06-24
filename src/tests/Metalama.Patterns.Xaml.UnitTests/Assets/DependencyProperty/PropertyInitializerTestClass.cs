@@ -21,6 +21,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
     [DependencyProperty]
     public int DefaultConfiguration { get; set; } = DefaultConfigurationInitializer();
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public static int NotDefaultNotInitialInitializerCallCount { get; private set; }
 
     private static int NotDefaultNotInitialInitializer()
@@ -32,6 +33,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
 
 #pragma warning restore LAMA5200 // Initializer will not be used.
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public static int InitialOnlyInitializerCallCount { get; private set; }
 
     private static int InitialOnlyInitializer()
@@ -41,6 +43,7 @@ public sealed partial class PropertyInitializerTestClass : DependencyObject
         return 42;
     }
 
+    // ReSharper disable once MemberCanBePrivate.Global
     public static int DefaultAndInitialInitializerCallCount { get; private set; }
 
     private static int DefaultAndInitialInitializer()

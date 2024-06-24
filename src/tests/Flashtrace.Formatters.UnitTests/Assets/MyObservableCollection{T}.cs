@@ -4,4 +4,4 @@ using System.Collections.ObjectModel;
 
 namespace Flashtrace.Formatters.UnitTests.Assets;
 
-internal class MyObservableCollection<T> : ObservableCollection<T> { }
+internal class MyObservableCollection<T> : ObservableCollection<T>;

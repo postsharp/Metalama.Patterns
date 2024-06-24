@@ -16,7 +16,7 @@ internal sealed record ObservabilityOptions : IHierarchicalOptions<ICompilation>
     /// </summary>
     public IObservabilityStrategy? ImplementationStrategy { get; init; }
 
-    private int? _diagnosticCommentVerbosity;
+    private readonly int? _diagnosticCommentVerbosity;
 
     /// <summary>
     /// Gets a value indicating the verbosity of diagnostic comments inserted into generated code. Must be a value

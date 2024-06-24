@@ -5,7 +5,6 @@ using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Locking;
 using System.Collections.Immutable;
 using System.ComponentModel;
-using System.Reflection;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Implementation;
@@ -21,7 +20,6 @@ internal sealed class CachingFrontend
     }
 
     public object? GetOrAdd(
-        MethodInfo method,
         string key,
         Type valueType,
         ICacheItemConfiguration configuration,
@@ -145,7 +143,6 @@ internal sealed class CachingFrontend
     }
 
     public async Task<object?> GetOrAddAsync(
-        MethodInfo method,
         string key,
         Type valueType,
         ICacheItemConfiguration configuration,
@@ -277,7 +274,6 @@ internal sealed class CachingFrontend
     }
 
     public async ValueTask<object?> GetOrAddAsync(
-        MethodInfo method,
         string key,
         Type valueType,
         ICacheItemConfiguration configuration,

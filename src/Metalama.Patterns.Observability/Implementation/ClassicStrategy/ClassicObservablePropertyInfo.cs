@@ -7,7 +7,7 @@ using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal class ClassicObservablePropertyInfo : ObservablePropertyInfo
+internal sealed class ClassicObservablePropertyInfo : ObservablePropertyInfo
 {
     public ClassicObservablePropertyInfo(
         IFieldOrProperty fieldOrProperty,

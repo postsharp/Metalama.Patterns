@@ -54,18 +54,6 @@ internal static class DiagnosticDescriptors
                 _category );
 
     /// <summary>
-    /// The type {2} of {0} {1} is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.
-    /// </summary>
-    public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty, IType ParameterType)>
-        ErrorFieldOrPropertyTypeIsUnconstrainedGeneric =
-            new(
-                "LAMA5153",
-                Error,
-                "The type '{2}' of {0} '{1}' is an unconstrained generic parameter. The generic parameter must at least be constrained to 'class', 'struct' or 'class, INotifyPropertyChanged'.",
-                "Property type is struct implementing INotifyPropertyChanged.",
-                _category );
-
-    /// <summary>
     /// The {0} {1} is virtual. This is not supported.
     /// </summary>
     public static readonly DiagnosticDefinition<(DeclarationKind Kind, IFieldOrProperty FieldOrProperty)> ErrorVirtualMemberIsNotSupported =

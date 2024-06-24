@@ -59,13 +59,13 @@ internal class ObservableExpression
     /// <summary>
     /// Gets the collection of direct children.
     /// </summary>
-    public IEnumerable<ObservableExpression> Children
+    protected IEnumerable<ObservableExpression> Children
         => (IReadOnlyCollection<ObservableExpression>?) this._childReferences?.Values ?? Array.Empty<ObservableExpression>();
 
     /// <summary>
     /// Gets the node for the referenced property.
     /// </summary>
-    public ObservablePropertyInfo ReferencedPropertyInfo { get; }
+    protected ObservablePropertyInfo ReferencedPropertyInfo { get; }
 
     /// <summary>
     /// Gets the Metalama <see cref="IFieldOrProperty"/> for the node. 
@@ -77,7 +77,7 @@ internal class ObservableExpression
     /// </summary>
     public ObservableExpression? Parent { get; }
 
-    public DependencyGraphBuilder Builder { get; }
+    private DependencyGraphBuilder Builder { get; }
 
     private HashSet<ObservablePropertyInfo>? _leafReferencingProperties;
 
@@ -85,16 +85,11 @@ internal class ObservableExpression
     /// Gets the list of properties referencing the current node as a leaf. For instance, if the current node path is <c>A.B</c> and we have two properties
     /// <c>P1 => A.B</c> and <c>P2 => A.B.C</c>, this property would only return <c>P1</c>.
     /// </summary>
-    public IEnumerable<ObservablePropertyInfo> LeafReferencingProperties
+    protected IEnumerable<ObservablePropertyInfo> LeafReferencingProperties
         => (IEnumerable<ObservablePropertyInfo>?) this._leafReferencingProperties ?? Array.Empty<ObservablePropertyInfo>();
 
     /// <summary>
-    /// Gets a value indicating whether the current node is referenced by some property as a leaf of a property path, not as an intermediate node.
-    /// </summary>
-    public bool HasLeafReferencingProperties => this._leafReferencingProperties != null;
-
-    /// <summary>
-    /// Gets a value indicating whether this node, or any descedent, is referenced from some property.
+    /// Gets a value indicating whether this node, or any descendant, is referenced from some property.
     /// </summary>
     public bool HasAnyReferencingProperties { get; private set; }
 
@@ -185,7 +180,7 @@ internal class ObservableExpression
         }
     }
 
-    public IReadOnlyCollection<ObservablePropertyInfo> GetAllReferencingProperties( Func<ObservableExpression, bool>? shouldIncludeImmediateChild = null )
+    private IReadOnlyCollection<ObservablePropertyInfo> GetAllReferencingProperties( Func<ObservableExpression, bool>? shouldIncludeImmediateChild = null )
         => this.GetAllReferencingProperties<ObservablePropertyInfo>( shouldIncludeImmediateChild );
 
     /// <summary>
@@ -198,7 +193,7 @@ internal class ObservableExpression
     /// itself are always included and followed, regardless of <paramref name="shouldIncludeImmediateChild"/>.
     /// </param>
     /// <returns></returns>
-    public IReadOnlyCollection<T> GetAllReferencingProperties<T>( Func<ObservableExpression, bool>? shouldIncludeImmediateChild = null )
+    protected IReadOnlyCollection<T> GetAllReferencingProperties<T>( Func<ObservableExpression, bool>? shouldIncludeImmediateChild = null )
         where T : ObservablePropertyInfo
     {
         // TODO: This algorithm is naive, and will cause repeated work if GetAllReferences() is called on one of the nodes already visited.

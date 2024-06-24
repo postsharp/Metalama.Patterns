@@ -8,6 +8,8 @@
 #pragma warning disable SA1401
 
 // ReSharper disable UnusedMember.Global
+// ReSharper disable UnassignedReadonlyField
+// ReSharper disable UnassignedGetOnlyAutoProperty
 
 namespace Metalama.Patterns.Immutability.AspectTests.ShallowAttributeAndWarnings;
 

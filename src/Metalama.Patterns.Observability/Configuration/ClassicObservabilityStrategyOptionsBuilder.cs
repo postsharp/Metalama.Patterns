@@ -7,8 +7,7 @@ namespace Metalama.Patterns.Observability.Configuration;
 
 /// <summary>
 /// Builds options for the classic implementation strategy of the <see cref="ObservableAttribute"/> aspect.
-/// To use, call <see cref="ObservabilityExtensions.ConfigureObservability(Metalama.Framework.Aspects.IAspectReceiver{Metalama.Framework.Code.ICompilation},System.Action{Metalama.Patterns.Observability.Configuration.ObservabilityTypeOptionsBuilder})"/>
-/// and the <see cref="ObservabilityTypeOptionsBuilder.ConfigureClassicStrategy"/>.
+/// To use, call <see cref="ObservabilityExtensions.ConfigureObservability(Metalama.Framework.Aspects.IAspectReceiver{Metalama.Framework.Code.ICompilation},System.Action{Metalama.Patterns.Observability.Configuration.ObservabilityTypeOptionsBuilder})"/>.
 /// </summary>
 [PublicAPI]
 [CompileTime]

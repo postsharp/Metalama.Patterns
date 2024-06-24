@@ -73,6 +73,7 @@ namespace Metalama.Patterns.Contracts.AspectTests.Fabric_Project
         {
           throw new ArgumentNullException("value", "The indexer must not be null.");
         }
+        _ = value;
       }
     }
     public void PublicMethod(string nonNullableParam, string? nullableParam)

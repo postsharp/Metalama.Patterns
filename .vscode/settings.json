@@ -1,4 +1,4 @@
 {
     "dotnet.defaultSolution": "Metalama.Patterns.sln",
-    "window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${profileName}${separator}${appName}${separator}[Branch: topic/2024.1/zero-warnings]"
+    "window.title": "${dirty}${activeEditorShort}${separator}${rootName}${separator}${profileName}${separator}${appName}${separator}[Branch: develop/2024.2]"
 }

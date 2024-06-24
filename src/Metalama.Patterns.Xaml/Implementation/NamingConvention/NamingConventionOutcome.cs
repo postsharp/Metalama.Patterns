@@ -2,15 +2,6 @@
 
 using Metalama.Framework.Aspects;
 
-namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
-
-[CompileTime]
-internal readonly record struct InspectedNamingConventionMatch<TMatch>(
-    TMatch Match,
-    NamingConventionOutcome Outcome,
-    IEnumerable<InspectedMember> InspectedDeclarations )
-    where TMatch : NamingConventionMatch;
-
 [CompileTime]
 internal enum NamingConventionOutcome
 {

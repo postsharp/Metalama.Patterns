@@ -8,6 +8,7 @@ namespace Metalama.Patterns.Observability.CompileTimeTests;
 
 internal static class TestExtensions
 {
+    // ReSharper disable once UnusedMember.Global
     public static void Add( this List<string> strings, IDiagnostic diagnostic, Location? location )
     {
         var start = location?.GetLineSpan().StartLinePosition ?? default;

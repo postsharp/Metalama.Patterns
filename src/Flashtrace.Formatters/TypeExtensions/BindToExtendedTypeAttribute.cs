@@ -5,4 +5,4 @@ using JetBrains.Annotations;
 namespace Flashtrace.Formatters.TypeExtensions;
 
 [PublicAPI]
-public sealed class BindToExtendedTypeAttribute : TypeExtensionBindingAttribute { }
+public sealed class BindToExtendedTypeAttribute : TypeExtensionBindingAttribute;

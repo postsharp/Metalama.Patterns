@@ -4,6 +4,7 @@ using Metalama.Framework.Fabrics;
 
 namespace Metalama.Patterns.Contracts.UnitTests;
 
+// ReSharper disable once UnusedType.Global
 internal class Fabric : ProjectFabric
 {
     public override void AmendProject( IProjectAmender amender )
