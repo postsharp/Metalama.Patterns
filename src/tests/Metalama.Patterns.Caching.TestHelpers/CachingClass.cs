@@ -2,4 +2,4 @@
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
-public class CachingClass : CachingClass<CachedValueClass> { }
+public class CachingClass : CachingClass<CachedValueClass>;

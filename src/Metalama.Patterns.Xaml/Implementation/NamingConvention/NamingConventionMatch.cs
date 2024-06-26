@@ -5,6 +5,7 @@ using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Xaml.Implementation.NamingConvention;
 
+// ReSharper disable once NotAccessedPositionalProperty.Global
 [CompileTime]
 internal abstract record NamingConventionMatch( INamingConvention NamingConvention, IReadOnlyList<InspectedMember> InspectedMembers )
 {

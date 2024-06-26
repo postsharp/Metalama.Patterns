@@ -34,7 +34,7 @@ public class ImmutableAttribute : TypeAspect, IHierarchicalOptionsProvider
     {
         foreach ( var field in builder.Target.Fields )
         {
-            if ( !field.IsImplicitlyDeclared && !field.IsStatic )
+            if ( field is { IsImplicitlyDeclared: false, IsStatic: false } )
             {
                 if ( field is { Writeability: > Writeability.InitOnly } )
                 {
@@ -49,7 +49,7 @@ public class ImmutableAttribute : TypeAspect, IHierarchicalOptionsProvider
 
         foreach ( var property in builder.Target.Properties )
         {
-            if ( property.IsAutoPropertyOrField == true && !property.IsStatic )
+            if ( property is { IsAutoPropertyOrField: true, IsStatic: false } )
             {
                 switch ( property.Writeability )
                 {

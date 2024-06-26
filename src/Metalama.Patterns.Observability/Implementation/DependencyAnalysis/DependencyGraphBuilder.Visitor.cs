@@ -43,7 +43,7 @@ internal partial class DependencyGraphBuilder
         // ReSharper disable once InvokeAsExtensionMethod
         var semanticModel = SymbolExtensions.GetSemanticModel( compilation, body.SyntaxTree );
 
-        var visitor = new Visitor( propertyInfo, semanticModel, context, trace, cancellationToken, ignoreWarnings );
+        var visitor = new Visitor( propertyInfo, semanticModel, context, trace, ignoreWarnings, cancellationToken );
 
         visitor.Visit( body );
     }
@@ -68,8 +68,8 @@ internal partial class DependencyGraphBuilder
             SemanticModel semanticModel,
             GraphBuildingContext context,
             Action<string>? trace,
-            CancellationToken cancellationToken,
-            bool ignoreWarnings )
+            bool ignoreWarnings,
+            CancellationToken cancellationToken )
         {
             this._trace = trace;
             this._propertyInfo = propertyInfo;

@@ -8,7 +8,7 @@ using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal class ClassicObservableExpression : ObservableExpression
+internal sealed class ClassicObservableExpression : ObservableExpression
 {
     public new IEnumerable<ClassicObservableExpression> Children => base.Children.Cast<ClassicObservableExpression>();
 

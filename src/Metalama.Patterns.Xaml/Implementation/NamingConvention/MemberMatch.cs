@@ -23,7 +23,7 @@ internal sealed class MemberMatch<TMember, TKind> : IMemberMatch
     public static MemberMatch<TMember, TKind> Success( TMember declaration, TKind kind )
         => new( MemberMatchOutcome.Success, declaration ?? throw new ArgumentNullException( nameof(declaration) ), kind: kind );
 
-    public static MemberMatch<TMember, TKind> Success( TKind kind ) => new( MemberMatchOutcome.Success, null, kind: kind );
+    public static MemberMatch<TMember, TKind> Success( TKind kind ) => new( MemberMatchOutcome.Success, kind: kind );
 
     public static MemberMatch<TMember, TKind> Conflict( TMember conflictingDeclaration ) => new( MemberMatchOutcome.Conflict, conflictingDeclaration );
 
@@ -31,9 +31,6 @@ internal sealed class MemberMatch<TMember, TKind> : IMemberMatch
 
     public static MemberMatch<TMember, TKind> NotFound( ImmutableArray<string> candidateNames )
         => new( MemberMatchOutcome.NotFound, candidateNames: candidateNames );
-
-    public static MemberMatch<TMember, TKind> NotFound( string candidateName )
-        => new( MemberMatchOutcome.NotFound, candidateNames: ImmutableArray.Create( candidateName ) );
 
     public static MemberMatch<TMember, TKind> NotFound() => new( MemberMatchOutcome.NotFound, candidateNames: ImmutableArray<string>.Empty );
 

@@ -7,7 +7,7 @@ using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 [CompileTime]
-internal class ClassicObservableTypeInfo : ObservableTypeInfo
+internal sealed class ClassicObservableTypeInfo : ObservableTypeInfo
 {
     public ClassicObservableTypeInfo(
         ClassicDependencyGraphBuilder builder,

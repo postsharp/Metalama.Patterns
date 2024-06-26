@@ -77,10 +77,6 @@ public sealed class ObservabilityTypeOptionsBuilder
     public bool? EnableOnObservablePropertyChangedMethod
     {
         get => this.ClassicStrategyOptions?.EnableOnObservablePropertyChangedMethod;
-        set
-            => this.ClassicStrategyOptions = (this.ClassicStrategyOptions ?? new ClassicObservabilityStrategyOptions()) with
-            {
-                EnableOnObservablePropertyChangedMethod = value
-            };
+        set => this.ClassicStrategyOptions = new ClassicObservabilityStrategyOptions { EnableOnObservablePropertyChangedMethod = value };
     }
 }

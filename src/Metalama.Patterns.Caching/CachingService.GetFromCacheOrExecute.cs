@@ -49,7 +49,6 @@ public partial class CachingService
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
                     result = this.Frontend.GetOrAdd(
-                        metadata.Method,
                         methodKey,
                         metadata.Method.ReturnType,
                         mergedConfiguration,
@@ -137,7 +136,6 @@ public partial class CachingService
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
                     var task = this.Frontend.GetOrAddAsync(
-                        metadata.Method,
                         methodKey,
                         metadata.AwaitableResultType!,
                         mergedConfiguration,
@@ -247,7 +245,6 @@ public partial class CachingService
                     logSource.Debug.IfEnabled?.Write( Formatted( "Key=\"{Key}\".", methodKey ) );
 
                     var task = this.Frontend.GetOrAddAsync(
-                        metadata.Method,
                         methodKey,
                         metadata.AwaitableResultType!,
                         mergedConfiguration,

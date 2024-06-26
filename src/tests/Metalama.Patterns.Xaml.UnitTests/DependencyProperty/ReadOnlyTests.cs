@@ -3,6 +3,7 @@
 using Metalama.Patterns.Xaml.UnitTests.Assets.DependencyPropertyNS;
 using Xunit;
 
+// ReSharper disable once CheckNamespace
 namespace Metalama.Patterns.Xaml.UnitTests.DependencyProperty_;
 
 public sealed class ReadOnlyTests

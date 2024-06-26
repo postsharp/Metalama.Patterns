@@ -129,6 +129,7 @@ public class TypeFormatterTests : FormattersTestsBase
 // ReSharper disable ClassNeverInstantiated.Global
 // ReSharper disable MemberCanBeInternal
 // ReSharper disable UnusedTypeParameter
+// ReSharper disable RedundantTypeDeclarationBody
 #pragma warning disable SA1314
 #pragma warning disable SA1402
 

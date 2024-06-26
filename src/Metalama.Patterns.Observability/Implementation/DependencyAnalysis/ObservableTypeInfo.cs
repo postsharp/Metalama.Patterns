@@ -17,6 +17,7 @@ internal class ObservableTypeInfo
 
     public DependencyGraphBuilder Builder { get; }
 
+    // ReSharper disable once UnusedAutoPropertyAccessor.Global
     public INamedType Type { get; }
 
     public ObservableTypeInfo( DependencyGraphBuilder builder, INamedType type )
@@ -59,7 +60,7 @@ internal class ObservableTypeInfo
         }
     }
 
-    public IEnumerable<ObservablePropertyInfo> Properties => this._properties.Values;
+    protected IEnumerable<ObservablePropertyInfo> Properties => this._properties.Values;
 
-    public IReadOnlyCollection<ObservableExpression> AllExpressions => this._allExpressions;
+    protected IReadOnlyCollection<ObservableExpression> AllExpressions => this._allExpressions;
 }

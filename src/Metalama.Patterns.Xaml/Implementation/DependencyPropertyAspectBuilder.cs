@@ -46,8 +46,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
                                 || this._attribute.ValidateMethod != null;
 
         var namingConventions = hasExplicitNaming
-            ?
-            [
+            ? [
                 new ExplicitDependencyPropertyNamingConvention(
                     this._attribute.RegistrationField,
                     this._attribute.PropertyChangedMethod,
@@ -100,8 +99,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
             }
         }
 
-        var onChangedMethod = match?.PropertyChangedMatch.Member;
-        var validateMethod = match?.ValidateMatch.Member;
+        var onChangedMethod = match.PropertyChangedMatch.Member;
+        var validateMethod = match.ValidateMatch.Member;
 
         if ( !MetalamaExecutionContext.Current.ExecutionScenario.CapturesNonObservableTransformations )
         {
@@ -118,6 +117,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
             return;
         }
 
+        // ReSharper disable once ConditionIsAlwaysTrueOrFalse
         if ( match == null || introduceRegistrationFieldResult is not { Outcome: AdviceOutcome.Default } )
         {
             // We cannot proceed with other transformations if there was no naming convention match or
