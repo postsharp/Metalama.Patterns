@@ -8,7 +8,6 @@
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
-    <Version Condition="'$(MetalamaPatternsXamlVersion)'!=''">$(MetalamaPatternsXamlVersion)</Version>
     <PackageDescription>
       Provides custom
     </PackageDescription>
