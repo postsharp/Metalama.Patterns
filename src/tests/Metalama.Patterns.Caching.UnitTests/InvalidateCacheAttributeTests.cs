@@ -131,13 +131,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => invalidatingClass.Invalidate( cachedMethods[0] ),
-                    () => invalidatingClass.Invalidate( 0, cachedMethods[1] ),
-                    () => invalidatingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => invalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => invalidatingClass.Invalidate( cachedMethods[0] ),
+                () => invalidatingClass.Invalidate( 0, cachedMethods[1] ),
+                () => invalidatingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => invalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeIgnoringThisParameterProfileName,
@@ -268,13 +267,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => invalidatingClass.InvalidateAsync( cachedMethods[0] ),
-                    () => invalidatingClass.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => invalidatingClass.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => invalidatingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => invalidatingClass.InvalidateAsync( cachedMethods[0] ),
+                () => invalidatingClass.InvalidateAsync( 0, cachedMethods[1] ),
+                () => invalidatingClass.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => invalidatingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromDifferentTypeIgnoringThisParameterAsyncProfileName,
@@ -396,13 +394,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => invalidatingAndCachingClass.Invalidate( cachedMethods[0] ),
-                    () => invalidatingAndCachingClass.Invalidate( 0, cachedMethods[1] ),
-                    () => invalidatingAndCachingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => invalidatingAndCachingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => invalidatingAndCachingClass.Invalidate( cachedMethods[0] ),
+                () => invalidatingAndCachingClass.Invalidate( 0, cachedMethods[1] ),
+                () => invalidatingAndCachingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => invalidatingAndCachingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromDerivedTypeNotIgnoringThisParameterProfileName,
@@ -530,13 +527,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => invalidatingAndCachingClass.InvalidateAsync( cachedMethods[0] ),
-                    () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => invalidatingAndCachingClass.InvalidateAsync( cachedMethods[0] ),
+                () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedMethods[1] ),
+                () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => invalidatingAndCachingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromDerivedTypeNotIgnoringThisParameterAsyncProfileName,
@@ -659,13 +655,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => invalidatingClass.Invalidate( cachedMethods[0] ),
-                    () => invalidatingClass.Invalidate( 0, cachedMethods[1] ),
-                    () => invalidatingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => invalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => invalidatingClass.Invalidate( cachedMethods[0] ),
+                () => invalidatingClass.Invalidate( 0, cachedMethods[1] ),
+                () => invalidatingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => invalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeInstanceMethodOnStaticMethodProfileName,
@@ -793,13 +788,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => invalidatingClass.InvalidateAsync( cachedMethods[0] ),
-                    () => invalidatingClass.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => invalidatingClass.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => invalidatingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => invalidatingClass.InvalidateAsync( cachedMethods[0] ),
+                () => invalidatingClass.InvalidateAsync( 0, cachedMethods[1] ),
+                () => invalidatingClass.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => invalidatingClass.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromDifferentTypeInstanceMethodOnStaticMethodAsyncProfileName,
@@ -920,13 +914,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( cachedMethods[0] ),
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedMethods[1] ),
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( cachedMethods[0] ),
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedMethods[1] ),
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodInvalidatingClass.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromDifferentTypeStaticMethodOnStaticMethodProfileName,
@@ -1054,15 +1047,14 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( cachedMethods[0] ),
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass
-                        .InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass
-                        .InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( cachedMethods[0] ),
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass.InvalidateAsync( 0, cachedMethods[1] ),
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass
+                    .InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => TestFromDifferentTypeStaticMethodOnStaticMethodAsyncInvalidatingClass
+                    .InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromDifferentTypeStaticMethodOnStaticMethodAsyncProfileName,
@@ -1179,13 +1171,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass1.Invalidate( cachedMethods[0] ),
-                    () => testClass1.Invalidate( 0, cachedMethods[1] ),
-                    () => testClass1.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass1.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass1.Invalidate( cachedMethods[0] ),
+                () => testClass1.Invalidate( 0, cachedMethods[1] ),
+                () => testClass1.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass1.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
@@ -1196,13 +1187,12 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.Invalidate( cachedMethods[0] ),
-                    () => testClass2.Invalidate( 1, cachedMethods[1] ),
-                    () => testClass2.Invalidate( 1, cachedValue2, cachedMethods[2] ),
-                    () => testClass2.Invalidate( 1, cachedValue2, 3, 4, cachedMethods[3] )
-                };
+            [
+                () => testClass2.Invalidate( cachedMethods[0] ),
+                () => testClass2.Invalidate( 1, cachedMethods[1] ),
+                () => testClass2.Invalidate( 1, cachedValue2, cachedMethods[2] ),
+                () => testClass2.Invalidate( 1, cachedValue2, 3, 4, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
@@ -1213,13 +1203,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.Invalidate( cachedMethods[0] ),
-                    () => testClass2.Invalidate( 0, cachedMethods[1] ),
-                    () => testClass2.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass2.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass2.Invalidate( cachedMethods[0] ),
+                () => testClass2.Invalidate( 0, cachedMethods[1] ),
+                () => testClass2.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass2.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeIgnoringThisParameterProfileName,
@@ -1341,13 +1330,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass1.InvalidateAsync( cachedMethods[0] ),
-                    () => testClass1.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => testClass1.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass1.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass1.InvalidateAsync( cachedMethods[0] ),
+                () => testClass1.InvalidateAsync( 0, cachedMethods[1] ),
+                () => testClass1.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass1.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
@@ -1358,13 +1346,12 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.InvalidateAsync( cachedMethods[0] ),
-                    () => testClass2.InvalidateAsync( 1, cachedMethods[1] ),
-                    () => testClass2.InvalidateAsync( 1, cachedValue2, cachedMethods[2] ),
-                    () => testClass2.InvalidateAsync( 1, cachedValue2, 3, 4, cachedMethods[3] )
-                };
+            [
+                () => testClass2.InvalidateAsync( cachedMethods[0] ),
+                () => testClass2.InvalidateAsync( 1, cachedMethods[1] ),
+                () => testClass2.InvalidateAsync( 1, cachedValue2, cachedMethods[2] ),
+                () => testClass2.InvalidateAsync( 1, cachedValue2, 3, 4, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
@@ -1375,13 +1362,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.InvalidateAsync( cachedMethods[0] ),
-                    () => testClass2.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => testClass2.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass2.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass2.InvalidateAsync( cachedMethods[0] ),
+                () => testClass2.InvalidateAsync( 0, cachedMethods[1] ),
+                () => testClass2.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass2.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromTheSameTypeIgnoringThisParameterAsyncProfileName,
@@ -1498,13 +1484,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass1.Invalidate( cachedMethods[0] ),
-                    () => testClass1.Invalidate( 0, cachedMethods[1] ),
-                    () => testClass1.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass1.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass1.Invalidate( cachedMethods[0] ),
+                () => testClass1.Invalidate( 0, cachedMethods[1] ),
+                () => testClass1.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass1.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
@@ -1515,13 +1500,12 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.Invalidate( cachedMethods[0] ),
-                    () => testClass2.Invalidate( 1, cachedMethods[1] ),
-                    () => testClass2.Invalidate( 1, cachedValue2, cachedMethods[2] ),
-                    () => testClass2.Invalidate( 1, cachedValue2, 3, 4, cachedMethods[3] )
-                };
+            [
+                () => testClass2.Invalidate( cachedMethods[0] ),
+                () => testClass2.Invalidate( 1, cachedMethods[1] ),
+                () => testClass2.Invalidate( 1, cachedValue2, cachedMethods[2] ),
+                () => testClass2.Invalidate( 1, cachedValue2, 3, 4, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
@@ -1532,13 +1516,12 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.Invalidate( cachedMethods[0] ),
-                    () => testClass2.Invalidate( 0, cachedMethods[1] ),
-                    () => testClass2.Invalidate( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass2.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass2.Invalidate( cachedMethods[0] ),
+                () => testClass2.Invalidate( 0, cachedMethods[1] ),
+                () => testClass2.Invalidate( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass2.Invalidate( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             this.DoInvalidateCacheAttributeTest(
                 _testFromTheSameTypeNotIgnoringThisParameterProfileName,
@@ -1660,13 +1643,12 @@ namespace Metalama.Patterns.Caching.Tests
                 true );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass1.InvalidateAsync( cachedMethods[0] ),
-                    () => testClass1.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => testClass1.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass1.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass1.InvalidateAsync( cachedMethods[0] ),
+                () => testClass1.InvalidateAsync( 0, cachedMethods[1] ),
+                () => testClass1.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass1.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
@@ -1677,13 +1659,12 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.InvalidateAsync( cachedMethods[0] ),
-                    () => testClass2.InvalidateAsync( 1, cachedMethods[1] ),
-                    () => testClass2.InvalidateAsync( 1, cachedValue2, cachedMethods[2] ),
-                    () => testClass2.InvalidateAsync( 1, cachedValue2, 3, 4, cachedMethods[3] )
-                };
+            [
+                () => testClass2.InvalidateAsync( cachedMethods[0] ),
+                () => testClass2.InvalidateAsync( 1, cachedMethods[1] ),
+                () => testClass2.InvalidateAsync( 1, cachedValue2, cachedMethods[2] ),
+                () => testClass2.InvalidateAsync( 1, cachedValue2, 3, 4, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,
@@ -1694,13 +1675,12 @@ namespace Metalama.Patterns.Caching.Tests
                 false );
 
             invalidatingMethods =
-                new[]
-                {
-                    () => testClass2.InvalidateAsync( cachedMethods[0] ),
-                    () => testClass2.InvalidateAsync( 0, cachedMethods[1] ),
-                    () => testClass2.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
-                    () => testClass2.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
-                };
+            [
+                () => testClass2.InvalidateAsync( cachedMethods[0] ),
+                () => testClass2.InvalidateAsync( 0, cachedMethods[1] ),
+                () => testClass2.InvalidateAsync( 0, cachedValue0, cachedMethods[2] ),
+                () => testClass2.InvalidateAsync( 0, cachedValue0, 0, 5, cachedMethods[3] )
+            ];
 
             await this.DoInvalidateCacheAttributeTestAsync(
                 _testFromTheSameTypeNotIgnoringThisParameterAsyncProfileName,

@@ -2,12 +2,7 @@ using System.Windows;
 namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.PropertyInitializer.InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue;
 public class InitializerProvidesDefaultValueIsFalseAndInitializerProvidesInitialValueIsTrue : DependencyObject
 {
-  private static List<int> InitMethod() => new(3)
-  {
-    1,
-    2,
-    3
-  };
+  private static List<int> InitMethod() => [1, 2, 3];
   [DependencyProperty(InitializerProvidesDefaultValue = false)]
   public List<int> Foo
   {

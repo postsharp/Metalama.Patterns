@@ -271,13 +271,12 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new[]
-                {
-                    () => CachingService.Default.Invalidate( cachingClass.GetValue ),
-                    () => CachingService.Default.Invalidate( cachingClass.GetValue, 0 ),
-                    () => CachingService.Default.Invalidate( cachingClass.GetValue, 0, cachedValue0 ),
-                    () => CachingService.Default.Invalidate( cachingClass.GetValue, 0, cachedValue0, 0, 5 )
-                };
+            [
+                () => CachingService.Default.Invalidate( cachingClass.GetValue ),
+                () => CachingService.Default.Invalidate( cachingClass.GetValue, 0 ),
+                () => CachingService.Default.Invalidate( cachingClass.GetValue, 0, cachedValue0 ),
+                () => CachingService.Default.Invalidate( cachingClass.GetValue, 0, cachedValue0, 0, 5 )
+            ];
 
             testName = "Not matching values test";
 
@@ -391,13 +390,12 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new[]
-                {
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync ).AsTask(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0 ).AsTask(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0 ).AsTask(),
-                    () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 ).AsTask()
-                };
+            [
+                () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync ).AsTask(),
+                () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0 ).AsTask(),
+                () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0 ).AsTask(),
+                () => CachingService.Default.InvalidateAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 ).AsTask()
+            ];
 
             testName = "Not matching values test";
 
@@ -511,13 +509,12 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new Action[]
-                {
-                    () => CachingService.Default.Refresh( cachingClass.GetValue ),
-                    () => CachingService.Default.Refresh( cachingClass.GetValue, 0 ),
-                    () => CachingService.Default.Refresh( cachingClass.GetValue, 0, cachedValue0 ),
-                    () => CachingService.Default.Refresh( cachingClass.GetValue, 0, cachedValue0, 0, 5 )
-                };
+            [
+                () => CachingService.Default.Refresh( cachingClass.GetValue ),
+                () => CachingService.Default.Refresh( cachingClass.GetValue, 0 ),
+                () => CachingService.Default.Refresh( cachingClass.GetValue, 0, cachedValue0 ),
+                () => CachingService.Default.Refresh( cachingClass.GetValue, 0, cachedValue0, 0, 5 )
+            ];
 
             testName = "Not matching values test";
 
@@ -632,13 +629,12 @@ namespace Metalama.Patterns.Caching.Tests
             }
 
             invalidatingMethods =
-                new[]
-                {
-                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync ),
-                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0 ),
-                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0, cachedValue0 ),
-                    () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 )
-                };
+            [
+                () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync ),
+                () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0 ),
+                () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0, cachedValue0 ),
+                () => CachingService.Default.RefreshAsync( cachingClass.GetValueAsync, 0, cachedValue0, 0, 5 )
+            ];
 
             testName = "Not matching values test";
 

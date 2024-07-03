@@ -9,4 +9,4 @@ namespace Metalama.Patterns.Caching.Backends;
 /// Meant to be used by caching backends. It's a <see cref="CacheValue"/> with an extra object that functions as a lock. Do not use this if you're not
 /// implementing a <see cref="CachingBackend"/>.
 /// </summary>
-internal record MemoryCacheValue( object? Value, IImmutableList<string>? Dependencies, object Sync ) : CacheValue( Value, Dependencies );
+internal record MemoryCacheValue( object? Value, ImmutableArray<string> Dependencies, object Sync ) : CacheValue( Value, Dependencies );

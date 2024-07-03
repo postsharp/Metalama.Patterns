@@ -3,7 +3,6 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Locking;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
@@ -435,7 +434,7 @@ internal sealed class CachingFrontend
             }
         }
 
-        var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
+        var cacheItem = new CacheItem( value, [..context.Dependencies], configuration );
 
         backend.SetItem( key, cacheItem );
 
@@ -474,7 +473,7 @@ internal sealed class CachingFrontend
             }
         }
 
-        var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
+        var cacheItem = new CacheItem( value, [..context.Dependencies], configuration );
 
         var setItemTask = backend.SetItemAsync( key, cacheItem, cancellationToken );
         await setItemTask;

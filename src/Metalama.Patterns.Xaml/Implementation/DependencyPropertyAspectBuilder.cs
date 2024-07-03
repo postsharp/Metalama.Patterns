@@ -46,7 +46,8 @@ internal sealed partial class DependencyPropertyAspectBuilder
                                 || this._attribute.ValidateMethod != null;
 
         var namingConventions = hasExplicitNaming
-            ? [
+            ?
+            [
                 new ExplicitDependencyPropertyNamingConvention(
                     this._attribute.RegistrationField,
                     this._attribute.PropertyChangedMethod,
@@ -222,9 +223,11 @@ internal sealed partial class DependencyPropertyAspectBuilder
     /// <returns></returns>
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
-        this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.Types )
-            .Select( m => m.Name ) );
+        this._existingMemberNames ??=
+        [
+            ..((IEnumerable<INamedDeclaration>) this._builder.Target.DeclaringType.AllMembers()).Concat( this._builder.Target.DeclaringType.Types )
+            .Select( m => m.Name )
+        ];
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {

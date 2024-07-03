@@ -954,7 +954,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
             }
         }
 
-        if ( !this.SupportedFeatures.Dependencies && cacheItem.Dependencies?.Count > 0 )
+        if ( !this.SupportedFeatures.Dependencies && !cacheItem.Dependencies.IsDefaultOrEmpty )
         {
             this.RequireFeature( this.SupportedFeatures.Dependencies, nameof(this.SupportedFeatures.Dependencies) );
         }

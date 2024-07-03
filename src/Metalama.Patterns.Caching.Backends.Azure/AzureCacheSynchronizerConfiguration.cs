@@ -54,12 +54,12 @@ public sealed record AzureCacheSynchronizerConfiguration : CacheSynchronizerConf
 
     private static Dictionary<string, string> ParseAzureConnectionString( string connectionString )
     {
-        var keyValuePairs = connectionString.Split( new[] { ';' }, StringSplitOptions.RemoveEmptyEntries );
+        var keyValuePairs = connectionString.Split( [';'], StringSplitOptions.RemoveEmptyEntries );
         var result = new Dictionary<string, string>( StringComparer.OrdinalIgnoreCase );
 
         foreach ( var keyValuePair in keyValuePairs )
         {
-            var parts = keyValuePair.Split( new[] { '=' }, 2 ); // We split only on the first '='
+            var parts = keyValuePair.Split( ['='], 2 ); // We split only on the first '='
 
             if ( parts.Length == 2 )
             {

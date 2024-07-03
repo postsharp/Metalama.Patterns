@@ -14,7 +14,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     [Fact]
     public void ByteTest()
     {
-        byte[] values = { 0, 1, 13, 42, 127, 128, 255 };
+        byte[] values = [0, 1, 13, 42, 127, 128, 255];
 
         var formatter = new ByteFormatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder( 1024 );
@@ -32,7 +32,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     [Fact]
     public void SByteTest()
     {
-        sbyte[] values = { 0, 1, 13, 42, 127, -1, -13, -127, -128 };
+        sbyte[] values = [0, 1, 13, 42, 127, -1, -13, -127, -128];
 
         var formatter = new SByteFormatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();
@@ -50,7 +50,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     [Fact]
     public void UInt16Test()
     {
-        ushort[] values = { 0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535 };
+        ushort[] values = [0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, 32768, 65534, 65535];
 
         var formatter = new UInt16Formatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();
@@ -68,7 +68,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     [Fact]
     public void Int16Test()
     {
-        short[] values = { 0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, -1, -13, -127, -128, -10000, -32767, -32768 };
+        short[] values = [0, 1, 13, 42, 127, 128, 255, 256, 10000, 32767, -1, -13, -127, -128, -10000, -32767, -32768];
 
         var formatter = new Int16Formatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();
@@ -87,7 +87,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     public void UInt32Test()
     {
         uint[] values =
-        {
+        [
             0,
             1,
             13,
@@ -109,7 +109,7 @@ public class IntegerFormatterTests : FormattersTestsBase
             2147483648,
             4294967294,
             4294967295
-        };
+        ];
 
         var formatter = new UInt32Formatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();
@@ -128,7 +128,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     public void Int32Test()
     {
         int[] values =
-        {
+        [
             0,
             1,
             13,
@@ -157,7 +157,7 @@ public class IntegerFormatterTests : FormattersTestsBase
             -65536,
             -2147483647,
             -2147483648
-        };
+        ];
 
         var formatter = new Int32Formatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();
@@ -194,7 +194,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     public void UInt64Test()
     {
         ulong[] values =
-        {
+        [
             0,
             1,
             13,
@@ -222,7 +222,7 @@ public class IntegerFormatterTests : FormattersTestsBase
             9223372036854775807,
             9223372036854775808,
             18446744073709551615
-        };
+        ];
 
         var formatter = new UInt64Formatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();
@@ -241,7 +241,7 @@ public class IntegerFormatterTests : FormattersTestsBase
     public void Int64Test()
     {
         long[] values =
-        {
+        [
             0,
             1,
             13,
@@ -281,7 +281,7 @@ public class IntegerFormatterTests : FormattersTestsBase
             -2305843008139952128,
             -9223372036854775807,
             -9223372036854775808
-        };
+        ];
 
         var formatter = new Int64Formatter( CreateRepository() );
         var stringBuilder = new UnsafeStringBuilder();

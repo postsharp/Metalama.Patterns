@@ -17,15 +17,10 @@ public class ImplicitObjectCreation : DependencyObject
   public static readonly DependencyProperty FooProperty;
   static ImplicitObjectCreation()
   {
-    FooProperty = DependencyProperty.Register("Foo", typeof(List<int>), typeof(ImplicitObjectCreation), new PropertyMetadata((List<int>)new(3) { 1, 2, 3 }));
+    FooProperty = DependencyProperty.Register("Foo", typeof(List<int>), typeof(ImplicitObjectCreation), new PropertyMetadata((List<int>)([1, 2, 3])));
   }
   public ImplicitObjectCreation()
   {
-    Foo = new(3)
-    {
-      1,
-      2,
-      3
-    };
+    Foo = [1, 2, 3];
   }
 }

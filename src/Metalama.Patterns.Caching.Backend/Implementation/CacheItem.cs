@@ -11,7 +11,7 @@ namespace Metalama.Patterns.Caching.Implementation;
 [PublicAPI]
 public sealed record CacheItem(
     object? Value,
-    IImmutableList<string>? Dependencies = null,
+    ImmutableArray<string> Dependencies = default,
     ICacheItemConfiguration? Configuration = null )
 {
     /// <summary>
@@ -36,26 +36,26 @@ public sealed record CacheItem(
             return false;
         }
 
-        if ( this.Dependencies == null )
+        if ( this.Dependencies.IsDefaultOrEmpty )
         {
-            if ( other.Dependencies != null )
+            if ( !other.Dependencies.IsDefaultOrEmpty )
             {
                 return false;
             }
         }
         else
         {
-            if ( other.Dependencies == null )
+            if ( other.Dependencies.IsDefaultOrEmpty )
             {
                 return false;
             }
 
-            if ( other.Dependencies.Count != this.Dependencies.Count )
+            if ( other.Dependencies.Length != this.Dependencies.Length )
             {
                 return false;
             }
 
-            for ( var i = 0; i < this.Dependencies.Count; i++ )
+            for ( var i = 0; i < this.Dependencies.Length; i++ )
             {
                 if ( !string.Equals( this.Dependencies[i], other.Dependencies[i], StringComparison.Ordinal ) )
                 {
@@ -76,7 +76,7 @@ public sealed record CacheItem(
 
             hashCode = (hashCode * 53) ^ (this.Value == null ? 0 : this.Value.GetHashCode());
 
-            if ( this.Dependencies != null )
+            if ( !this.Dependencies.IsDefaultOrEmpty )
             {
                 foreach ( var dependency in this.Dependencies )
                 {

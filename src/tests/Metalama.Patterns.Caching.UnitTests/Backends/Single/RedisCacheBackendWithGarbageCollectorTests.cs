@@ -27,9 +27,9 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
         await using ( var cache = await this.CreateBackendAsync( prefix ) )
         {
-            await cache.SetItemAsync( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-            await cache.SetItemAsync( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-            await cache.SetItemAsync( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            await cache.SetItemAsync( "i1", new CacheItem( "value", ImmutableArray.Create( "d1", "d2", "d3" ) ) );
+            await cache.SetItemAsync( "i2", new CacheItem( "value", ImmutableArray.Create( "d1", "d2", "d3" ) ) );
+            await cache.SetItemAsync( "i3", new CacheItem( "value", ImmutableArray.Create( "d1", "d2", "d3" ) ) );
 
             // ReSharper restore MethodHasAsyncOverload
 
@@ -86,7 +86,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
             var cacheItem = new CacheItem(
                 "v",
-                ImmutableList.Create( dependencySmallKey ),
+                ImmutableArray.Create( dependencySmallKey ),
                 new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
             await cache.SetItemAsync( valueSmallKey, cacheItem );
@@ -133,12 +133,12 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
             var expiringCacheItem = new CacheItem(
                 "v",
-                ImmutableList.Create( dependencySmallKey ),
+                ImmutableArray.Create( dependencySmallKey ),
                 new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
             var nonExpiringCacheItem = new CacheItem(
                 "v",
-                ImmutableList.Create( dependencySmallKey ) );
+                ImmutableArray.Create( dependencySmallKey ) );
 
             await cache.SetItemAsync( valueSmallKey, expiringCacheItem );
 

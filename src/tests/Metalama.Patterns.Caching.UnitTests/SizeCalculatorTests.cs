@@ -49,20 +49,20 @@ namespace Metalama.Patterns.Caching.Tests
                             } ),
                     this.ServiceProvider );
 
-            backend.SetItem( "A", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
-            backend.SetItem( "B", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
-            backend.SetItem( "C", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.Low } ) );
-            backend.SetItem( "D", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
-            backend.SetItem( "E", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "A", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "B", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "C", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.Low } ) );
+            backend.SetItem( "D", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "E", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
 
-            backend.SetItem( "F", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.Low } ) );
-            backend.SetItem( "G", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.Low } ) );
-            backend.SetItem( "H", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
-            backend.SetItem( "I", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
-            backend.SetItem( "J", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "F", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.Low } ) );
+            backend.SetItem( "G", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.Low } ) );
+            backend.SetItem( "H", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "I", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "J", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
 
             // trigger compaction:
-            backend.SetItem( "K", new CacheItem( 2, null, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
+            backend.SetItem( "K", new CacheItem( 2, default, new CacheItemConfiguration { Priority = CacheItemPriority.High } ) );
 
             Assert.False( backend.ContainsItem( "K" ) );
             EvictEventually( backend, "G" );

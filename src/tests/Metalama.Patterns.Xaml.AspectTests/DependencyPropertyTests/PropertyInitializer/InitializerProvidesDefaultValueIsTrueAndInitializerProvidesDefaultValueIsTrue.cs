@@ -7,7 +7,7 @@ namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.PropertyIni
 
 public class InitializerProvidesDefaultValueIsTrueAndInitializerProvidesDefaultValueIsTrue : DependencyObject
 {
-    private static List<int> InitMethod() => new( 3 ) { 1, 2, 3 };
+    private static List<int> InitMethod() => [1, 2, 3];
 
     [DependencyProperty]
     public List<int> Foo { get; set; } = InitMethod();
