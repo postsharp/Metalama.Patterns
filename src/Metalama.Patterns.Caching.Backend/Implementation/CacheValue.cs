@@ -12,4 +12,4 @@ namespace Metalama.Patterns.Caching.Implementation;
 /// <param name="Value">The cached value.</param>
 /// <param name="Dependencies">An optional list of dependencies.</param>
 [PublicAPI]
-public record CacheValue( object? Value, IImmutableList<string>? Dependencies = null );
+public record CacheValue( object? Value, ImmutableArray<string> Dependencies = default );

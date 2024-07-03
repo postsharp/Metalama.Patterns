@@ -436,10 +436,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
                     new List<int>(),
                     new List<object>(),
-                    new List<int>(),
-                    new List<object>(),
-                    Array.Empty<int>(),
-                    Array.Empty<object>() ) );
+                    [],
+                    [],
+                    [],
+                    [] ) );
         }
 
         #endregion TestMethodWithEmptyCollectionParameters
@@ -474,10 +474,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
                     new List<int>(),
                     new List<object>(),
-                    new List<int>(),
-                    new List<object>(),
-                    Array.Empty<int>(),
-                    Array.Empty<object>() ) );
+                    [],
+                    [],
+                    [],
+                    [] ) );
         }
 
         #endregion TestMethodWithEmptyCollectionParametersAsync
@@ -512,10 +512,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
                     new List<int>( new[] { 1 } ),
                     new List<object>( new object[] { "Object1" } ),
-                    new List<int>( new[] { 2 } ),
-                    new List<object>( new object[] { "Object2" } ),
-                    new[] { 3 },
-                    new object[] { "Object3" } ) );
+                    [..new[] { 2 }],
+                    [..new object[] { "Object2" }],
+                    [3],
+                    ["Object3"] ) );
         }
 
         #endregion TestMethodWithOneItemCollectionParameters
@@ -550,10 +550,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
                     new List<int>( new[] { 1 } ),
                     new List<object>( new object[] { "Object1" } ),
-                    new List<int>( new[] { 2 } ),
-                    new List<object>( new object[] { "Object2" } ),
-                    new[] { 3 },
-                    new object[] { "Object3" } ) );
+                    [..new[] { 2 }],
+                    [..new object[] { "Object2" }],
+                    [3],
+                    ["Object3"] ) );
         }
 
         #endregion TestMethodWithOneItemCollectionParametersAsync
@@ -588,10 +588,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
                     new List<int>( new[] { 1, 2 } ),
                     new List<object>( new object[] { "Object1", "Object2" } ),
-                    new List<int>( new[] { 3, 4 } ),
-                    new List<object>( new object[] { "Object3", "Object4" } ),
-                    new[] { 5, 6 },
-                    new object[] { "Object5", "Object6" } ) );
+                    [..new[] { 3, 4 }],
+                    [..new object[] { "Object3", "Object4" }],
+                    [5, 6],
+                    ["Object5", "Object6"] ) );
         }
 
         #endregion TestMethodWithTwoItemCollectionParameters
@@ -626,10 +626,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
                     new List<int>( new[] { 1, 2 } ),
                     new List<object>( new object[] { "Object1", "Object2" } ),
-                    new List<int>( new[] { 3, 4 } ),
-                    new List<object>( new object[] { "Object3", "Object4" } ),
-                    new[] { 5, 6 },
-                    new object[] { "Object5", "Object6" } ) );
+                    [..new[] { 3, 4 }],
+                    [..new object[] { "Object3", "Object4" }],
+                    [5, 6],
+                    ["Object5", "Object6"] ) );
         }
 
         #endregion TestMethodWithTwoItemCollectionParametersAsync
@@ -664,10 +664,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParameters(
                     new List<int>( new[] { 1, 2, 3 } ),
                     new List<object>( new object[] { "Object1", "Object2", "Object3" } ),
-                    new List<int>( new[] { 4, 5, 6 } ),
-                    new List<object>( new object[] { "Object4", "Object5", "Object6" } ),
-                    new[] { 7, 8, 9 },
-                    new object[] { "Object7", "Object8", "Object9" } ) );
+                    [..new[] { 4, 5, 6 }],
+                    [..new object[] { "Object4", "Object5", "Object6" }],
+                    [7, 8, 9],
+                    ["Object7", "Object8", "Object9"] ) );
         }
 
         #endregion TestMethodWithThreeItemCollectionParameters
@@ -703,10 +703,10 @@ namespace Metalama.Patterns.Caching.Tests
                 () => testObject.CachedInstanceMethodWithCollectionParametersAsync(
                     new List<int>( new[] { 1, 2, 3 } ),
                     new List<object>( new object[] { "Object1", "Object2", "Object3" } ),
-                    new List<int>( new[] { 4, 5, 6 } ),
-                    new List<object>( new object[] { "Object4", "Object5", "Object6" } ),
-                    new[] { 7, 8, 9 },
-                    new object[] { "Object7", "Object8", "Object9" } ) );
+                    [..new[] { 4, 5, 6 }],
+                    [..new object[] { "Object4", "Object5", "Object6" }],
+                    [7, 8, 9],
+                    ["Object7", "Object8", "Object9"] ) );
         }
 
         #endregion TestMethodWithThreeItemCollectionParametersAsync

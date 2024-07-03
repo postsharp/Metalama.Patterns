@@ -151,7 +151,7 @@ namespace Metalama.Patterns.Caching.Tests
             var cachedMethods =
                 new[]
                 {
-                    new[] { () => cachingClass.GetValue( 0 ), () => cachingClass.GetValue( 1 ) },
+                    [() => cachingClass.GetValue( 0 ), () => cachingClass.GetValue( 1 )],
                     new[] { () => cachingClass.GetValue( 0, 0 ), () => cachingClass.GetValue( 0, 1 ) }
                 };
 

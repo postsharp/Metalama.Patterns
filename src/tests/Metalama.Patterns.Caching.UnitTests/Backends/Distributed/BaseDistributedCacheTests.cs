@@ -88,7 +88,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
                 {
                     itemRemovedEvents[i] = new TaskCompletionSource<bool>();
                     var backend2 = backends[i];
-                    await backend2.SetItemAsync( itemKey, new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) ) );
+                    await backend2.SetItemAsync( itemKey, new CacheItem( "Hello, world.", ImmutableArray.Create( dependencyKey ) ) );
                 }
 
                 // [Porting] Not fixing, can't be certain of original intent.
@@ -150,7 +150,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
                 {
                     itemRemovedEvents[i] = new ManualResetEventSlim( false );
                     var backend2 = backends[i];
-                    backend2.SetItem( itemKey, new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) ) );
+                    backend2.SetItem( itemKey, new CacheItem( "Hello, world.", ImmutableArray.Create( dependencyKey ) ) );
                 }
 
                 backend1.InvalidateDependency( dependencyKey );
@@ -211,7 +211,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
 
                     if ( this.TestDependencies )
                     {
-                        cacheItem = new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) );
+                        cacheItem = new CacheItem( "Hello, world.", ImmutableArray.Create( dependencyKey ) );
                     }
                     else
                     {
@@ -280,7 +280,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
                 for ( var i = 0; i < backends.Length; i++ )
                 {
                     var backend2 = backends[i];
-                    await backend2.SetItemAsync( $"i{i}", new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) ) );
+                    await backend2.SetItemAsync( $"i{i}", new CacheItem( "Hello, world.", ImmutableArray.Create( dependencyKey ) ) );
                     itemRemovedEvents[i] = new TaskCompletionSource<bool>();
                 }
 
@@ -343,7 +343,7 @@ public abstract class BaseDistributedCacheTests : BaseCachingTests, IClassFixtur
 
                     if ( this.TestDependencies )
                     {
-                        cacheItem = new CacheItem( "Hello, world.", ImmutableList.Create( dependencyKey ) );
+                        cacheItem = new CacheItem( "Hello, world.", ImmutableArray.Create( dependencyKey ) );
                     }
                     else
                     {

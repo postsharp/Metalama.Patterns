@@ -34,7 +34,7 @@ public sealed class AspectlessTests : BaseCachingTests
 
             Assert.Equal( nameof(this.Get), cachedMethod.Method.Name );
 
-            return CachingService.Default.GetFromCacheOrExecute<int>( cachedMethod, this, Array.Empty<object?>(), ( instance, args ) => this._invocations++ );
+            return CachingService.Default.GetFromCacheOrExecute<int>( cachedMethod, this, [], ( instance, args ) => this._invocations++ );
         }
     }
 }

@@ -9,6 +9,11 @@ using System.Numerics;
 
 namespace Metalama.Patterns.Caching.LoadTests;
 
+internal static class ImmutableArrayExtensions
+{
+    public static ImmutableArray<T> EmptyIfDefault<T>( this ImmutableArray<T> array ) => array.IsDefault ? ImmutableArray<T>.Empty : array;
+}
+
 internal sealed class LoadTest : IDisposable
 {
     private sealed class TestClient : IDisposable
@@ -224,7 +229,7 @@ internal sealed class LoadTest : IDisposable
 
                 payload.Dependencies = dependencies;
 
-                item = new CacheItem( payload, ImmutableList.Create( dependencies ), configuration );
+                item = new CacheItem( payload, ImmutableArray.Create( dependencies ), configuration );
             }
 
             this._backend.SetItem( key, item );
@@ -262,15 +267,15 @@ internal sealed class LoadTest : IDisposable
                 this._errorsCounters.Increment(
                     "Corrupted payload type.",
                     value.Value == null
-                        ? $"payload is null, dependencies: {string.Join( ", ", value.Dependencies ?? [] )}"
+                        ? $"payload is null, dependencies: {string.Join( ", ", value.Dependencies.EmptyIfDefault() )}"
                         : value.Value.GetType().FullName + ", " + value.Value );
 
                 return;
             }
 
-            var retrievedDependenciesList = value.Dependencies ?? ImmutableList<string>.Empty;
+            var retrievedDependenciesList = value.Dependencies;
 
-            if ( payload.Dependencies == null && retrievedDependenciesList.Count == 0 )
+            if ( payload.Dependencies == null && retrievedDependenciesList.IsDefaultOrEmpty )
             {
                 // No dependencies as expected
                 return;
@@ -281,7 +286,7 @@ internal sealed class LoadTest : IDisposable
                 this._errorsCounters.Increment( "Corrupted payload - dependencies missing." );
             }
 
-            if ( payload.Dependencies == null && retrievedDependenciesList.Count > 0 )
+            if ( payload.Dependencies == null && retrievedDependenciesList.Length > 0 )
             {
                 this._errorsCounters.Increment(
                     "Corrupted dependencies - dependencies not expected but retrieved.",
@@ -290,7 +295,7 @@ internal sealed class LoadTest : IDisposable
                 return;
             }
 
-            if ( payload.Dependencies != null && payload.Dependencies.Length != retrievedDependenciesList.Count )
+            if ( payload.Dependencies != null && payload.Dependencies.Length != retrievedDependenciesList.Length )
             {
                 this._errorsCounters.Increment(
                     "Corrupted dependencies - different number of expected and retrieved dependencies.",

@@ -337,7 +337,7 @@ public abstract class TypeExtensionFactoryBase<T>
 
         if ( additionalConstructorArgs == null || additionalConstructorArgs.Length == 0 )
         {
-            ctorArgs = new object[] { 0 };
+            ctorArgs = [0];
         }
         else
         {
@@ -419,7 +419,7 @@ public abstract class TypeExtensionFactoryBase<T>
     private Type[] GetGenericArguments( Type extendedType, Type extensionType )
     {
         var genericArguments = new List<Type>( extendedType.GetGenericArguments().Length );
-        var extendedTypeArguments = extendedType.IsArray ? new[] { extendedType.GetElementType()! } : extendedType.GetGenericArguments();
+        var extendedTypeArguments = extendedType.IsArray ? [extendedType.GetElementType()!] : extendedType.GetGenericArguments();
         var extendedTypeArgumentsIndex = 0;
 
         foreach ( var extensionTypeArgument in extensionType.GetGenericArguments() )

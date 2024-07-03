@@ -132,7 +132,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             {
                 var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
-                var cacheItem0 = new CacheItem( storedValue0, this.TestDependencies ? ImmutableList.Create( "a", "b", "c" ) : null );
+                var cacheItem0 = new CacheItem( storedValue0, this.TestDependencies ? ["a", "b", "c"] : default );
 
                 cache.SetItem( key, cacheItem0 );
                 var retrievedItem = cache.GetItem( key );
@@ -144,7 +144,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 if ( this.TestDependencies )
                 {
                     // The dependencies retrieved before the timeout must be the same as the initial dependencies.
-                    Assert.Equal( cacheItem0.Dependencies?.ToList(), (ICollection?) retrievedItem.Dependencies?.ToList() );
+                    Assert.Equal( cacheItem0.Dependencies.ToList(), (ICollection?) retrievedItem.Dependencies.ToList() );
                 }
 
                 var storedValue1 = new CachedValueClass( 1 );
@@ -168,7 +168,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
             {
                 var storedValue0 = new CachedValueClass( 0 );
                 const string key = "0";
-                var cacheItem0 = new CacheItem( storedValue0, this.TestDependencies ? ImmutableList.Create( "a", "b", "c" ) : null );
+                var cacheItem0 = new CacheItem( storedValue0, this.TestDependencies ? ["a", "b", "c"] : default );
 
                 // [Porting] Not fixing, can't be certain of original intent.
                 // ReSharper disable once MethodHasAsyncOverload
@@ -182,7 +182,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 if ( this.TestDependencies )
                 {
                     // "The dependencies retrieved before the timeout must be the same as the initial dependencies."
-                    Assert.Equal( cacheItem0.Dependencies?.ToList(), (ICollection?) retrievedItem.Dependencies?.ToList() );
+                    Assert.Equal( cacheItem0.Dependencies.ToList(), (ICollection?) retrievedItem.Dependencies.ToList() );
                 }
 
                 var storedValue1 = new CachedValueClass( 1 );
@@ -212,7 +212,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                     var cacheItem = new CacheItem(
                         storedValue,
                         Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                        Dependencies: this.TestDependencies ? ImmutableList.Create( "d" ) : null );
+                        Dependencies: this.TestDependencies ? ["d"] : default );
 
                     var itemRemovedEvent = new ManualResetEvent( false );
                     cache.ItemRemoved += ( _, _ ) => itemRemovedEvent.Set();
@@ -587,7 +587,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    Dependencies: ImmutableList.Create( dependencyKey ) );
+                    Dependencies: [dependencyKey] );
 
                 cache.SetItem( key, cacheItem );
                 cache.InvalidateDependency( dependencyKey );
@@ -650,7 +650,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    Dependencies: ImmutableList.Create( dependencyKey ) );
+                    Dependencies: [dependencyKey] );
 
                 await cache.SetItemAsync( key, cacheItem );
 
@@ -680,11 +680,11 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
             using ( var cache = this.CreateBackend() )
             {
-                List<CacheItemRemovedEventArgs> events = new();
+                List<CacheItemRemovedEventArgs> events = [];
                 cache.ItemRemoved += ( _, args ) => events.Add( args );
 
                 const string dependencyKey = "dependency";
-                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), ImmutableList.Create( dependencyKey ) );
+                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), [dependencyKey] );
                 cache.SetItem( "m1", cacheItem1 );
 
                 this.GiveChanceToResetLocalCache( cache );
@@ -723,7 +723,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 cache.ItemRemoved += ( _, _ ) => eventsCount++;
 
                 const string dependencyKey = "dependency";
-                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), ImmutableList.Create( dependencyKey ) );
+                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), [dependencyKey] );
                 await cache.SetItemAsync( "m1", cacheItem1 );
 
                 this.GiveChanceToResetLocalCache( cache );
@@ -759,8 +759,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 cache.ItemRemoved += ( _, _ ) => eventsCount++;
 
                 const string dependencyKey = "dependency";
-                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( dependencyKey ) : null );
-                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? ImmutableList.Create( dependencyKey ) : null );
+                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? [dependencyKey] : default );
+                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? [dependencyKey] : default );
                 cache.SetItem( "m1", cacheItem1 );
                 cache.SetItem( "m2", cacheItem2 );
 
@@ -793,8 +793,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 cache.ItemRemoved += ( _, _ ) => eventsCount++;
 
                 const string dependencyKey = "dependency";
-                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( dependencyKey ) : null );
-                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? ImmutableList.Create( dependencyKey ) : null );
+                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? [dependencyKey] : default );
+                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? [dependencyKey] : default );
                 await cache.SetItemAsync( "m1", cacheItem1 );
                 await cache.SetItemAsync( "m2", cacheItem2 );
 
@@ -813,8 +813,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
         {
             using ( var cache = this.CreateBackend() )
             {
-                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( "d1" ) : null );
-                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? ImmutableList.Create( "d2" ) : null );
+                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ["d1"] : default );
+                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? ["d2"] : default );
                 cache.SetItem( "m", cacheItem1 );
                 cache.SetItem( "m", cacheItem2 );
 
@@ -843,8 +843,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
             // ReSharper disable once UseAwaitUsing
             using ( var cache = await this.CreateBackendAsync() )
             {
-                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ImmutableList.Create( "d1" ) : null );
-                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? ImmutableList.Create( "d2" ) : null );
+                var cacheItem1 = new CacheItem( new CachedValueClass( 1 ), this.TestDependencies ? ["d1"] : default );
+                var cacheItem2 = new CacheItem( new CachedValueClass( 2 ), this.TestDependencies ? ["d2"] : default );
                 await cache.SetItemAsync( "m", cacheItem1 );
                 await cache.SetItemAsync( "m", cacheItem2 );
 
@@ -881,7 +881,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
-                Assert.Throws<NotSupportedException>( () => cache.SetItem( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
+                Assert.Throws<NotSupportedException>( () => cache.SetItem( "i", new CacheItem( "v", ["d"] ) ) );
             }
         }
 
@@ -902,8 +902,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 Assert.False( cache.SupportedFeatures.Dependencies );
 
-                await Assert.ThrowsAsync<NotSupportedException>(
-                    async () => await cache.SetItemAsync( "i", new CacheItem( "v", ImmutableList.Create( "d" ) ) ) );
+                await Assert.ThrowsAsync<NotSupportedException>( async () => await cache.SetItemAsync( "i", new CacheItem( "v", ["d"] ) ) );
             }
         }
 

@@ -25,11 +25,11 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
     {
         var prefix = Guid.NewGuid().ToString();
 
-        return new CachingBackend[]
-        {
+        return
+        [
             await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, prefix ),
             await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, prefix )
-        };
+        ];
     }
 
     protected override CachingBackend[] CreateBackends() => Task.Run( this.CreateBackendsAsync ).Result;

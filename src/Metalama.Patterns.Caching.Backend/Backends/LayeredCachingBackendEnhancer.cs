@@ -259,7 +259,7 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
 
         var cacheItem = new CacheItem(
             multiLayerCacheValue.Value,
-            remoteCacheValue.Dependencies?.ToImmutableList(),
+            remoteCacheValue.Dependencies,
             multiLayerCacheValue.ToCacheItemConfiguration() );
 
         this.LocalCache.SetItem( key, cacheItem );
@@ -447,6 +447,6 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
         public readonly long Timestamp = GetTimestamp();
 #pragma warning restore SA1401
 
-        public RemovedValue() : base( null, null, new object() ) { }
+        public RemovedValue() : base( null, default, new object() ) { }
     }
 }

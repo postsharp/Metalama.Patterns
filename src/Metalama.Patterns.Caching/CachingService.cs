@@ -81,7 +81,7 @@ public sealed partial class CachingService : ICachingService
         this.ValueAdapters = new ValueAdapterFactory( builder.ValueAdapters );
         this.ServiceProvider = builder.ServiceProvider;
         this.Profiles = new CachingProfileRegistry( profilesDictionary.ToImmutable() );
-        this.AllBackends = this.Profiles.AllBackends.ToImmutableArray();
+        this.AllBackends = [..this.Profiles.AllBackends];
         this.Frontend = new CachingFrontend( this );
         this.AutoReloadManager = new AutoReloadManager( this );
         this.KeyBuilder = builder.CreateKeyBuilder( this._formatters );

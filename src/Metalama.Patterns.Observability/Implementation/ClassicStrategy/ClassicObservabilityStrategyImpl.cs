@@ -15,7 +15,7 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 {
-    private static readonly string[] _onPropertyChangedMethodNames = { "OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged" };
+    private static readonly string[] _onPropertyChangedMethodNames = ["OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged"];
 
     private readonly Promise<ObservabilityTemplateArgs> _templateArgs = new();
     private readonly ObservabilityOptions _commonOptions;
@@ -33,8 +33,8 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     private readonly Promise<IMethod> _onPropertyChangedMethod = new();
     private readonly Promise<IMethod?> _onChildPropertyChangedMethod = new();
     private readonly Promise<IMethod?>? _onObservablePropertyChangedMethod;
-    private readonly List<string> _propertyPathsForOnChildPropertyChangedMethod = new();
-    private readonly List<string> _propertyNamesForOnObservablePropertyChangedMethod = new();
+    private readonly List<string> _propertyPathsForOnChildPropertyChangedMethod = [];
+    private readonly List<string> _propertyNamesForOnObservablePropertyChangedMethod = [];
     private readonly Promise<ClassicObservableTypeInfo> _dependencyTypeNode = new();
 
     public InpcInstrumentationKindLookup InpcInstrumentationKindLookup { get; }
@@ -738,8 +738,10 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     /// </summary>
     private string GetAndReserveUnusedMemberName( string desiredName )
     {
-        this._existingMemberNames ??= new HashSet<string>(
-            ((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.Types ).Select( m => m.Name ) );
+        this._existingMemberNames ??=
+        [
+            ..((IEnumerable<INamedDeclaration>) this.CurrentType.AllMembers()).Concat( this.CurrentType.Types ).Select( m => m.Name )
+        ];
 
         if ( this._existingMemberNames.Add( desiredName ) )
         {
@@ -760,8 +762,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         }
     }
 
-    private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths )
-        => propertyPaths == null ? new HashSet<string>() : new HashSet<string>( propertyPaths );
+    private static HashSet<string> BuildPropertyPathLookup( IEnumerable<string>? propertyPaths ) => propertyPaths == null ? [] : [..propertyPaths];
 
     [return: NotNullIfNotNull( nameof(method) )]
     private static IEnumerable<string>? GetPropertyPaths( INamedType attributeType, IMethod? method, bool includeInherited = true )

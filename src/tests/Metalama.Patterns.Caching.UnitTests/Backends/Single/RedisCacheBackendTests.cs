@@ -6,7 +6,6 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using Microsoft.Extensions.DependencyInjection;
-using StackExchange.Redis;
 using System.Collections.Immutable;
 using Xunit;
 using Xunit.Abstractions;
@@ -55,7 +54,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     [Fact]
     public void TestDisposeRedisBeforeCaching()
     {
-        ServiceCollection serviceCollection = new();
+        ServiceCollection serviceCollection = [];
         var connection = RedisFactory.CreateConnection( this.TestOptions );
         serviceCollection.AddSingleton( connection );
 
@@ -68,7 +67,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     [Fact]
     public async Task TestDisposeRedisBeforeCachingAsync()
     {
-        ServiceCollection serviceCollection = new();
+        ServiceCollection serviceCollection = [];
         var connection = RedisFactory.CreateConnection( this.TestOptions );
         serviceCollection.AddSingleton( connection );
 
@@ -92,20 +91,20 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
             // [Porting] Not fixing, can't be certain of original intent.
             // ReSharper disable MethodHasAsyncOverload
-            cache.SetItem( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
-            cache.SetItem( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
+            cache.SetItem( "i1", new CacheItem( "value", ImmutableArray.Create( "d1", "d2", "d3" ) ) );
+            cache.SetItem( "i2", new CacheItem( "value", ImmutableArray.Create( "d1", "d2", "d3" ) ) );
             cache.SetItem( "i3", new CacheItem( "value" ) );
 
             // ReSharper restore MethodHasAsyncOverload
 
-            cache.Database.ListRightPush( GetValueKey( cache, "lonely-value-key" ), new RedisValue[] { Guid.NewGuid().ToString(), "value" } );
+            cache.Database.ListRightPush( GetValueKey( cache, "lonely-value-key" ), [Guid.NewGuid().ToString(), "value"] );
             cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key1" ), "non-existing-value-key1" );
             cache.Database.StringSet( GetDependenciesKey( cache, "lonely-dependencies-key2" ), "" );
             cache.Database.SetAdd( GetDependencyKey( cache, "lonely-dependency-key" ), "non-existing-value-key2" );
 
             cache.Database.ListRightPush(
                 GetValueKey( cache, "non-corresponding-version-key" ),
-                new RedisValue[] { "non-corresponding-version1", "value" } );
+                ["non-corresponding-version1", "value"] );
 
             cache.Database.StringSet(
                 GetDependenciesKey( cache, "non-corresponding-version-key" ),

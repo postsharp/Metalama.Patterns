@@ -170,9 +170,9 @@ internal class MemoryCachingBackend : CachingBackend
         }
     }
 
-    private void AddDependencies( string key, IImmutableList<string>? dependencies )
+    private void AddDependencies( string key, ImmutableArray<string> dependencies )
     {
-        if ( dependencies is not { Count: > 0 } )
+        if ( dependencies.IsDefaultOrEmpty )
         {
             return;
         }
@@ -236,7 +236,7 @@ internal class MemoryCachingBackend : CachingBackend
                 this.CleanDependencies( key, previousValue );
             }
 
-            if ( item.Dependencies is { Count: > 0 } )
+            if ( !item.Dependencies.IsDefaultOrEmpty )
             {
                 this.AddDependencies( key, item.Dependencies );
             }

@@ -129,7 +129,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             var dependencies = await this.GetDependenciesAsync( key, transaction );
             this.DeleteItemTransaction( key, dependencies, transaction );
 
-            if ( await transaction.ExecuteAsync() )
+            if ( await transaction.ExecuteAsync( this.Configuration.WriteCommandFlags ) )
             {
                 return;
             }
@@ -323,7 +323,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             this.SetItemTransaction( key, item, transaction );
 
-            if ( await transaction.ExecuteAsync() )
+            if ( await transaction.ExecuteAsync( this.Configuration.WriteCommandFlags ) )
             {
                 return;
             }
@@ -346,7 +346,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         string version;
 
-        if ( item.Dependencies == null )
+        if ( item.Dependencies.IsDefaultOrEmpty )
         {
             version = _noDependencyVersion;
         }
@@ -502,7 +502,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 this.DeleteItemTransaction( dependentItemKeyString, dependencies, transaction );
             }
 
-            if ( await transaction.ExecuteAsync() )
+            if ( await transaction.ExecuteAsync( this.Configuration.WriteCommandFlags ) )
             {
                 // Send notifications.
                 await this.SendEventAsync( _dependencyInvalidatedEvent, key );

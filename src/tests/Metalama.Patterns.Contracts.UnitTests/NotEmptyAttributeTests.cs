@@ -52,7 +52,7 @@ public sealed class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        cut.ListMethod( new List<int> { 1, 2, 3 } );
+        cut.ListMethod( [1, 2, 3] );
     }
 
     [Fact]
@@ -60,7 +60,7 @@ public sealed class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.ListMethod( new List<int>() ) );
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.ListMethod( [] ) );
 
         Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
@@ -71,7 +71,7 @@ public sealed class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        cut.ListField = new List<int> { 1, 2, 3 };
+        cut.ListField = [1, 2, 3];
     }
 
     [Fact]
@@ -79,7 +79,7 @@ public sealed class NotEmptyAttributeTests
     {
         var cut = new NotEmptyTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.ListField = new List<int>() );
+        var e = TestHelpers.RecordException<ArgumentException>( () => cut.ListField = [] );
 
         Assert.NotNull( e );
         Assert.Contains( "ListField", e!.Message, StringComparison.Ordinal );
@@ -174,7 +174,7 @@ public sealed class NotEmptyAttributeTests
 
         var e = TestHelpers.RecordException<ArgumentException>(
             () =>
-                cut.Array( new[] { 1 } ) );
+                cut.Array( [1] ) );
 
         Assert.Null( e );
     }
@@ -186,7 +186,7 @@ public sealed class NotEmptyAttributeTests
 
         var e = TestHelpers.RecordException<ArgumentException>(
             () =>
-                cut.Array( Array.Empty<int>() ) );
+                cut.Array( [] ) );
 
         Assert.NotNull( e );
     }

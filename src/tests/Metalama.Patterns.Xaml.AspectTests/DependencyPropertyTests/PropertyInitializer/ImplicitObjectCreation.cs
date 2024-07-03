@@ -7,5 +7,5 @@ namespace Metalama.Patterns.Xaml.AspectTests.DependencyPropertyTests.PropertyIni
 public class ImplicitObjectCreation : DependencyObject
 {
     [DependencyProperty]
-    public List<int> Foo { get; set; } = new( 3 ) { 1, 2, 3 };
+    public List<int> Foo { get; set; } = [1, 2, 3];
 }

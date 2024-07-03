@@ -495,7 +495,7 @@ public static partial class CachingServiceExtensions
     /// <param name="cancellationToken"></param>
     /// <returns>A <see cref="Task"/>.</returns>
     public static ValueTask InvalidateAsync<TReturn>( this ICachingService cachingService, Func<TReturn> method, CancellationToken cancellationToken = default )
-        => cachingService.InvalidateDelegateAsync( method, Array.Empty<object?>(), cancellationToken );
+        => cachingService.InvalidateDelegateAsync( method, [], cancellationToken );
 
     private static CachingContext OpenRefreshContext( this ICachingService cachingService, Delegate method, params object?[] args )
     {

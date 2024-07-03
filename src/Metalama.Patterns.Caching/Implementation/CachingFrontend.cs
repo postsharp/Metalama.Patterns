@@ -435,7 +435,7 @@ internal sealed class CachingFrontend
             }
         }
 
-        var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
+        var cacheItem = new CacheItem( value, [..context.Dependencies], configuration );
 
         backend.SetItem( key, cacheItem );
 
@@ -474,7 +474,7 @@ internal sealed class CachingFrontend
             }
         }
 
-        var cacheItem = new CacheItem( value, context.Dependencies.ToImmutableList(), configuration );
+        var cacheItem = new CacheItem( value, [..context.Dependencies], configuration );
 
         var setItemTask = backend.SetItemAsync( key, cacheItem, cancellationToken );
         await setItemTask;

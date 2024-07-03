@@ -127,6 +127,6 @@ public sealed partial class CachedMethodMetadata
             cachedParameterInfos[i] = new Parameter( isIgnored );
         }
 
-        return cachedParameterInfos.ToImmutableArray();
+        return [..cachedParameterInfos];
     }
 }

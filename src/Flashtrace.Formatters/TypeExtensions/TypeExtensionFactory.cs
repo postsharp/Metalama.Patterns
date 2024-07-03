@@ -21,7 +21,7 @@ public class TypeExtensionFactory<T, TContext> : TypeExtensionFactoryBase<T>
     public TypeExtensionFactory( Type genericInterfaceType, Type? converterType, Type? roleType, TContext? context )
         : base( genericInterfaceType, converterType, roleType )
     {
-        this._contextArray = new object?[] { context };
+        this._contextArray = [context];
     }
 
     [return: NotNullIfNotNull( nameof(o) )]

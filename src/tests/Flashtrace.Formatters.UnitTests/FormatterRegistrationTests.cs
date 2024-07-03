@@ -39,7 +39,7 @@ namespace Flashtrace.Formatters.UnitTests
 
         private void EnumerableIntFormatterMethod( Func<IFormatterRepository, Formatter<IEnumerable<int>>> formatterFactory )
         {
-            int[] array = { 1, 2, 3 };
+            int[] array = [1, 2, 3];
 
             var formatters = CreateRepository( b => b.AddFormatter( formatterFactory ) );
 
@@ -51,7 +51,7 @@ namespace Flashtrace.Formatters.UnitTests
         [Fact]
         public void EnumerableTFormatter()
         {
-            int[] array = { 1, 2, 3 };
+            int[] array = [1, 2, 3];
 
             var formatters = CreateRepository( b => b.AddFormatter( typeof(IEnumerable<>), typeof(EnumerableFormatter<>) ) );
 
@@ -75,7 +75,7 @@ namespace Flashtrace.Formatters.UnitTests
         [Fact]
         public void ArrayFormatter()
         {
-            int[] array = { 1, 2, 3 };
+            int[] array = [1, 2, 3];
 
             var formatters = CreateRepository( b => b.AddFormatter( typeof(Array), typeof(EnumerableFormatter<>) ) );
 
@@ -155,7 +155,7 @@ namespace Flashtrace.Formatters.UnitTests
         {
             var formatters = CreateRepository( b => b.AddFormatter( r => new EnumerableFormatter<object>( r ) ) );
 
-            string[] array = { "foo", "bar", "baz" };
+            string[] array = ["foo", "bar", "baz"];
 
             Assert.Equal( "{string[]}", this.Format<IEnumerable<string>>( formatters, array ) );
             Assert.Equal( "[foo,bar,baz]", this.Format<IEnumerable<object>>( formatters, array ) );

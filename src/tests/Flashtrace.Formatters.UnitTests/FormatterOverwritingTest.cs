@@ -204,13 +204,12 @@ public class FormatterOverwritingTest : FormattersTestsBase
             .MakeGenericMethod( testCaseRecord.TValue )
             .Invoke(
                 this,
-                new object[]
-                {
+                [
                     testCaseRecord.OldFormatterTargetType,
                     testCaseRecord.OldFormatterType,
                     testCaseRecord.NewFormatterTargetType,
                     testCaseRecord.NewFormatterType
-                } );
+                ] );
     }
 
     private void EnsureOverwritesCore<TValue>(
@@ -349,13 +348,12 @@ public class FormatterOverwritingTest : FormattersTestsBase
             .MakeGenericMethod( testCaseRecord.TValue )
             .Invoke(
                 this,
-                new object[]
-                {
+                [
                     testCaseRecord.OldFormatterTargetType,
                     testCaseRecord.OldFormatterType,
                     testCaseRecord.NewFormatterTargetType,
                     testCaseRecord.NewFormatterType
-                } );
+                ] );
     }
 
     private void EnsureDoesntOverwriteCore<TValue>(

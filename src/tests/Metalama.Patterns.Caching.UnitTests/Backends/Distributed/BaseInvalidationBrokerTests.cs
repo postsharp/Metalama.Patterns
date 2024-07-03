@@ -30,7 +30,7 @@ public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
             return backend;
         }
 
-        return new[] { await CreateCacheInvalidator(), await CreateCacheInvalidator(), await CreateCacheInvalidator() };
+        return [await CreateCacheInvalidator(), await CreateCacheInvalidator(), await CreateCacheInvalidator()];
     }
 
     protected override CachingBackend[] CreateBackends()
