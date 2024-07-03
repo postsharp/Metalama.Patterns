@@ -275,9 +275,16 @@ internal class MemoryCachingBackend : CachingBackend
         {
             return null;
         }
+        else if ( cacheValue.Value == null )
+        {
+            return cacheValue;
+        }
         else if ( this._serializer != null )
         {
-            return cacheValue with { Value = this._serializer.Deserialize( (byte[]) cacheValue.Value! ) };
+            var stream = new MemoryStream( (byte[]) cacheValue.Value! );
+            var reader = new BinaryReader( stream );
+
+            return cacheValue with { Value = this._serializer.Deserialize( reader ) };
         }
         else
         {
@@ -289,7 +296,11 @@ internal class MemoryCachingBackend : CachingBackend
     {
         if ( this._serializer != null )
         {
-            return cacheValue with { Value = this._serializer.Serialize( cacheValue.Value! ) };
+            var stream = new MemoryStream();
+            var writer = new BinaryWriter( stream );
+            this._serializer.Serialize( cacheValue.Value!, writer );
+
+            return cacheValue with { Value = stream.ToArray() };
         }
         else
         {

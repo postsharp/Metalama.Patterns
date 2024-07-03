@@ -80,7 +80,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
         CachedValueClass setValue;
         var redisTestInstance = this._redisSetupFixture.TestInstance;
 
-        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+        this.TestOptions.Endpoint = redisTestInstance.Endpoint;
 
         await using ( this.InitializeTest(
                          "TestIssue15680",

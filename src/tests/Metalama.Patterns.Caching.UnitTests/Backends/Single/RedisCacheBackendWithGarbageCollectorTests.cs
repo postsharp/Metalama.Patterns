@@ -18,6 +18,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
     protected override bool GarbageCollectorEnabled => true;
 
+
     [Fact( Timeout = Timeout )]
     public async Task TestGarbageCollectionAsync()
     {
@@ -33,7 +34,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
             // ReSharper restore MethodHasAsyncOverload
 
-            Assert.True( this.GetAllKeys( prefix ).Count > 0 );
+            Assert.NotEmpty( this.GetAllKeys( prefix ) );
 
             await cache.InvalidateDependencyAsync( "d1" );
         }

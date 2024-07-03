@@ -10,6 +10,7 @@
   <ItemGroup>
     <PackageVersion Include="Azure.Identity" Version="1.11.4" />
     <PackageVersion Include="Azure.Messaging.ServiceBus" Version="7.16.2" />
+    <PackageVersion Include="Microsoft.CodeAnalysis.Elfie" Version="1.0.0" />
     <PackageVersion Include="PostSharp.Engineering.BuildTools" Version="$(PostSharpEngineeringVersion)" />
     <PackageVersion Include="JetBrains.Annotations" Version="2023.3.0" PrivateAssets="all" />
     <PackageVersion Include="Metalama.Framework" Version="$(MetalamaVersion)" />

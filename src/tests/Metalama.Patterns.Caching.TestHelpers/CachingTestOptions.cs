@@ -2,18 +2,13 @@
 
 using JetBrains.Annotations;
 using System.Collections;
+using System.Net;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
     // ReSharper disable once ClassNeverInstantiated.Global
     public sealed class CachingTestOptions
     {
-        public IDictionary Properties { get; }
-
-        [UsedImplicitly]
-        public CachingTestOptions()
-        {
-            this.Properties = new Hashtable();
-        }
+        public EndPoint? Endpoint { get; set; }
     }
 }

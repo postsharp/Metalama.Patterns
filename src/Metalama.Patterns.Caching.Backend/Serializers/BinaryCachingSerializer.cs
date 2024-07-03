@@ -11,35 +11,38 @@ namespace Metalama.Patterns.Caching.Serializers;
 [Obsolete( "The BinaryFormatter facility is considered obsolete." )]
 public sealed class BinaryCachingSerializer : ICachingSerializer
 {
+    private const byte _null = 0;
+    private const byte _object = 1;
+
     private readonly BinaryFormatter _serializer = new();
 
     /// <inheritdoc />
-    public byte[] Serialize( object? value )
+    public void Serialize( object? value, BinaryWriter writer )
     {
         if ( value == null )
         {
-            return Array.Empty<byte>();
+            writer.Write( _null );
         }
-
-        using ( var stream = new MemoryStream() )
+        else
         {
-            this._serializer.Serialize( stream, value );
-
-            return stream.ToArray();
+            writer.Write( _object );
+            this._serializer.Serialize( writer.BaseStream, value );
         }
     }
 
     /// <inheritdoc />  
-    public object? Deserialize( byte[]? array )
+    public object? Deserialize( BinaryReader reader )
     {
-        if ( array == null || array.Length == 0 )
+        switch ( reader.ReadByte() )
         {
-            return null;
-        }
+            case _null:
+                return null;
 
-        using ( var stream = new MemoryStream( array ) )
-        {
-            return this._serializer.Deserialize( stream );
+            case _object:
+                return this._serializer.Deserialize( reader.BaseStream );
+
+            default:
+                throw new InvalidCacheItemException();
         }
     }
 }

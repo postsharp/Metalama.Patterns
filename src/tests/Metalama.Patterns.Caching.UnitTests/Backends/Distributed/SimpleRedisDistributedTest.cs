@@ -37,6 +37,6 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
     protected override void ConnectToRedisIfRequired()
     {
         var redisTestInstance = this._redisSetupFixture.TestInstance;
-        this.TestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+        this.TestOptions.Endpoint = redisTestInstance.Endpoint;
     }
 }

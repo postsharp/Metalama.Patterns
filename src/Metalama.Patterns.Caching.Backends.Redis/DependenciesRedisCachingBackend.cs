@@ -338,8 +338,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private void SetItemTransaction( string key, CacheItem item, ITransaction transaction )
     {
-        // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-        var value = this.CreateRedisValue( item );
+        var value = this.Serialize( item );
 
         var valueKey = this.KeyBuilder.GetValueKey( key );
 
@@ -404,15 +403,15 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     itemGotten:
 
-        var cacheValue = this.GetCacheValue( valueKey, itemList[_itemValueIndex] );
+        var cacheValue = this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex] );
 
         if ( dependencies == null )
         {
-            return new CacheValue( cacheValue );
+            return new CacheValue( cacheValue.Value );
         }
         else
         {
-            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
+            return new CacheValue( cacheValue.Value, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
         }
     }
 
@@ -449,15 +448,15 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     itemGotten:
 
-        var cacheValue = this.GetCacheValue( valueKey, itemList[_itemValueIndex] );
+        var cacheValue = this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex] );
 
         if ( dependencies == null )
         {
-            return new CacheValue( cacheValue );
+            return new CacheValue( cacheValue.Value );
         }
         else
         {
-            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
+            return new CacheValue( cacheValue.Value, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
         }
     }
 

@@ -6,7 +6,6 @@ using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.RedisServer;
 using StackExchange.Redis;
-using System.Net;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
@@ -16,10 +15,10 @@ internal static class RedisFactory
     {
         RedisTestInstance? redisTestInstance = null;
 
-        if ( !cachingTestOptions.Properties.Contains( "RedisEndpoint" ) )
+        if ( cachingTestOptions.Endpoint == null )
         {
             redisTestInstance = redisSetupFixture.TestInstance;
-            cachingTestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+            cachingTestOptions.Endpoint = redisTestInstance.Endpoint;
         }
 
         return redisTestInstance;
@@ -27,10 +26,14 @@ internal static class RedisFactory
 
     public static DisposingConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
     {
+        var endPoint = cachingTestOptions.Endpoint
+                       ?? throw new ArgumentOutOfRangeException( nameof(cachingTestOptions), "The Endpoint property is null." );
+
         var socketManager = new SocketManager();
 
         var redisConfigurationOptions = new ConfigurationOptions();
-        redisConfigurationOptions.EndPoints.Add( (EndPoint?) cachingTestOptions.Properties["RedisEndpoint"] );
+    
+        redisConfigurationOptions.EndPoints.Add( endPoint );
         redisConfigurationOptions.AbortOnConnectFail = false;
         redisConfigurationOptions.SocketManager = socketManager;
 

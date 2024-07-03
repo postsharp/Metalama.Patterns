@@ -17,8 +17,12 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
 
         private object? RoundTrip( object? cacheItem )
         {
-            var serialization = this._serializer.Serialize( this.Wrap( cacheItem ) );
-            var newCacheItem = this.Unwrap( this._serializer.Deserialize( serialization ) );
+            var memoryStream = new MemoryStream();
+            var writer = new BinaryWriter( memoryStream );
+            this._serializer.Serialize( this.Wrap( cacheItem ), writer );
+            memoryStream.Seek( 0, SeekOrigin.Begin );
+            var reader = new BinaryReader( memoryStream );
+            var newCacheItem = this.Unwrap( this._serializer.Deserialize( reader ) );
 
             return newCacheItem;
         }

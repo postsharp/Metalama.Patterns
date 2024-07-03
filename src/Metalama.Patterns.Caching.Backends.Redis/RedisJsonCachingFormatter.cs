@@ -12,7 +12,8 @@ public class RedisJsonCachingFormatter : JsonCachingFormatter
     private static JsonSerializerOptions GetOptions( JsonSerializerOptions? options )
     {
         options ??= new JsonSerializerOptions();
-        options.Converters.Add( new RedisCacheValueConverter() );
+
+        // If we want to add converters, do it here.
 
         return options;
     }
