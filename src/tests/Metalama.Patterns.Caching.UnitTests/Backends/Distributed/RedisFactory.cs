@@ -24,7 +24,7 @@ internal static class RedisFactory
         return redisTestInstance;
     }
 
-    public static DisposingConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
+    public static IConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
     {
         var endPoint = cachingTestOptions.Endpoint
                        ?? throw new ArgumentOutOfRangeException( nameof(cachingTestOptions), "The Endpoint property is null." );
@@ -32,14 +32,12 @@ internal static class RedisFactory
         var socketManager = new SocketManager();
 
         var redisConfigurationOptions = new ConfigurationOptions();
-    
+
         redisConfigurationOptions.EndPoints.Add( endPoint );
         redisConfigurationOptions.AbortOnConnectFail = false;
         redisConfigurationOptions.SocketManager = socketManager;
 
-        var connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
-
-        return new DisposingConnectionMultiplexer( connection, socketManager );
+        return ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
     }
 
     public static async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync(
@@ -53,7 +51,7 @@ internal static class RedisFactory
     {
         _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
 
-        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
+        var connection = CreateConnection( cachingTestOptions );
 
         var configuration =
             new RedisCachingBackendConfiguration

@@ -66,6 +66,6 @@ public sealed class BrokenRedisTests
 
         var connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
 
-        return new DisposingConnectionMultiplexer( connection, socketManager );
+        return connection;
     }
 }
