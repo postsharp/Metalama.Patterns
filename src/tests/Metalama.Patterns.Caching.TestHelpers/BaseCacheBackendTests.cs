@@ -3,7 +3,6 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections;
-using System.Collections.Immutable;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using Xunit;

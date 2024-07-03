@@ -2,7 +2,6 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
-using System.Collections.Immutable;
 using System.Globalization;
 
 namespace Metalama.Patterns.Caching.Backends;

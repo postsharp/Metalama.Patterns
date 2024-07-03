@@ -3,7 +3,6 @@
 using Flashtrace;
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Locking;
-using System.Collections.Immutable;
 using System.ComponentModel;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
