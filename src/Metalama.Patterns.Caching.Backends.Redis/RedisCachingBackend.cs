@@ -69,7 +69,7 @@ internal class RedisCachingBackend : CachingBackend
         this._ownsConnection = configuration.OwnsConnection;
 
         this._createSerializerFunc = configuration.CreateSerializer
-                                     ?? (() => new JsonCachingFormatter( RedisCachingBackendConfiguration.DefaultJsonSerializerOptions ));
+                                     ?? (() => new RedisJsonCachingFormatter());
 
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
     }
@@ -84,7 +84,7 @@ internal class RedisCachingBackend : CachingBackend
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
 
         this._createSerializerFunc = this.Configuration.CreateSerializer
-                                     ?? (() => new JsonCachingFormatter( RedisCachingBackendConfiguration.DefaultJsonSerializerOptions ));
+                                     ?? (() => new RedisJsonCachingFormatter());
     }
 
     protected override void InitializeCore()

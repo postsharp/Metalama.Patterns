@@ -13,5 +13,7 @@ public class RedisJsonCachingFormatter : JsonCachingFormatter
     {
         options ??= new JsonSerializerOptions();
         options.Converters.Add( new RedisCacheValueConverter() );
+
+        return options;
     }
 }
