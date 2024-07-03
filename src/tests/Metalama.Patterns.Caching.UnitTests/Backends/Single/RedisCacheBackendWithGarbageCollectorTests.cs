@@ -27,7 +27,6 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
         await using ( var cache = await this.CreateBackendAsync( prefix ) )
         {
-            this.TestOutputHelper.WriteLine( this.TestOptions.Endpoint.ToString() );
             await cache.SetItemAsync( "i1", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             await cache.SetItemAsync( "i2", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );
             await cache.SetItemAsync( "i3", new CacheItem( "value", ImmutableList.Create( "d1", "d2", "d3" ) ) );

@@ -3,7 +3,6 @@
 using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.TestHelpers;
-using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using StackExchange.Redis;
 using Xunit;
 
