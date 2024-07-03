@@ -64,8 +64,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         connection.Dispose();
         backend.Dispose();
     }
-    
-    
+
     [Fact]
     public async Task TestDisposeRedisBeforeCachingAsync()
     {
