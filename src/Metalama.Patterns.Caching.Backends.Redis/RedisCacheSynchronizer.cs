@@ -2,8 +2,8 @@
 
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
-using System.Collections.Immutable;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
 
@@ -38,12 +38,21 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 
     protected override void InitializeCore()
     {
-        this._connection = ((RedisCacheSynchronizerConfiguration) this.Configuration).RedisConnectionFactory.GetConnection( this.ServiceProvider );
+        var redisConnectionFactory = ((RedisCacheSynchronizerConfiguration) this.Configuration).ConnectionFactory;
+
+        if ( redisConnectionFactory != null )
+        {
+            this._connection = redisConnectionFactory.GetConnection( this.ServiceProvider );
+        }
+        else
+        {
+            this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+        }
 
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this._channel ),
+            [this._channel],
             this.HandleMessage,
             this._connectionTimeout,
             this.ServiceProvider );
@@ -55,16 +64,23 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
     {
         var configuration = (RedisCacheSynchronizerConfiguration) this.Configuration;
 
-        this._connection =
-            await configuration.RedisConnectionFactory.GetConnectionAsync(
-                this.ServiceProvider,
-                configuration.LogRedisConnection,
-                cancellationToken );
+        if ( configuration.ConnectionFactory != null )
+        {
+            this._connection =
+                await configuration.ConnectionFactory.GetConnectionAsync(
+                    this.ServiceProvider,
+                    configuration.LogRedisConnection,
+                    cancellationToken );
+        }
+        else
+        {
+            this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+        }
 
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this._channel ),
+            [this._channel],
             this.HandleMessage,
             this._connectionTimeout,
             this.ServiceProvider,
@@ -75,7 +91,12 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 
     private void HandleMessage( RedisNotification notification )
     {
-        this.OnMessageReceived( notification.Value );
+        string? notificationValue = notification.Value;
+
+        if ( notificationValue != null )
+        {
+            this.OnMessageReceived( notificationValue );
+        }
     }
 
     /// <inheritdoc />

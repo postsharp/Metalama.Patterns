@@ -19,6 +19,7 @@
 
   <ItemGroup>
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
+    <PackageReference Include="Microsoft.CodeAnalysis.Elfie" />
     <PackageReference Include="StackExchange.Redis" />
     <PackageReference Include="Microsoft.Extensions.Hosting.Abstractions" />
     <ProjectReference Include="..\Metalama.Patterns.Caching\Metalama.Patterns.Caching.csproj" />

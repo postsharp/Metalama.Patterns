@@ -6,7 +6,6 @@ using Metalama.Patterns.Caching.Building;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.RedisServer;
 using StackExchange.Redis;
-using System.Net;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
@@ -16,27 +15,29 @@ internal static class RedisFactory
     {
         RedisTestInstance? redisTestInstance = null;
 
-        if ( !cachingTestOptions.Properties.Contains( "RedisEndpoint" ) )
+        if ( cachingTestOptions.Endpoint == null )
         {
             redisTestInstance = redisSetupFixture.TestInstance;
-            cachingTestOptions.Properties["RedisEndpoint"] = redisTestInstance.Endpoint;
+            cachingTestOptions.Endpoint = redisTestInstance.Endpoint;
         }
 
         return redisTestInstance;
     }
 
-    public static DisposingConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
+    public static IConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
     {
+        var endPoint = cachingTestOptions.Endpoint
+                       ?? throw new ArgumentOutOfRangeException( nameof(cachingTestOptions), "The Endpoint property is null." );
+
         var socketManager = new SocketManager();
 
         var redisConfigurationOptions = new ConfigurationOptions();
-        redisConfigurationOptions.EndPoints.Add( (EndPoint?) cachingTestOptions.Properties["RedisEndpoint"] );
+
+        redisConfigurationOptions.EndPoints.Add( endPoint );
         redisConfigurationOptions.AbortOnConnectFail = false;
         redisConfigurationOptions.SocketManager = socketManager;
 
-        var connection = ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
-
-        return new DisposingConnectionMultiplexer( connection, socketManager );
+        return ConnectionMultiplexer.Connect( redisConfigurationOptions, Console.Out );
     }
 
     public static async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync(
@@ -50,13 +51,13 @@ internal static class RedisFactory
     {
         _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
 
-        IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
+        var connection = CreateConnection( cachingTestOptions );
 
         var configuration =
-            new RedisCachingBackendConfiguration( connection )
+            new RedisCachingBackendConfiguration
             {
                 KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
-                OwnsConnection = true,
+                Connection = connection,
                 SupportsDependencies = supportsDependencies,
                 RunGarbageCollector = collector
             };

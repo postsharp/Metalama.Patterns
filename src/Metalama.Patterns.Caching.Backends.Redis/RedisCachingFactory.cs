@@ -21,7 +21,7 @@ public static class RedisCachingFactory
     /// </summary>
     public static RedisCachingBackendBuilder Redis(
         this CachingBackendBuilder builder,
-        RedisCachingBackendConfiguration configuration )
+        RedisCachingBackendConfiguration? configuration = null )
         => new( configuration, builder.ServiceProvider );
 
     /// <summary>
@@ -29,21 +29,7 @@ public static class RedisCachingFactory
     /// </summary>
     public static RedisCacheSynchronizerBuilder WithRedisSynchronization(
         this MemoryCachingBackendBuilder builder,
-        RedisCacheSynchronizerConfiguration configuration )
-        => new( builder, configuration, builder.ServiceProvider );
-
-    /// <summary>
-    /// Enhances an in-memory cache with a component that synchronizes several local, in-memory caches, using Redis Pub/Sub, given
-    /// a Redis <see cref="ConfigurationOptions"/> object. 
-    /// </summary>
-    /// <param name="builder"></param>
-    /// <param name="redisOptions"></param>
-    /// <param name="configuration">A <see cref="RedisCachingBackendConfiguration"/>. The <see cref="RedisCachingBackendConfiguration.OwnsConnection"/>
-    /// is overridden to <c>true</c>.</param> 
-    public static RedisCacheSynchronizerBuilder WithRedisSynchronization(
-        this MemoryCachingBackendBuilder builder,
-        ConfigurationOptions redisOptions,
-        RedisCacheSynchronizerConfiguration configuration )
+        RedisCacheSynchronizerConfiguration? configuration = null )
         => new( builder, configuration, builder.ServiceProvider );
 
     /// <summary>

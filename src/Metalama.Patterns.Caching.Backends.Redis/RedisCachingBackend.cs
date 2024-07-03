@@ -3,9 +3,8 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
-using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -19,10 +18,10 @@ internal class RedisCachingBackend : CachingBackend
     private const string _itemRemovedEvent = "item-removed";
 
     private readonly Func<ICachingSerializer> _createSerializerFunc;
-    private readonly ConcurrentStack<ICachingSerializer> _serializerPool = new();
     private readonly bool _ownsConnection;
     private readonly BackgroundTaskScheduler _backgroundTaskScheduler;
     private readonly Func<IConnectionMultiplexer, IDatabase> _databaseFactory;
+    private ICachingSerializer? _serializer;
     private int _backgroundTaskExceptions;
     private RedisNotificationQueue? _notificationQueue;
     private IConnectionMultiplexer? _connection;
@@ -67,7 +66,10 @@ internal class RedisCachingBackend : CachingBackend
         this._databaseFactory = ( connection ) => connection.GetDatabase( configuration.Database );
 
         this._ownsConnection = configuration.OwnsConnection;
-        this._createSerializerFunc = configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
+
+        this._createSerializerFunc = configuration.CreateSerializer
+                                     ?? (() => new RedisJsonCachingFormatter());
+
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
     }
 
@@ -79,19 +81,29 @@ internal class RedisCachingBackend : CachingBackend
         this._databaseFactory = databaseFactory;
         this._ownsConnection = false;
         this._backgroundTaskScheduler = new BackgroundTaskScheduler( serviceProvider );
-        this._createSerializerFunc = this.Configuration.CreateSerializer ?? (() => new JsonCachingFormatter());
+
+        this._createSerializerFunc = this.Configuration.CreateSerializer
+                                     ?? (() => new RedisJsonCachingFormatter());
     }
 
     protected override void InitializeCore()
     {
-        this._connection = this.Configuration.RedisConnectionFactory.GetConnection( this.ServiceProvider );
+        if ( this.Configuration.ConnectionFactory != null )
+        {
+            this._connection = this.Configuration.ConnectionFactory.GetConnection( this.ServiceProvider );
+        }
+        else
+        {
+            this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+        }
+
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
 
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
+            [this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel],
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider );
@@ -101,7 +113,7 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        this._connection = await this.Configuration.RedisConnectionFactory.GetConnectionAsync(
+        this._connection = await this.Configuration.ConnectionFactory.GetConnectionAsync(
             this.ServiceProvider,
             this.Configuration.LogRedisConnection,
             cancellationToken );
@@ -112,9 +124,10 @@ internal class RedisCachingBackend : CachingBackend
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create(
+            [
                 this.KeyBuilder.EventsChannel,
-                this.KeyBuilder.NotificationChannel ),
+                this.KeyBuilder.NotificationChannel
+            ],
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider,
@@ -140,7 +153,12 @@ internal class RedisCachingBackend : CachingBackend
 
     private void ProcessKeyspaceNotification( RedisNotification notification )
     {
-        string channelName = notification.Channel;
+        string? channelName = notification.Channel;
+
+        if ( channelName == null )
+        {
+            return;
+        }
 
         if ( !this.KeyBuilder.TryParseKeyspaceNotification( channelName, out var keyKind, out var itemKey ) )
         {
@@ -175,14 +193,21 @@ internal class RedisCachingBackend : CachingBackend
 
     private void ProcessEvent( RedisNotification notification )
     {
-        var tokenizer = new StringTokenizer( notification.Value );
+        string? notificationValue = notification.Value;
+
+        if ( notificationValue == null )
+        {
+            return;
+        }
+
+        var tokenizer = new StringTokenizer( notificationValue );
         var kind = tokenizer.GetNext( ':' );
         var sourceIdStr = tokenizer.GetNext( ':' );
         var key = tokenizer.GetRemainder();
 
         if ( kind.IsEmpty || sourceIdStr.IsEmpty || key.IsEmpty )
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
+            this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notificationValue ) );
 
             return;
         }
@@ -259,13 +284,13 @@ internal class RedisCachingBackend : CachingBackend
     /// <exclude />
     protected virtual async Task DeleteItemAsync( string key )
     {
-        await this.Database.KeyDeleteAsync( this.KeyBuilder.GetValueKey( key ) );
+        await this.Database.KeyDeleteAsync( this.KeyBuilder.GetValueKey( key ), this.Configuration.WriteCommandFlags );
     }
 
     /// <exclude />
     protected virtual void DeleteItem( string key )
     {
-        this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ) );
+        this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ), this.Configuration.WriteCommandFlags );
     }
 
     private TimeSpan? CreateExpiry( CacheItem policy )
@@ -291,154 +316,168 @@ internal class RedisCachingBackend : CachingBackend
         return ttl;
     }
 
-    private byte[] Serialize( object? item )
+    private void Serialize( object? item, BinaryWriter writer )
     {
-        if ( !this._serializerPool.TryPop( out var serializer ) )
-        {
-            serializer = this._createSerializerFunc();
-        }
-
-        var bytes = serializer.Serialize( item );
-
-        // No try/finally. We don't want to reuse the serializer if there is an exception.
-
-        this._serializerPool.Push( serializer );
-
-        return bytes;
+        this._serializer ??= this._createSerializerFunc();
+        this._serializer.Serialize( item, writer );
     }
 
-    private object? Deserialize( byte[] bytes )
+    private static long EncodeSlidingExpiration( CacheItem item )
     {
-        if ( !this._serializerPool.TryPop( out var serializer ) )
+        var slidingExpiration = item.Configuration?.SlidingExpiration;
+
+        return (long?) slidingExpiration?.TotalMilliseconds ?? 0;
+    }
+
+    /// <inheritdoc />
+    protected override void SetItemCore( string key, CacheItem item )
+    {
+        var bytes = this.Serialize( item );
+
+        var valueKey = this.KeyBuilder.GetValueKey( key );
+
+        var expiry = this.CreateExpiry( item );
+
+        this.Database.StringSet( valueKey, bytes, expiry, flags: this.Configuration.WriteCommandFlags );
+    }
+
+    private protected byte[] Serialize( CacheItem item )
+    {
+        var memoryStream = new MemoryStream();
+        var writer = new BinaryWriter( memoryStream );
+        this.Serialize( item, writer );
+
+        return memoryStream.ToArray();
+    }
+
+    private protected void Serialize( CacheItem item, BinaryWriter writer )
+    {
+        MemoryStream? memoryStream = null;
+
+        try
         {
-            serializer = this._createSerializerFunc();
+            this.Serialize( item.Value, writer );
+            writer.Write( EncodeSlidingExpiration( item ) );
         }
+        catch
+        {
+            memoryStream?.Dispose();
+
+            throw;
+        }
+    }
+
+    private protected record struct DeserializedCacheItem( object? Value, TimeSpan? SlidingExpiration );
+
+    private protected DeserializedCacheItem Deserialize( RedisValue value )
+    {
+        byte[]? bytes = value;
+
+        if ( bytes == null )
+        {
+            throw new CachingAssertionFailedException();
+        }
+
+        var memoryStream = new MemoryStream( bytes );
+        var reader = new BinaryReader( memoryStream );
+
+        return this.Deserialize( reader );
+    }
+
+    private protected DeserializedCacheItem Deserialize( BinaryReader reader )
+    {
+        this._serializer ??= this._createSerializerFunc();
 
         object? item;
 
         try
         {
-            item = serializer.Deserialize( bytes );
+            item = this._serializer.Deserialize( reader );
         }
         catch ( Exception e )
         {
             throw new InvalidCacheItemException( "Failed to deserialize a cache item: " + e.Message, e );
         }
 
-        // No try/finally. We don't want to reuse the serializer if there is an exception.
+        var slidingExpiration = reader.ReadInt64();
 
-        this._serializerPool.Push( serializer );
-
-        return item;
-    }
-
-    /// <summary>
-    /// Creates the value that will be serialized and stored in the cache.
-    /// </summary>
-    /// <param name="item">The source <see cref="CacheItem"/>.</param>
-    /// <returns>The <see cref="object"/> that should be serialized or stored in the cache. Typically
-    /// <see cref="CacheItem.Value"/> or a <see cref="RedisCacheValue"/>.
-    /// </returns>
-    private static object? CreateCacheValue( CacheItem item )
-    {
-        if ( item.Configuration?.SlidingExpiration == null )
-        {
-            return item.Value;
-        }
-        else
-        {
-            return new RedisCacheValue( item.Value, item.Configuration.SlidingExpiration.Value );
-        }
-    }
-
-    internal RedisValue CreateRedisValue( CacheItem item )
-    {
-        var value = CreateCacheValue( item );
-
-        return this.Serialize( value );
-    }
-
-    /// <inheritdoc />
-    protected override void SetItemCore( string key, CacheItem item )
-    {
-        // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-        var value = this.CreateRedisValue( item );
-        var valueKey = this.KeyBuilder.GetValueKey( key );
-
-        var expiry = this.CreateExpiry( item );
-
-        this.Database.StringSet( valueKey, value, expiry );
+        return new DeserializedCacheItem( item, slidingExpiration == 0 ? null : TimeSpan.FromMilliseconds( slidingExpiration ) );
     }
 
     /// <inheritdoc />
     protected override async ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-        var value = this.CreateRedisValue( item );
+        var value = this.Serialize( item );
 
         var valueKey = this.KeyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
-        await this.Database.StringSetAsync( valueKey, value, expiry );
+        await this.Database.StringSetAsync( valueKey, value, expiry, flags: this.Configuration.WriteCommandFlags );
     }
 
     /// <inheritdoc />
     protected override bool ContainsItemCore( string key )
     {
-        return this.Database.KeyExists( this.KeyBuilder.GetValueKey( key ) );
+        return this.Database.KeyExists( this.KeyBuilder.GetValueKey( key ), this.Configuration.ReadCommandFlags );
     }
 
     /// <inheritdoc />
     protected override async ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ) );
+        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ), this.Configuration.ReadCommandFlags );
     }
 
     /// <exclude />
-    protected object? GetCacheValue( RedisKey valueKey, RedisValue value )
+    private protected DeserializedCacheItem DeserializeAndExpire( RedisKey valueKey, RedisValue value )
     {
-        var cacheValue = this.Deserialize( value );
+        var cacheItem = this.Deserialize( value );
 
-        if ( cacheValue is RedisCacheValue withSlidingExpiration )
+        this.Expire( valueKey, cacheItem );
+
+        return cacheItem;
+    }
+
+    private protected void Expire( RedisKey valueKey, DeserializedCacheItem cacheItem )
+    {
+        if ( cacheItem.SlidingExpiration != null )
         {
-            this.ExecuteNonBlockingTask( _ => this.Database.KeyExpireAsync( valueKey, withSlidingExpiration.SlidingExpiration ) );
-            cacheValue = withSlidingExpiration.Value;
+            this.ExecuteNonBlockingTask(
+                _ => this.Database.KeyExpireAsync( valueKey, cacheItem.SlidingExpiration.Value, this.Configuration.WriteCommandFlags ) );
         }
-
-        return cacheValue;
     }
 
     /// <exclude />
     protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
-        var serializedValue = this.Database.StringGet( valueKey );
+        var serializedValue = this.Database.StringGet( valueKey, this.Configuration.ReadCommandFlags );
 
         if ( !serializedValue.HasValue )
         {
             return null;
         }
 
-        var cacheValue = this.GetCacheValue( valueKey, serializedValue );
+        var cacheItem = this.DeserializeAndExpire( valueKey, serializedValue );
 
-        return new CacheValue( cacheValue );
+        return new CacheValue( cacheItem.Value );
     }
 
     /// <exclude />
     protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
-        var serializedValue = await this.Database.StringGetAsync( valueKey );
+        var serializedValue = await this.Database.StringGetAsync( valueKey, this.Configuration.ReadCommandFlags );
 
         if ( !serializedValue.HasValue )
         {
             return null;
         }
 
-        var cacheValue = this.GetCacheValue( valueKey, serializedValue );
+        var cacheItem = this.DeserializeAndExpire( valueKey, serializedValue );
 
-        return new CacheValue( cacheValue );
+        return new CacheValue( cacheItem.Value );
     }
 
     /// <inheritdoc />

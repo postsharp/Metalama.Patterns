@@ -262,7 +262,7 @@ internal sealed class LoadTest : IDisposable
                 this._errorsCounters.Increment(
                     "Corrupted payload type.",
                     value.Value == null
-                        ? "payload is null"
+                        ? $"payload is null, dependencies: {string.Join( ", ", value.Dependencies ?? [] )}"
                         : value.Value.GetType().FullName + ", " + value.Value );
 
                 return;

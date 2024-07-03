@@ -11,13 +11,12 @@ public interface ICachingSerializer
     /// Serializes an object into a byte array.
     /// </summary>
     /// <param name="value">The object to serialize.</param>
-    /// <returns>A byte array representing <paramref name="value"/>.</returns>
-    byte[] Serialize( object? value );
+    /// <param name="writer"></param>
+    void Serialize( object? value, BinaryWriter writer );
 
     /// <summary>
     /// Deserializes a byte array into an object.
     /// </summary>
-    /// <param name="array">A byte array.</param>
-    /// <returns>The object represented by <paramref name="array"/>.</returns>
-    object? Deserialize( byte[]? array );
+    /// <param name="reader"></param>
+    object? Deserialize( BinaryReader reader );
 }

@@ -11,6 +11,9 @@ namespace Metalama.Patterns.Caching.Serializers;
 [PublicAPI]
 public class JsonCachingFormatter : ICachingSerializer
 {
+    private const byte _null = 0;
+    private const byte _object = 1;
+
     private readonly JsonSerializerOptions _options;
 
     public JsonCachingFormatter( JsonSerializerOptions? options = null )
@@ -18,23 +21,22 @@ public class JsonCachingFormatter : ICachingSerializer
         this._options = options ?? new JsonSerializerOptions();
     }
 
-    public byte[] Serialize( object? value )
+    public void Serialize( object? value, BinaryWriter writer )
     {
         if ( value == null )
         {
-            return Array.Empty<byte>();
+            writer.Write( _null );
         }
-
-        using ( var stream = new MemoryStream() )
+        else
         {
+            writer.Write( _object );
+
             // Write the assembly-qualified name.
-            using var writer = new BinaryWriter( stream );
             writer.Write( this.GetTypeName( value.GetType() ) );
 
             // Write the JSON.
-            JsonSerializer.Serialize( stream, value, this._options );
-
-            return stream.ToArray();
+            var json = JsonSerializer.Serialize( value, this._options );
+            writer.Write( json );
         }
     }
 
@@ -42,21 +44,24 @@ public class JsonCachingFormatter : ICachingSerializer
 
     protected virtual Type ResolveTypeName( string assemblyQualifiedTypeName ) => Type.GetType( assemblyQualifiedTypeName, throwOnError: true )!;
 
-    public object? Deserialize( byte[]? array )
+    public object? Deserialize( BinaryReader reader )
     {
-        if ( array == null || array.Length == 0 )
+        switch ( reader.ReadByte() )
         {
-            return null;
-        }
+            case _null:
+                return null;
 
-        using ( var stream = new MemoryStream( array ) )
-        {
-            // Read the type name.
-            using var reader = new BinaryReader( stream );
-            var typeName = reader.ReadString();
-            var type = this.ResolveTypeName( typeName );
+            case _object:
+                var typeName = reader.ReadString();
+                var type = this.ResolveTypeName( typeName );
 
-            return JsonSerializer.Deserialize( stream, type, this._options );
+                // Read the JSON payload.
+                var json = reader.ReadString();
+
+                return JsonSerializer.Deserialize( json, type, this._options );
+
+            default:
+                throw new InvalidCacheItemException();
         }
     }
 }

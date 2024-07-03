@@ -33,7 +33,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
             // ReSharper restore MethodHasAsyncOverload
 
-            Assert.True( this.GetAllKeys( prefix ).Count > 0 );
+            Assert.NotEmpty( this.GetAllKeys( prefix ) );
 
             await cache.InvalidateDependencyAsync( "d1" );
         }
@@ -124,9 +124,9 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 
             var keyBuilder = new RedisKeyBuilder( cache.Database, cache.Configuration );
 
-            string valueKey = keyBuilder.GetValueKey( valueSmallKey );
-            string dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
-            string dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
+            string? valueKey = keyBuilder.GetValueKey( valueSmallKey );
+            string? dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
+            string? dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
 
             var collector = cache.Collector!;
             collector.NotificationQueue.SuspendProcessing();

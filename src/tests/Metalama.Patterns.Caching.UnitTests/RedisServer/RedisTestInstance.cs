@@ -198,7 +198,6 @@ public class RedisTestInstance : IDisposable
 
             if ( disposing )
             {
-                this._process.WaitForExit();
                 this._process.Dispose();
                 this._executable.Dispose();
             }

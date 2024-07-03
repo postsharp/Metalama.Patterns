@@ -30,8 +30,11 @@ internal sealed class RedisKeyBuilder
     {
         this.KeyPrefix = configuration?.KeyPrefix ?? "_";
         this.HeartbeatKey = this.KeyPrefix + ":" + GarbageCollectionPrefix + ":heartbeat";
-        this.EventsChannel = this.KeyPrefix + ":events";
-        this.NotificationChannel = string.Format( CultureInfo.InvariantCulture, "__keyspace@{0}__:{1}*", database.Database, this.KeyPrefix );
+        this.EventsChannel = new RedisChannel( this.KeyPrefix + ":events", RedisChannel.PatternMode.Literal );
+
+        this.NotificationChannel = new RedisChannel(
+            string.Format( CultureInfo.InvariantCulture, "__keyspace@{0}__:{1}*", database.Database, this.KeyPrefix ),
+            RedisChannel.PatternMode.Pattern );
     }
 
     public RedisKey GetDependencyKey( string dependency )

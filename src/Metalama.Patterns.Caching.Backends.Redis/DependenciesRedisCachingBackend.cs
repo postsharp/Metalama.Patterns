@@ -42,7 +42,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     private string[]? GetDependencies( string key, ITransaction? transaction = null )
     {
         var dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
-        string dependencies = this.Database.StringGet( dependenciesKey );
+        string? dependencies = this.Database.StringGet( dependenciesKey );
 
         transaction?.AddCondition(
             dependencies == null
@@ -87,7 +87,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     internal async Task<string[]?> GetDependenciesAsync( string key, ITransaction? transaction = null )
     {
         var dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
-        string dependencies = await this.Database.StringGetAsync( dependenciesKey );
+        string? dependencies = await this.Database.StringGetAsync( dependenciesKey, this.Configuration.ReadCommandFlags );
 
         transaction?.AddCondition(
             dependencies == null
@@ -156,7 +156,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             var dependencies = this.GetDependencies( key, transaction );
             this.DeleteItemTransaction( key, dependencies, transaction );
 
-            if ( transaction.Execute() )
+            if ( transaction.Execute( this.Configuration.WriteCommandFlags ) )
             {
                 return;
             }
@@ -201,7 +201,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         var dependencyKey = this.KeyBuilder.GetDependencyKey( dependency );
         this.LogSource.Debug.Write( Formatted( "SetRemove({DependencyKey}, {ValueKey})", dependencyKey, valueKey ) );
 
-        return database.SetRemoveAsync( dependencyKey, valueKey );
+        return database.SetRemoveAsync( dependencyKey, valueKey, this.Configuration.WriteCommandFlags );
     }
 
     private static TimeSpan? CreateExpiry( CacheItem policy )
@@ -237,7 +237,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         {
             var transaction = this.Database.CreateTransaction();
 
-            var version = this.Database.ListGetByIndex( valueKey, _itemVersionIndex );
+            var version = this.Database.ListGetByIndex( valueKey, _itemVersionIndex, this.Configuration.ReadCommandFlags );
 
             if ( version.HasValue )
             {
@@ -268,7 +268,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             this.SetItemTransaction( key, item, transaction );
 
-            if ( transaction.Execute() )
+            if ( transaction.Execute( this.Configuration.WriteCommandFlags ) )
             {
                 return;
             }
@@ -290,7 +290,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         {
             var transaction = this.Database.CreateTransaction();
 
-            var version = await this.Database.ListGetByIndexAsync( valueKey, _itemVersionIndex );
+            var version = await this.Database.ListGetByIndexAsync( valueKey, _itemVersionIndex, this.Configuration.ReadCommandFlags );
 
             if ( version.HasValue )
             {
@@ -338,8 +338,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private void SetItemTransaction( string key, CacheItem item, ITransaction transaction )
     {
-        // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-        var value = this.CreateRedisValue( item );
+        var value = this.Serialize( item );
 
         var valueKey = this.KeyBuilder.GetValueKey( key );
 
@@ -367,7 +366,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
         }
 
         // Store the item itself.
-        transaction.ListRightPushAsync( valueKey, new RedisValue[] { version, value } );
+        transaction.ListRightPushAsync( valueKey, [version, value] );
         transaction.KeyExpireAsync( valueKey, expiry );
     }
 
@@ -380,7 +379,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         for ( var attempt = 0; attempt < this.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
-            itemList = this.Database.ListRange( valueKey );
+            itemList = this.Database.ListRange( valueKey, flags: this.Configuration.ReadCommandFlags );
 
             if ( itemList == null || itemList.Length == 0 )
             {
@@ -394,7 +393,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             dependencies = this.GetDependencies( key );
 
-            if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string) itemList[_itemVersionIndex] )
+            if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string?) itemList[_itemVersionIndex] )
             {
                 goto itemGotten;
             }
@@ -404,15 +403,15 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     itemGotten:
 
-        var cacheValue = this.GetCacheValue( valueKey, itemList[_itemValueIndex] );
+        var cacheValue = this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex] );
 
         if ( dependencies == null )
         {
-            return new CacheValue( cacheValue );
+            return new CacheValue( cacheValue.Value );
         }
         else
         {
-            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
+            return new CacheValue( cacheValue.Value, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
         }
     }
 
@@ -425,7 +424,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         for ( var attempt = 0; attempt < this.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
-            itemList = await this.Database.ListRangeAsync( valueKey );
+            itemList = await this.Database.ListRangeAsync( valueKey, flags: this.Configuration.ReadCommandFlags );
 
             if ( itemList == null || itemList.Length == 0 )
             {
@@ -439,7 +438,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             dependencies = await this.GetDependenciesAsync( key );
 
-            if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string) itemList[_itemVersionIndex] )
+            if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string?) itemList[_itemVersionIndex] )
             {
                 goto itemGotten;
             }
@@ -449,28 +448,28 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     itemGotten:
 
-        var cacheValue = this.GetCacheValue( valueKey, itemList[_itemValueIndex] );
+        var cacheValue = this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex] );
 
         if ( dependencies == null )
         {
-            return new CacheValue( cacheValue );
+            return new CacheValue( cacheValue.Value );
         }
         else
         {
-            return new CacheValue( cacheValue, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
+            return new CacheValue( cacheValue.Value, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
         }
     }
 
     /// <inheritdoc />
     protected override bool ContainsDependencyCore( string key )
     {
-        return this.Database.KeyExists( this.KeyBuilder.GetDependencyKey( key ) );
+        return this.Database.KeyExists( this.KeyBuilder.GetDependencyKey( key ), this.Configuration.ReadCommandFlags );
     }
 
     /// <inheritdoc />
     protected override async ValueTask<bool> ContainsDependencyAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetDependencyKey( key ) );
+        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetDependencyKey( key ), this.Configuration.ReadCommandFlags );
     }
 
     /// <inheritdoc />
@@ -480,7 +479,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         for ( var attempt = 0; attempt < this.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
-            var dependentItemKeys = await this.Database.SetMembersAsync( dependencyKey );
+            var dependentItemKeys = await this.Database.SetMembersAsync( dependencyKey, this.Configuration.WriteCommandFlags );
 
             if ( dependentItemKeys is not { Length: > 0 } )
             {
@@ -492,8 +491,15 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             foreach ( var dependentItemKey in dependentItemKeys )
             {
-                var dependencies = await this.GetDependenciesAsync( dependentItemKey, transaction );
-                this.DeleteItemTransaction( dependentItemKey, dependencies, transaction );
+                string? dependentItemKeyString = dependentItemKey;
+
+                if ( dependentItemKeyString == null )
+                {
+                    continue;
+                }
+
+                var dependencies = await this.GetDependenciesAsync( dependentItemKeyString, transaction );
+                this.DeleteItemTransaction( dependentItemKeyString, dependencies, transaction );
             }
 
             if ( await transaction.ExecuteAsync() )
@@ -503,7 +509,14 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
                 foreach ( var dependentItemKey in dependentItemKeys )
                 {
-                    await this.SendEventAsync( _itemInvalidatedEvent, dependentItemKey );
+                    string? dependentItemKeyString = dependentItemKey;
+
+                    if ( dependentItemKeyString == null )
+                    {
+                        continue;
+                    }
+
+                    await this.SendEventAsync( _itemInvalidatedEvent, dependentItemKeyString );
                 }
 
                 return;
@@ -523,7 +536,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
         for ( var attempt = 0; attempt < this.Configuration.TransactionMaxRetries + 1; attempt++ )
         {
-            var dependentItemKeys = this.Database.SetMembers( dependencyKey );
+            var dependentItemKeys = this.Database.SetMembers( dependencyKey, this.Configuration.WriteCommandFlags );
 
             if ( dependentItemKeys is not { Length: > 0 } )
             {
@@ -535,18 +548,32 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             foreach ( var dependentItemKey in dependentItemKeys )
             {
-                var dependencies = this.GetDependencies( dependentItemKey, transaction );
-                this.DeleteItemTransaction( dependentItemKey, dependencies, transaction );
+                string? dependentItemKeyString = dependentItemKey;
+
+                if ( dependentItemKeyString == null )
+                {
+                    continue;
+                }
+
+                var dependencies = this.GetDependencies( dependentItemKeyString, transaction );
+                this.DeleteItemTransaction( dependentItemKeyString, dependencies, transaction );
             }
 
-            if ( transaction.Execute() )
+            if ( transaction.Execute( this.Configuration.WriteCommandFlags ) )
             {
                 // Send notifications.
                 this.SendEvent( _dependencyInvalidatedEvent, key );
 
                 foreach ( var dependentItemKey in dependentItemKeys )
                 {
-                    this.SendEvent( _itemInvalidatedEvent, dependentItemKey );
+                    string? dependentItemKeyString = dependentItemKey;
+
+                    if ( dependentItemKeyString == null )
+                    {
+                        continue;
+                    }
+
+                    this.SendEvent( _itemInvalidatedEvent, dependentItemKeyString );
                 }
 
                 return;
@@ -569,13 +596,19 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     public Task CleanUpAsync( IServer server, CancellationToken cancellationToken = default )
     {
-        List<Task> tasks = new();
+        List<Task> tasks = [];
 
-        foreach ( var key in server.Keys( this.Database.Database, this.KeyBuilder.KeyPrefix + ":*", flags: CommandFlags.PreferSlave ) )
+        foreach ( var key in server.Keys( this.Database.Database, this.KeyBuilder.KeyPrefix + ":*", flags: this.Configuration.ReadCommandFlags ) )
         {
             cancellationToken.ThrowIfCancellationRequested();
+            string? keyString = key;
 
-            var tokenizer = new StringTokenizer( key );
+            if ( keyString == null )
+            {
+                continue;
+            }
+
+            var tokenizer = new StringTokenizer( keyString );
 
             var keyPrefix = tokenizer.GetNext( ':' );
 
@@ -620,22 +653,29 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private async Task CleanUpDependency( string key )
     {
-        var items = await this.Database.SetMembersAsync( this.KeyBuilder.GetDependencyKey( key ) );
+        var items = await this.Database.SetMembersAsync( this.KeyBuilder.GetDependencyKey( key ), this.Configuration.WriteCommandFlags );
 
         foreach ( var item in items )
         {
-            if ( !await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( item ) ) )
+            string? itemString = item;
+
+            if ( itemString == null )
+            {
+                continue;
+            }
+
+            if ( !await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( itemString ), this.Configuration.ReadCommandFlags ) )
             {
                 this.LogSource.Warning.Write( Formatted( "The dependency key {Key} does not have the corresponding dependencies key. Deleting it.", key ) );
 
-                await this.RemoveDependencyAsync( item, key, this.Database );
+                await this.RemoveDependencyAsync( itemString, key, this.Database );
             }
         }
     }
 
     private async Task CleanUpDependencies( string key )
     {
-        if ( !await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ) ) )
+        if ( !await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ), this.Configuration.ReadCommandFlags ) )
         {
             this.LogSource.Warning.Write( Formatted( "The dependencies key {Key} does not have the corresponding value key. Deleting it.", key ) );
 
@@ -645,7 +685,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
     private async Task CleanUpValue( RedisKey redisKey, string smallKey )
     {
-        string itemVersion = this.Database.ListGetByIndex( redisKey, _itemVersionIndex, CommandFlags.PreferSlave );
+        string? itemVersion = this.Database.ListGetByIndex( redisKey, _itemVersionIndex, this.Configuration.ReadCommandFlags );
         var dependencies = await this.GetDependenciesAsync( smallKey );
 
         if ( dependencies == null )
@@ -657,7 +697,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             this.LogSource.Warning.Write( Formatted( "The value key {Key} does not have the corresponding dependencies key. Deleting it.", smallKey ) );
 
-            await this.Database.KeyDeleteAsync( redisKey );
+            await this.Database.KeyDeleteAsync( redisKey, this.Configuration.WriteCommandFlags );
 
             return;
         }
@@ -674,15 +714,15 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 await this.RemoveDependencyAsync( smallKey, dependencies[i], this.Database );
             }
 
-            await this.Database.KeyDeleteAsync( this.KeyBuilder.GetDependenciesKey( smallKey ) );
-            await this.Database.KeyDeleteAsync( redisKey );
+            await this.Database.KeyDeleteAsync( this.KeyBuilder.GetDependenciesKey( smallKey ), this.Configuration.WriteCommandFlags );
+            await this.Database.KeyDeleteAsync( redisKey, this.Configuration.WriteCommandFlags );
 
             return;
         }
 
         for ( var i = _firstDependencyIndex; i < dependencies.Length; i++ )
         {
-            if ( !await this.Database.SetContainsAsync( this.KeyBuilder.GetDependencyKey( dependencies[i] ), smallKey ) )
+            if ( !await this.Database.SetContainsAsync( this.KeyBuilder.GetDependencyKey( dependencies[i] ), smallKey, this.Configuration.WriteCommandFlags ) )
             {
                 this.LogSource.Warning.Write(
                     Formatted(

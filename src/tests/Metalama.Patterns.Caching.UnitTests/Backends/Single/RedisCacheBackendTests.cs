@@ -20,6 +20,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         testOutputHelper )
     {
         this._redisSetupFixture = redisSetupFixture;
+        this.TestOptions.Endpoint = redisSetupFixture.TestInstance.Endpoint;
     }
 
     protected override void Cleanup()
@@ -182,12 +183,13 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
     protected IList<string> GetAllKeys( string prefix )
     {
-        using ( var connection = RedisFactory.CreateConnection( this.TestOptions ) )
-        {
-            var servers = connection.Inner.GetEndPoints().Select( endpoint => connection.Inner.GetServer( endpoint ) ).ToList();
-            var keys = servers.SelectMany( server => server.Keys( pattern: prefix + ":*" ) ).ToList();
+        using var connection = RedisFactory.CreateConnection( this.TestOptions );
 
-            return keys.Select( k => k.ToString() ).Where( k => k?.IndexOf( ":gc:", StringComparison.Ordinal ) == -1 ).ToList();
-        }
+        var servers = connection.GetEndPoints().Select( endpoint => connection.GetServer( endpoint ) ).ToList();
+        var keys = servers.SelectMany( server => server.Keys( pattern: prefix + "*" ) ).ToList();
+
+        var filteredKeys = keys.Select( k => k.ToString() ).Where( k => k?.IndexOf( ":gc:", StringComparison.Ordinal ) == -1 ).ToList();
+
+        return filteredKeys;
     }
 }

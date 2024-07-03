@@ -11,33 +11,41 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 [PublicAPI]
 public sealed class RedisCachingBackendBuilder : OutOfProcessCachingBackendBuilder
 {
-    private RedisCachingBackendConfiguration _configuration;
+    private const int _serializationVersion = 2; // Increase when the serialization protocol changes.
+
+    private readonly RedisCachingBackendConfiguration _configuration;
 
     internal RedisCachingBackendBuilder(
-        RedisCachingBackendConfiguration configuration,
+        RedisCachingBackendConfiguration? configuration,
         IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
-        this._configuration = configuration;
+        this._configuration = configuration ?? new RedisCachingBackendConfiguration();
     }
 
     public override CachingBackend CreateBackend( CreateBackendArgs args )
     {
+        var configuration = this._configuration;
+
+        // Compute the final key prefix.
+        var prefixSuffix = $"V{_serializationVersion}";
+
         if ( args.Layer != 1 )
         {
             // #20775 Caching: two-layered cache should modify the key to avoid conflicts when toggling the option
-            var prefixSuffix = $"L{args.Layer}";
-
-            this._configuration = this._configuration with
-            {
-                KeyPrefix = this._configuration.KeyPrefix != null ? this._configuration.KeyPrefix + "." + prefixSuffix : prefixSuffix
-            };
+            prefixSuffix = $".L{args.Layer}";
         }
 
-        if ( this._configuration.SupportsDependencies )
+        configuration = configuration with
         {
-            var backend = new DependenciesRedisCachingBackend( this._configuration, this.ServiceProvider );
+            KeyPrefix = this._configuration.KeyPrefix != null ? this._configuration.KeyPrefix + "." + prefixSuffix : prefixSuffix
+        };
 
-            if ( this._configuration.RunGarbageCollector )
+        // Instantiate the caching back-end.
+        if ( configuration.SupportsDependencies )
+        {
+            var backend = new DependenciesRedisCachingBackend( configuration, this.ServiceProvider );
+
+            if ( configuration.RunGarbageCollector )
             {
                 // This conveniently binds the lifetime of the collector with the one of the back-end.
                 backend.Collector = new RedisCacheDependencyGarbageCollector( backend );
@@ -47,7 +55,7 @@ public sealed class RedisCachingBackendBuilder : OutOfProcessCachingBackendBuild
         }
         else
         {
-            return new RedisCachingBackend( this._configuration, this.ServiceProvider );
+            return new RedisCachingBackend( configuration, this.ServiceProvider );
         }
     }
 }
