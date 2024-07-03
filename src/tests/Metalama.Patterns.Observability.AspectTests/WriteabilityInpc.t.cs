@@ -127,9 +127,6 @@ public class PersonViewModelReadonlyField : INotifyPropertyChanged
           oldValue.PropertyChanged -= _handle_modelPropertyChanged;
         }
         _model1 = value;
-        OnPropertyChanged("FirstName");
-        OnPropertyChanged("FullName");
-        OnPropertyChanged("LastName");
         SubscribeTo_model(value);
       }
     }
@@ -206,10 +203,6 @@ public class PersonViewModelGetOnlyProperty : INotifyPropertyChanged
           oldValue.PropertyChanged -= _handleModelPropertyChanged;
         }
         _model = value;
-        OnObservablePropertyChanged("Model", oldValue, (INotifyPropertyChanged? )value);
-        OnPropertyChanged("FirstName");
-        OnPropertyChanged("FullName");
-        OnPropertyChanged("LastName");
         SubscribeToModel(value);
       }
     }
@@ -281,10 +274,6 @@ public class PersonViewModelInitProperty : INotifyPropertyChanged
           oldValue.PropertyChanged -= _handleModelPropertyChanged;
         }
         _model = value;
-        OnObservablePropertyChanged("Model", oldValue, (INotifyPropertyChanged? )value);
-        OnPropertyChanged("FirstName");
-        OnPropertyChanged("FullName");
-        OnPropertyChanged("LastName");
         SubscribeToModel(value);
       }
     }
