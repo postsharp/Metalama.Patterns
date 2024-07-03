@@ -156,7 +156,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
             var dependencies = this.GetDependencies( key, transaction );
             this.DeleteItemTransaction( key, dependencies, transaction );
 
-            if ( transaction.Execute() )
+            if ( transaction.Execute( this.Configuration.WriteCommandFlags ) )
             {
                 return;
             }
@@ -268,7 +268,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             this.SetItemTransaction( key, item, transaction );
 
-            if ( transaction.Execute() )
+            if ( transaction.Execute( this.Configuration.WriteCommandFlags ) )
             {
                 return;
             }
@@ -539,7 +539,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
                 this.DeleteItemTransaction( dependentItemKey, dependencies, transaction );
             }
 
-            if ( transaction.Execute() )
+            if ( transaction.Execute( this.Configuration.WriteCommandFlags ) )
             {
                 // Send notifications.
                 this.SendEvent( _dependencyInvalidatedEvent, key );
