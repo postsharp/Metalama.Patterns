@@ -9,11 +9,6 @@ using System.Numerics;
 
 namespace Metalama.Patterns.Caching.LoadTests;
 
-internal static class ImmutableArrayExtensions
-{
-    public static ImmutableArray<T> EmptyIfDefault<T>( this ImmutableArray<T> array ) => array.IsDefault ? ImmutableArray<T>.Empty : array;
-}
-
 internal sealed class LoadTest : IDisposable
 {
     private sealed class TestClient : IDisposable
