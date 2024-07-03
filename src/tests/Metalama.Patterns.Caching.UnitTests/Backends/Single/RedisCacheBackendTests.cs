@@ -1,9 +1,11 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+using Metalama.Patterns.Caching.Backends;
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 using Xunit;
@@ -48,6 +50,32 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         var keyPrefix = Guid.NewGuid().ToString();
 
         return keyPrefix;
+    }
+
+    [Fact]
+    public void TestDisposeRedisBeforeCaching()
+    {
+        ServiceCollection serviceCollection = new();
+        var connection = RedisFactory.CreateConnection( this.TestOptions );
+        serviceCollection.AddSingleton( connection );
+
+        var backend = CachingBackend.Create( b => b.Redis(), serviceCollection.BuildServiceProvider() );
+        backend.Initialize();
+        connection.Dispose();
+        backend.Dispose();
+    }
+
+    [Fact]
+    public async Task TestDisposeRedisBeforeCachingAsync()
+    {
+        ServiceCollection serviceCollection = new();
+        var connection = RedisFactory.CreateConnection( this.TestOptions );
+        serviceCollection.AddSingleton( connection );
+
+        var backend = CachingBackend.Create( b => b.Redis(), serviceCollection.BuildServiceProvider() );
+        await backend.InitializeAsync();
+        await connection.DisposeAsync();
+        await backend.DisposeAsync();
     }
 
     [Fact( Timeout = Timeout )]

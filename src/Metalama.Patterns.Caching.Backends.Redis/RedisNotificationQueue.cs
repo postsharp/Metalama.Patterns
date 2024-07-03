@@ -328,7 +328,18 @@ internal sealed class RedisNotificationQueue : IDisposable
                 {
                     if ( disposing )
                     {
-                        this.Subscriber.UnsubscribeAll();
+                        if ( this.Subscriber.Multiplexer.IsConnected )
+                        {
+                            try
+                            {
+                                this.Subscriber.UnsubscribeAll();
+                            }
+                            catch ( ObjectDisposedException ) { }
+                        }
+                        else
+                        {
+                            // The connection has already been already disposed of.
+                        }
                     }
                     else
                     {
@@ -397,7 +408,18 @@ internal sealed class RedisNotificationQueue : IDisposable
                 {
                     cancellationToken.ThrowIfCancellationRequested();
 
-                    await this.Subscriber.UnsubscribeAllAsync();
+                    if ( this.Subscriber.Multiplexer.IsConnected )
+                    {
+                        try
+                        {
+                            await this.Subscriber.UnsubscribeAllAsync();
+                        }
+                        catch ( ObjectDisposedException ) { }
+                    }
+                    else
+                    {
+                        // The connection has already been already disposed of.
+                    }
 
                     cancellationToken.ThrowIfCancellationRequested();
 
@@ -414,7 +436,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 #if NETCOREAPP
                         await
 #endif
-                        using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
+                            using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
                             await this._notificationProcessingThreadCompleted.Task;
 
