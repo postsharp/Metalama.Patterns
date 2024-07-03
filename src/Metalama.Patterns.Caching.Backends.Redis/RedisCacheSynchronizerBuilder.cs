@@ -16,11 +16,11 @@ public sealed class RedisCacheSynchronizerBuilder : ConcreteCachingBackendBuilde
 
     internal RedisCacheSynchronizerBuilder(
         MemoryCachingBackendBuilder underlying,
-        RedisCacheSynchronizerConfiguration configuration,
+        RedisCacheSynchronizerConfiguration? configuration,
         IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
         this._underlying = underlying;
-        this._configuration = configuration;
+        this._configuration = configuration ?? new RedisCacheSynchronizerConfiguration();
     }
 
     public override CachingBackend CreateBackend( CreateBackendArgs args )

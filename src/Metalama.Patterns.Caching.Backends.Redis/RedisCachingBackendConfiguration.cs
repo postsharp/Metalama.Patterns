@@ -12,31 +12,96 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// Configuration for <see cref="RedisCachingBackend"/>.
 /// </summary>
+/// <remarks>
+/// <para>By default, the <see cref="IConnectionMultiplexer"/> is retrieved from the <see cref="IServiceProvider"/>.
+/// To define another way to get the <see cref="IConnectionMultiplexer"/>, set the <see cref="Connection"/> or <see cref="NewConnectionOptions"/> properties.</para>
+/// </remarks>
 [PublicAPI]
 public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 {
-    private string? _keyPrefix = "cache";
+    private string? _keyPrefix;
+    private ConfigurationOptions? _configurationOptions;
+    private IConnectionMultiplexer? _connection;
 
-    internal RedisConnectionFactory RedisConnectionFactory { get; }
+    internal IRedisConnectionFactory ConnectionFactory { get; init; } = ServiceProviderRedisConnectionFactory.Instance;
 
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RedisCachingBackendConfiguration"/> class.
+    /// </summary>
+    public RedisCachingBackendConfiguration() { }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RedisCachingBackendConfiguration"/> class that
+    /// creates a new <see cref="IConnectionMultiplexer"/>.
+    /// </summary>
+    [Obsolete( "Use the default constructor and the NewConnectionOptions property." )]
     public RedisCachingBackendConfiguration( ConfigurationOptions redisConnectionOptions, string? keyPrefix = null )
     {
-        this.RedisConnectionFactory = new RedisConnectionFactory( redisConnectionOptions );
-        this.OwnsConnection = true;
+        this.NewConnectionOptions = redisConnectionOptions;
+        this.KeyPrefix = keyPrefix;
+    }
 
-        if ( keyPrefix != null )
+    /// <summary>
+    /// Initializes a new instance of the <see cref="RedisCachingBackendConfiguration"/> class that
+    /// with a given <see cref="IConnectionMultiplexer"/>.
+    /// </summary>
+    [Obsolete( "Use the default constructor and the Connection ." )]
+    public RedisCachingBackendConfiguration( IConnectionMultiplexer connection, ConfigurationOptions? configurationOptions, string? keyPrefix = null )
+    {
+        this._configurationOptions = configurationOptions;
+        this.Connection = connection;
+        this.KeyPrefix = keyPrefix;
+    }
+
+    /// <summary>
+    /// Gets or sets the <see cref="IConnectionMultiplexer"/> that will be used by the Redis <see cref="CachingBackend"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>Setting this property resets the <see cref="NewConnectionOptions"/> property.</para>
+    /// </remarks>
+    public IConnectionMultiplexer? Connection
+    {
+        get => this._connection;
+        init
         {
-            this.KeyPrefix = keyPrefix;
+            this._connection = value;
+
+            if ( value != null )
+            {
+                this.ConnectionFactory = new ExistingRedisConnectionFactory( value );
+                this._configurationOptions = null;
+            }
+            else
+            {
+                this.ConnectionFactory = ServiceProviderRedisConnectionFactory.Instance;
+            }
         }
     }
 
-    public RedisCachingBackendConfiguration( IConnectionMultiplexer connection, string? keyPrefix = null )
+    /// <summary>
+    /// Gets or sets the <see cref="ConfigurationOptions"/> that will be used to create a new <see cref="ConnectionMultiplexer"/> for use by
+    /// the new Redis <see cref="CachingBackend"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>Setting this property resets the <see cref="Connection"/> property.</para>
+    /// </remarks>
+    public ConfigurationOptions? NewConnectionOptions
     {
-        this.RedisConnectionFactory = new RedisConnectionFactory( connection );
-
-        if ( keyPrefix != null )
+        get => this._configurationOptions;
+        init
         {
-            this.KeyPrefix = keyPrefix;
+            this._configurationOptions = value;
+
+            if ( value != null )
+            {
+                this.ConnectionFactory = new NewRedisConnectionFactory( value );
+                this._connection = null;
+                this.OwnsConnection = true;
+            }
+            else
+            {
+                this.ConnectionFactory = ServiceProviderRedisConnectionFactory.Instance;
+            }
         }
     }
 
@@ -132,4 +197,14 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     /// redirected. The default value is <c>false</c>. 
     /// </summary>
     public bool LogRedisConnection { get; init; }
+
+    /// <summary>
+    /// Gets or sets the Redis <see cref="CommandFlags"/> for read-only operations. The default value is <see cref="CommandFlags.PreferSlave"/>.
+    /// </summary>
+    public CommandFlags ReadCommandFlags { get; init; } = CommandFlags.PreferSlave;
+
+    /// <summary>
+    /// Gets or sets the Redis <see cref="CommandFlags"/> for write operations. The default value is <see cref="CommandFlags.PreferMaster"/>.
+    /// </summary>
+    public CommandFlags WriteCommandFlags { get; init; } = CommandFlags.PreferMaster;
 }

@@ -14,10 +14,10 @@ public sealed class RedisCachingBackendBuilder : OutOfProcessCachingBackendBuild
     private RedisCachingBackendConfiguration _configuration;
 
     internal RedisCachingBackendBuilder(
-        RedisCachingBackendConfiguration configuration,
+        RedisCachingBackendConfiguration? configuration,
         IServiceProvider? serviceProvider ) : base( serviceProvider )
     {
-        this._configuration = configuration;
+        this._configuration = configuration ?? new RedisCachingBackendConfiguration();
     }
 
     public override CachingBackend CreateBackend( CreateBackendArgs args )

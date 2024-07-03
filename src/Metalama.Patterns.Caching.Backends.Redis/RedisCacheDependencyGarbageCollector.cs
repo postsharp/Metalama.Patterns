@@ -5,7 +5,6 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Microsoft.Extensions.Hosting;
 using StackExchange.Redis;
-using System.Collections.Immutable;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -243,7 +242,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
         this.NotificationQueue = RedisNotificationQueue.Create(
             this.ToString()!,
             this.Connection,
-            ImmutableArray.Create( this.KeyBuilder.NotificationChannel ),
+            [this.KeyBuilder.NotificationChannel],
             this.ProcessKeyspaceNotification,
             this._configuration.ConnectionTimeout,
             this.ServiceProvider );
@@ -264,7 +263,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
         this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString()!,
             this.Connection,
-            ImmutableArray.Create( this.KeyBuilder.NotificationChannel ),
+            [this.KeyBuilder.NotificationChannel],
             this.ProcessKeyspaceNotification,
             this._configuration.ConnectionTimeout,
             this.ServiceProvider,

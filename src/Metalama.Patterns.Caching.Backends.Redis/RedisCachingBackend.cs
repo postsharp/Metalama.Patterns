@@ -3,9 +3,9 @@
 using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
+using Microsoft.Extensions.DependencyInjection;
 using StackExchange.Redis;
 using System.Collections.Concurrent;
-using System.Collections.Immutable;
 using static Flashtrace.Messages.FormattedMessageBuilder;
 
 namespace Metalama.Patterns.Caching.Backends.Redis;
@@ -84,14 +84,22 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override void InitializeCore()
     {
-        this._connection = this.Configuration.RedisConnectionFactory.GetConnection( this.ServiceProvider );
+        if ( this.Configuration.ConnectionFactory != null )
+        {
+            this._connection = this.Configuration.ConnectionFactory.GetConnection( this.ServiceProvider );
+        }
+        else
+        {
+            this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+        }
+
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
 
         this._notificationQueue = RedisNotificationQueue.Create(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create( this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel ),
+            [this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel],
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider );
@@ -101,10 +109,17 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        this._connection = await this.Configuration.RedisConnectionFactory.GetConnectionAsync(
-            this.ServiceProvider,
-            this.Configuration.LogRedisConnection,
-            cancellationToken );
+        if ( this.Configuration.ConnectionFactory != null )
+        {
+            this._connection = await this.Configuration.ConnectionFactory.GetConnectionAsync(
+                this.ServiceProvider,
+                this.Configuration.LogRedisConnection,
+                cancellationToken );
+        }
+        else
+        {
+            this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
+        }
 
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
@@ -112,9 +127,10 @@ internal class RedisCachingBackend : CachingBackend
         this._notificationQueue = await RedisNotificationQueue.CreateAsync(
             this.ToString(),
             this.Connection,
-            ImmutableArray.Create(
+            [
                 this.KeyBuilder.EventsChannel,
-                this.KeyBuilder.NotificationChannel ),
+                this.KeyBuilder.NotificationChannel
+            ],
             this.ProcessNotification,
             this.Configuration.ConnectionTimeout,
             this.ServiceProvider,
@@ -259,13 +275,13 @@ internal class RedisCachingBackend : CachingBackend
     /// <exclude />
     protected virtual async Task DeleteItemAsync( string key )
     {
-        await this.Database.KeyDeleteAsync( this.KeyBuilder.GetValueKey( key ) );
+        await this.Database.KeyDeleteAsync( this.KeyBuilder.GetValueKey( key ), this.Configuration.WriteCommandFlags );
     }
 
     /// <exclude />
     protected virtual void DeleteItem( string key )
     {
-        this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ) );
+        this.Database.KeyDelete( this.KeyBuilder.GetValueKey( key ), this.Configuration.WriteCommandFlags );
     }
 
     private TimeSpan? CreateExpiry( CacheItem policy )
@@ -367,7 +383,7 @@ internal class RedisCachingBackend : CachingBackend
 
         var expiry = this.CreateExpiry( item );
 
-        this.Database.StringSet( valueKey, value, expiry );
+        this.Database.StringSet( valueKey, value, expiry, flags: this.Configuration.WriteCommandFlags );
     }
 
     /// <inheritdoc />
@@ -380,19 +396,19 @@ internal class RedisCachingBackend : CachingBackend
 
         var expiry = this.CreateExpiry( item );
 
-        await this.Database.StringSetAsync( valueKey, value, expiry );
+        await this.Database.StringSetAsync( valueKey, value, expiry, flags: this.Configuration.WriteCommandFlags );
     }
 
     /// <inheritdoc />
     protected override bool ContainsItemCore( string key )
     {
-        return this.Database.KeyExists( this.KeyBuilder.GetValueKey( key ) );
+        return this.Database.KeyExists( this.KeyBuilder.GetValueKey( key ), this.Configuration.ReadCommandFlags );
     }
 
     /// <inheritdoc />
     protected override async ValueTask<bool> ContainsItemAsyncCore( string key, CancellationToken cancellationToken )
     {
-        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ) );
+        return await this.Database.KeyExistsAsync( this.KeyBuilder.GetValueKey( key ), this.Configuration.ReadCommandFlags );
     }
 
     /// <exclude />
@@ -402,7 +418,9 @@ internal class RedisCachingBackend : CachingBackend
 
         if ( cacheValue is RedisCacheValue withSlidingExpiration )
         {
-            this.ExecuteNonBlockingTask( _ => this.Database.KeyExpireAsync( valueKey, withSlidingExpiration.SlidingExpiration ) );
+            this.ExecuteNonBlockingTask(
+                _ => this.Database.KeyExpireAsync( valueKey, withSlidingExpiration.SlidingExpiration, this.Configuration.WriteCommandFlags ) );
+
             cacheValue = withSlidingExpiration.Value;
         }
 
@@ -413,7 +431,7 @@ internal class RedisCachingBackend : CachingBackend
     protected override CacheValue? GetItemCore( string key, bool includeDependencies )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
-        var serializedValue = this.Database.StringGet( valueKey );
+        var serializedValue = this.Database.StringGet( valueKey, this.Configuration.ReadCommandFlags );
 
         if ( !serializedValue.HasValue )
         {
@@ -429,7 +447,7 @@ internal class RedisCachingBackend : CachingBackend
     protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
-        var serializedValue = await this.Database.StringGetAsync( valueKey );
+        var serializedValue = await this.Database.StringGetAsync( valueKey, this.Configuration.ReadCommandFlags );
 
         if ( !serializedValue.HasValue )
         {

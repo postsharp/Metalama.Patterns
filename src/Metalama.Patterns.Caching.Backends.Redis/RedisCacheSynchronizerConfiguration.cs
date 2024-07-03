@@ -11,29 +11,83 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 /// <summary>
 /// Options for <see cref="RedisCacheSynchronizer"/>.
 /// </summary>
+/// <remarks>
+/// <para>By default, the <see cref="IConnectionMultiplexer"/> is retrieved from the <see cref="IServiceProvider"/>.
+/// To define another way to get the <see cref="IConnectionMultiplexer"/>, set the <see cref="Connection"/> or <see cref="NewConnectionOptions"/> properties.</para>
+/// </remarks>
 [PublicAPI]
 public sealed record RedisCacheSynchronizerConfiguration : CacheSynchronizerConfiguration
 {
-    internal RedisConnectionFactory RedisConnectionFactory { get; }
+    private IConnectionMultiplexer? _connection;
+    private ConfigurationOptions? _configurationOptions;
 
+    internal IRedisConnectionFactory ConnectionFactory { get; init; } = ServiceProviderRedisConnectionFactory.Instance;
+
+    public RedisCacheSynchronizerConfiguration() { }
+
+    [Obsolete( "Use the default constructor and use RedisCacheSynchronizerBuilder.WithNewRedisConnection." )]
     public RedisCacheSynchronizerConfiguration( ConfigurationOptions redisConnectionOptions, string? prefix = null )
     {
-        this.RedisConnectionFactory = new RedisConnectionFactory( redisConnectionOptions );
-        this.OwnsConnection = true;
+        this.NewConnectionOptions = redisConnectionOptions;
+        this.Prefix = prefix ?? DefaultPrefix;
+    }
 
-        if ( prefix != null )
+    [Obsolete( "Use the default constructor and use RedisCacheSynchronizerBuilder.WithRedisConnection." )]
+    public RedisCacheSynchronizerConfiguration( IConnectionMultiplexer connection, string? prefix = null )
+    {
+        this.Connection = connection;
+        this.Prefix = prefix ?? DefaultPrefix;
+    }
+
+    /// <summary>
+    /// Gets or sets the <see cref="IConnectionMultiplexer"/> that will be used by the <see cref="RedisCacheSynchronizer"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>Setting this property resets the <see cref="NewConnectionOptions"/> property.</para>
+    /// </remarks>
+    public IConnectionMultiplexer? Connection
+    {
+        get => this._connection;
+        init
         {
-            this.Prefix = prefix;
+            this._connection = value;
+
+            if ( value != null )
+            {
+                this.ConnectionFactory = new ExistingRedisConnectionFactory( value );
+                this._configurationOptions = null;
+            }
+            else
+            {
+                this.ConnectionFactory = ServiceProviderRedisConnectionFactory.Instance;
+            }
         }
     }
 
-    public RedisCacheSynchronizerConfiguration( IConnectionMultiplexer connection, string? prefix = null )
+    /// <summary>
+    /// Gets or sets the <see cref="ConfigurationOptions"/> that will be used to create a new <see cref="ConnectionMultiplexer"/> for use by
+    /// the new <see cref="RedisCacheSynchronizer"/>.
+    /// </summary>
+    /// <remarks>
+    /// <para>Setting this property resets the <see cref="Connection"/> property.</para>
+    /// </remarks>
+    public ConfigurationOptions? NewConnectionOptions
     {
-        this.RedisConnectionFactory = new RedisConnectionFactory( connection );
-
-        if ( prefix != null )
+        get => this._configurationOptions;
+        init
         {
-            this.Prefix = prefix;
+            this._configurationOptions = value;
+
+            if ( value != null )
+            {
+                this.ConnectionFactory = new NewRedisConnectionFactory( value );
+                this.OwnsConnection = true;
+                this._connection = null;
+            }
+            else
+            {
+                this.ConnectionFactory = ServiceProviderRedisConnectionFactory.Instance;
+            }
         }
     }
 

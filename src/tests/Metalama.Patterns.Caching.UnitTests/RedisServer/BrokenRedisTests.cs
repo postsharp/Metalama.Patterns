@@ -19,8 +19,9 @@ public sealed class BrokenRedisTests
             var connection = CreateConnection( false );
 
             var configuration =
-                new RedisCachingBackendConfiguration( connection )
+                new RedisCachingBackendConfiguration
                 {
+                    Connection = connection,
                     KeyPrefix = Guid.NewGuid().ToString(),
                     OwnsConnection = true,
                     SupportsDependencies = false,

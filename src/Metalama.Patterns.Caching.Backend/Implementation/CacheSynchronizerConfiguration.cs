@@ -15,5 +15,7 @@ public record CacheSynchronizerConfiguration
     /// Messages received by the <see cref="CacheSynchronizer.OnMessageReceived"/> method are
     /// ignored if they don't start with the proper prefix.
     /// </summary>
-    public string Prefix { get; init; } = "invalidate";
+    public string Prefix { get; init; } = DefaultPrefix;
+
+    public const string DefaultPrefix = "invalidate";
 }

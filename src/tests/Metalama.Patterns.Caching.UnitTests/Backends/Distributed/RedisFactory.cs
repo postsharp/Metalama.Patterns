@@ -53,10 +53,10 @@ internal static class RedisFactory
         IConnectionMultiplexer connection = CreateConnection( cachingTestOptions );
 
         var configuration =
-            new RedisCachingBackendConfiguration( connection )
+            new RedisCachingBackendConfiguration
             {
                 KeyPrefix = prefix ?? Guid.NewGuid().ToString(),
-                OwnsConnection = true,
+                Connection = connection,
                 SupportsDependencies = supportsDependencies,
                 RunGarbageCollector = collector
             };
