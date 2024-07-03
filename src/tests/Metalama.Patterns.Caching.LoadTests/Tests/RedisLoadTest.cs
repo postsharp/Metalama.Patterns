@@ -15,7 +15,7 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
     {
         Console.WriteLine( "collector init" );
 
-        var collectors = new IHostedService[configuration.CollectorsCount];
+        var collectors = new IHostedService?[configuration.CollectorsCount];
 
         try
         {
@@ -37,7 +37,10 @@ internal sealed class RedisLoadTest : BaseTestClass<RedisLoadTestConfiguration>
         {
             foreach ( var collector in collectors )
             {
-                await collector.StopAsync( default );
+                if ( collector != null )
+                {
+                    await collector.StopAsync( default );
+                }
             }
         }
     }
