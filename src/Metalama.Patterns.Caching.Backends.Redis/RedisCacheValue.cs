@@ -6,7 +6,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 
 [Serializable]
 [DataContract]
-internal class RedisCacheValue
+internal sealed class RedisCacheValue
 {
     public RedisCacheValue( object? value, TimeSpan slidingExpiration )
     {

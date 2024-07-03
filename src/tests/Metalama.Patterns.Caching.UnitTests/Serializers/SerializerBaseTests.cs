@@ -17,11 +17,15 @@ namespace Metalama.Patterns.Caching.Tests.Serializers
 
         private object? RoundTrip( object? cacheItem )
         {
-            var serialization = this._serializer.Serialize( cacheItem );
-            var newCacheItem = this._serializer.Deserialize( serialization );
+            var serialization = this._serializer.Serialize( this.Wrap( cacheItem ) );
+            var newCacheItem = this.Unwrap( this._serializer.Deserialize( serialization ) );
 
             return newCacheItem;
         }
+
+        protected virtual object? Wrap( object? o ) => o;
+
+        protected virtual object? Unwrap( object? o ) => o;
 
         [Fact]
         public void TestDictionary()

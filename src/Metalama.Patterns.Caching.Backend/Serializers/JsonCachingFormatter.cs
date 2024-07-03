@@ -32,7 +32,8 @@ public class JsonCachingFormatter : ICachingSerializer
             writer.Write( this.GetTypeName( value.GetType() ) );
 
             // Write the JSON.
-            JsonSerializer.Serialize( stream, value, this._options );
+            var json = JsonSerializer.Serialize( value, this._options );
+            writer.Write( json );
 
             return stream.ToArray();
         }
@@ -56,7 +57,10 @@ public class JsonCachingFormatter : ICachingSerializer
             var typeName = reader.ReadString();
             var type = this.ResolveTypeName( typeName );
 
-            return JsonSerializer.Deserialize( stream, type, this._options );
+            // Read the JSON payload.
+            var json = reader.ReadString();
+
+            return JsonSerializer.Deserialize( json, type, this._options );
         }
     }
 }

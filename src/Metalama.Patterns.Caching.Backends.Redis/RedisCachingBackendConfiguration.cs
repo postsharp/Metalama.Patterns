@@ -142,7 +142,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 
     /// <summary>
     /// Gets or sets a function that creates the serializer used to serialize objects into byte arrays (and conversely).
-    /// The default value is <c>null</c>, which means that <see cref="JsonCachingFormatter"/> will be used.
+    /// The default value is <c>null</c>, which means that <see cref="RedisJsonCachingFormatter"/> will be used.
     /// </summary>
     public Func<ICachingSerializer>? CreateSerializer { get; init; }
 

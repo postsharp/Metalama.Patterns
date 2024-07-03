@@ -13,8 +13,8 @@ internal static class Program
         var configuration =
             new RedisLoadTestConfiguration()
             {
-                CollectorsCount = 2,
-                ClientsCount = 4,
+                CollectorsCount = 0,
+                ClientsCount = 1,
                 ValueKeyLength = new Interval( 20, 30 ),
                 ValueKeysCount = 100,
                 ValueKeyExpiry = new Interval( 5, 15 ),
