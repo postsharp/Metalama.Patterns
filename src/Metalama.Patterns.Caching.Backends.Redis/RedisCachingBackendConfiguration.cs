@@ -199,9 +199,9 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     public bool LogRedisConnection { get; init; }
 
     /// <summary>
-    /// Gets or sets the Redis <see cref="CommandFlags"/> for read-only operations. The default value is <see cref="CommandFlags.PreferSlave"/>.
+    /// Gets or sets the Redis <see cref="CommandFlags"/> for read-only operations. The default value is <see cref="CommandFlags.PreferReplica"/>.
     /// </summary>
-    public CommandFlags ReadCommandFlags { get; init; } = CommandFlags.PreferSlave;
+    public CommandFlags ReadCommandFlags { get; init; } = CommandFlags.PreferReplica;
 
     /// <summary>
     /// Gets or sets the Redis <see cref="CommandFlags"/> for write operations. The default value is <see cref="CommandFlags.PreferMaster"/>.

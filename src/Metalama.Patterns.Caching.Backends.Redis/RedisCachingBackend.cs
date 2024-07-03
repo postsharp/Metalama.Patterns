@@ -113,17 +113,10 @@ internal class RedisCachingBackend : CachingBackend
 
     protected override async Task InitializeCoreAsync( CancellationToken cancellationToken = default )
     {
-        if ( this.Configuration.ConnectionFactory != null )
-        {
-            this._connection = await this.Configuration.ConnectionFactory.GetConnectionAsync(
-                this.ServiceProvider,
-                this.Configuration.LogRedisConnection,
-                cancellationToken );
-        }
-        else
-        {
-            this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
-        }
+        this._connection = await this.Configuration.ConnectionFactory.GetConnectionAsync(
+            this.ServiceProvider,
+            this.Configuration.LogRedisConnection,
+            cancellationToken );
 
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
@@ -160,7 +153,12 @@ internal class RedisCachingBackend : CachingBackend
 
     private void ProcessKeyspaceNotification( RedisNotification notification )
     {
-        string channelName = notification.Channel;
+        string? channelName = notification.Channel;
+
+        if ( channelName == null )
+        {
+            return;
+        }
 
         if ( !this.KeyBuilder.TryParseKeyspaceNotification( channelName, out var keyKind, out var itemKey ) )
         {
@@ -195,14 +193,21 @@ internal class RedisCachingBackend : CachingBackend
 
     private void ProcessEvent( RedisNotification notification )
     {
-        var tokenizer = new StringTokenizer( notification.Value );
+        string? notificationValue = notification.Value;
+
+        if ( notificationValue == null )
+        {
+            return;
+        }
+
+        var tokenizer = new StringTokenizer( notificationValue );
         var kind = tokenizer.GetNext( ':' );
         var sourceIdStr = tokenizer.GetNext( ':' );
         var key = tokenizer.GetRemainder();
 
         if ( kind.IsEmpty || sourceIdStr.IsEmpty || key.IsEmpty )
         {
-            this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notification.Value ) );
+            this.LogSource.Warning.Write( Formatted( "Cannot parse the event '{Event}'. Skipping it.", notificationValue ) );
 
             return;
         }
@@ -366,7 +371,14 @@ internal class RedisCachingBackend : CachingBackend
 
     private protected DeserializedCacheItem Deserialize( RedisValue value )
     {
-        var memoryStream = new MemoryStream( value );
+        byte[]? bytes = value;
+
+        if ( bytes == null )
+        {
+            throw new CachingAssertionFailedException();
+        }
+
+        var memoryStream = new MemoryStream( bytes );
         var reader = new BinaryReader( memoryStream );
 
         return this.Deserialize( reader );

@@ -70,7 +70,12 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
     private void ProcessKeyspaceNotification( RedisNotification notification )
     {
-        string channelName = notification.Channel;
+        string? channelName = notification.Channel;
+
+        if ( channelName == null )
+        {
+            return;
+        }
 
         var tokenizer = new StringTokenizer( channelName );
 
@@ -148,8 +153,8 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
 
     private async Task OnValueEvictedAsync( string key, CancellationToken cancellationToken )
     {
-        string valueKey = this.KeyBuilder.GetValueKey( key );
-        string dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
+        string? valueKey = this.KeyBuilder.GetValueKey( key );
+        string? dependenciesKey = this.KeyBuilder.GetDependenciesKey( key );
 
         for ( var attempt = 0; attempt < this._backend.Configuration.TransactionMaxRetries + 1; attempt++ )
         {

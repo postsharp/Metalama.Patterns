@@ -191,6 +191,4 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
             return keys.Select( k => k.ToString() ).Where( k => k?.IndexOf( ":gc:", StringComparison.Ordinal ) == -1 ).ToList();
         }
     }
-    
-    
 }

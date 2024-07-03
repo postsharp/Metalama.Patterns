@@ -91,7 +91,12 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 
     private void HandleMessage( RedisNotification notification )
     {
-        this.OnMessageReceived( notification.Value );
+        string? notificationValue = notification.Value;
+
+        if ( notificationValue != null )
+        {
+            this.OnMessageReceived( notificationValue );
+        }
     }
 
     /// <inheritdoc />

@@ -1,6 +1,7 @@
 // Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using StackExchange.Redis;
+using StackExchange.Redis.Maintenance;
 using StackExchange.Redis.Profiling;
 using System.Net;
 
@@ -18,6 +19,8 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
         this._disposables = disposables;
     }
 
+    void IConnectionMultiplexer.AddLibraryNameSuffix( string suffix ) => this.Inner.AddLibraryNameSuffix( suffix );
+
     string IConnectionMultiplexer.ClientName => this.Inner.ClientName;
 
     string IConnectionMultiplexer.Configuration => this.Inner.Configuration;
@@ -34,6 +37,7 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 
     bool IConnectionMultiplexer.IsConnecting => this.Inner.IsConnecting;
 
+    [Obsolete]
     bool IConnectionMultiplexer.IncludeDetailInExceptions
     {
         get => this.Inner.IncludeDetailInExceptions;
@@ -78,6 +82,12 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
         remove => this.Inner.ConfigurationChangedBroadcast -= value;
     }
 
+    event EventHandler<ServerMaintenanceEvent>? IConnectionMultiplexer.ServerMaintenanceEvent
+    {
+        add => this.Inner.ServerMaintenanceEvent += value;
+        remove => this.Inner.ServerMaintenanceEvent -= value;
+    }
+
     event EventHandler<HashSlotMovedEventArgs> IConnectionMultiplexer.HashSlotMoved
     {
         add => this.Inner.HashSlotMoved += value;
@@ -88,9 +98,11 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 
     Task IConnectionMultiplexer.CloseAsync( bool allowCommandsToComplete ) => this.Inner.CloseAsync( allowCommandsToComplete );
 
-    bool IConnectionMultiplexer.Configure( TextWriter log ) => this.Inner.Configure( log );
+    bool IConnectionMultiplexer.Configure( TextWriter? log ) => this.Inner.Configure( log );
 
-    Task<bool> IConnectionMultiplexer.ConfigureAsync( TextWriter log ) => this.Inner.ConfigureAsync( log );
+    IServer[] IConnectionMultiplexer.GetServers() => this.Inner.GetServers();
+
+    Task<bool> IConnectionMultiplexer.ConfigureAsync( TextWriter? log ) => this.Inner.ConfigureAsync( log );
 
     void IDisposable.Dispose()
     {
@@ -106,27 +118,27 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 
     ServerCounters IConnectionMultiplexer.GetCounters() => this.Inner.GetCounters();
 
-    IDatabase IConnectionMultiplexer.GetDatabase( int db, object asyncState ) => this.Inner.GetDatabase( db, asyncState );
+    IDatabase IConnectionMultiplexer.GetDatabase( int db, object? asyncState ) => this.Inner.GetDatabase( db, asyncState );
 
     EndPoint[] IConnectionMultiplexer.GetEndPoints( bool configuredOnly ) => this.Inner.GetEndPoints( configuredOnly );
 
     int IConnectionMultiplexer.GetHashSlot( RedisKey key ) => this.Inner.GetHashSlot( key );
 
-    IServer IConnectionMultiplexer.GetServer( string host, int port, object asyncState ) => this.Inner.GetServer( host, port, asyncState );
+    IServer IConnectionMultiplexer.GetServer( string host, int port, object? asyncState ) => this.Inner.GetServer( host, port, asyncState );
 
-    IServer IConnectionMultiplexer.GetServer( string hostAndPort, object asyncState ) => this.Inner.GetServer( hostAndPort, asyncState );
+    IServer IConnectionMultiplexer.GetServer( string hostAndPort, object? asyncState ) => this.Inner.GetServer( hostAndPort, asyncState );
 
     IServer IConnectionMultiplexer.GetServer( IPAddress host, int port ) => this.Inner.GetServer( host, port );
 
-    IServer IConnectionMultiplexer.GetServer( EndPoint endpoint, object asyncState ) => this.Inner.GetServer( endpoint, asyncState );
+    IServer IConnectionMultiplexer.GetServer( EndPoint endpoint, object? asyncState ) => this.Inner.GetServer( endpoint, asyncState );
 
     string IConnectionMultiplexer.GetStatus() => this.Inner.GetStatus();
 
     void IConnectionMultiplexer.GetStatus( TextWriter log ) => this.Inner.GetStatus( log );
 
-    string IConnectionMultiplexer.GetStormLog() => this.Inner.GetStormLog();
+    string? IConnectionMultiplexer.GetStormLog() => this.Inner.GetStormLog();
 
-    ISubscriber IConnectionMultiplexer.GetSubscriber( object asyncState ) => this.Inner.GetSubscriber( asyncState );
+    ISubscriber IConnectionMultiplexer.GetSubscriber( object? asyncState ) => this.Inner.GetSubscriber( asyncState );
 
     int IConnectionMultiplexer.HashSlot( RedisKey key ) => this.Inner.HashSlot( key );
 
@@ -134,12 +146,22 @@ internal sealed class DisposingConnectionMultiplexer : IConnectionMultiplexer
 
     Task<long> IConnectionMultiplexer.PublishReconfigureAsync( CommandFlags flags ) => this.Inner.PublishReconfigureAsync( flags );
 
-    void IConnectionMultiplexer.RegisterProfiler( Func<ProfilingSession> profilingSessionProvider ) => this.Inner.RegisterProfiler( profilingSessionProvider );
+    void IConnectionMultiplexer.RegisterProfiler( Func<ProfilingSession?> profilingSessionProvider ) => this.Inner.RegisterProfiler( profilingSessionProvider );
 
     void IConnectionMultiplexer.ResetStormLog() => this.Inner.ResetStormLog();
 
     // ReSharper disable once RedundantSuppressNullableWarningExpression
     string IConnectionMultiplexer.ToString() => this.Inner.ToString()!;
+
+    async ValueTask IAsyncDisposable.DisposeAsync()
+    {
+        await this.Inner.DisposeAsync();
+
+        foreach ( var disposable in this._disposables )
+        {
+            disposable.Dispose();
+        }
+    }
 
     void IConnectionMultiplexer.Wait( Task task ) => this.Inner.Wait( task );
 
