@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
 using Microsoft.Extensions.Caching.Memory;
+using Microsoft.IO;
 using System.Collections.Immutable;
 using System.Globalization;
 using CacheItemPriority = Microsoft.Extensions.Caching.Memory.CacheItemPriority;
@@ -32,6 +33,7 @@ internal class MemoryCachingBackend : CachingBackend
     private readonly IMemoryCache _cache;
     private readonly Func<object?, long> _sizeCalculator;
     private readonly ICachingSerializer? _serializer;
+    private static readonly RecyclableMemoryStreamManager _memoryStreamManager = new();
 
     /// <summary>
     /// Initializes a new instance of the <see cref="MemoryCachingBackend"/> class based on a new instance of the <see cref="Microsoft.Extensions.Caching.Memory.MemoryCache"/> class.
@@ -281,7 +283,7 @@ internal class MemoryCachingBackend : CachingBackend
         }
         else if ( this._serializer != null )
         {
-            var stream = new MemoryStream( (byte[]) item.Value! );
+            var stream = new MemoryStream( (byte[]) item.Value!, false );
             var reader = new BinaryReader( stream );
 
             return item with { Value = this._serializer.Deserialize( reader ) };
@@ -296,7 +298,7 @@ internal class MemoryCachingBackend : CachingBackend
     {
         if ( this._serializer != null )
         {
-            var stream = new MemoryStream();
+            using var stream = _memoryStreamManager.GetStream();
             var writer = new BinaryWriter( stream );
             this._serializer.Serialize( item.Value!, writer );
 

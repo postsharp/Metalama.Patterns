@@ -4,6 +4,7 @@ using JetBrains.Annotations;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.Serializers;
 using Microsoft.Extensions.DependencyInjection;
+using Microsoft.IO;
 using StackExchange.Redis;
 using System.Collections.Immutable;
 using static Flashtrace.Messages.FormattedMessageBuilder;
@@ -17,6 +18,7 @@ namespace Metalama.Patterns.Caching.Backends.Redis;
 internal class RedisCachingBackend : CachingBackend
 {
     private const string _itemRemovedEvent = "item-removed";
+    private static readonly RecyclableMemoryStreamManager _memoryStreamManager = new();
 
     private readonly Func<ICachingSerializer> _createSerializerFunc;
     private readonly bool _ownsConnection;
@@ -327,22 +329,24 @@ internal class RedisCachingBackend : CachingBackend
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item )
     {
-        var bytes = this.Serialize( item );
+        var serializedItem = this.Serialize( item );
 
         var valueKey = this.KeyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
-        this.Database.StringSet( valueKey, bytes, expiry, flags: this.Configuration.WriteCommandFlags );
+        this.Database.StringSet( valueKey, serializedItem, expiry, flags: this.Configuration.WriteCommandFlags );
     }
 
-    private protected byte[] Serialize( CacheItem item )
+    private protected RedisValue Serialize( CacheItem item )
     {
-        var memoryStream = new MemoryStream();
+        using var memoryStream = _memoryStreamManager.GetStream();
+
         var writer = new BinaryWriter( memoryStream );
         this.Serialize( item, writer );
+        memoryStream.Seek( 0, SeekOrigin.Begin );
 
-        return memoryStream.ToArray();
+        return RedisValue.CreateFrom( memoryStream );
     }
 
     private protected void Serialize( CacheItem item, BinaryWriter writer )
@@ -393,13 +397,13 @@ internal class RedisCachingBackend : CachingBackend
     protected override async ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
         // We could serialize in the background but it does not really make sense here, because the main cost is deserializing, not serializing.
-        var value = this.Serialize( item );
+        var serializedItem = this.Serialize( item );
 
         var valueKey = this.KeyBuilder.GetValueKey( key );
 
         var expiry = this.CreateExpiry( item );
 
-        await this.Database.StringSetAsync( valueKey, value, expiry, flags: this.Configuration.WriteCommandFlags );
+        await this.Database.StringSetAsync( valueKey, serializedItem, expiry, flags: this.Configuration.WriteCommandFlags );
     }
 
     /// <inheritdoc />

@@ -27,10 +27,20 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         this.ClassFixture.Endpoint = redisAssemblyFixture.TestInstance.Endpoint;
     }
 
+    protected override void AddServices( ServiceCollection serviceCollection )
+    {
+        base.AddServices( serviceCollection );
+        serviceCollection.AddSingleton<IRedisBackendObserver>( this.Observer );
+    }
+
+    internal RedisBackendObserver Observer { get; } = new();
+
     protected override void Cleanup()
     {
         base.Cleanup();
-        AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
+        Assert.NotEqual( 0, this.Observer.CreatedNotificationThreads );
+
+        AssertEx.Equal( 0, this.Observer.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
     protected virtual bool GarbageCollectorEnabled => false;
@@ -43,7 +53,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         => await RedisFactory.CreateBackendAsync(
             this.ClassFixture,
             this._redisAssemblyFixture,
-            this.ServiceProvider, 
+            this.ServiceProvider,
             keyPrefix,
             supportsDependencies: true,
             collector: this.GarbageCollectorEnabled );
@@ -61,6 +71,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         ServiceCollection serviceCollection = [];
         var connection = RedisFactory.CreateConnection( this.ClassFixture );
         serviceCollection.AddSingleton( connection );
+        this.AddServices( serviceCollection );
 
         var backend = CachingBackend.Create( b => b.Redis(), serviceCollection.BuildServiceProvider() );
         backend.Initialize();
@@ -74,6 +85,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
         ServiceCollection serviceCollection = [];
         var connection = RedisFactory.CreateConnection( this.ClassFixture );
         serviceCollection.AddSingleton( connection );
+        this.AddServices( serviceCollection );
 
         var backend = CachingBackend.Create( b => b.Redis(), serviceCollection.BuildServiceProvider() );
         await backend.InitializeAsync();

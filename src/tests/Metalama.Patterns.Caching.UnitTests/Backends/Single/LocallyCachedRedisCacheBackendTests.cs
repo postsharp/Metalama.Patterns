@@ -6,10 +6,30 @@ using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
+using Microsoft.Extensions.DependencyInjection;
+using System.Collections.Concurrent;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
+
+internal sealed class RedisBackendObserver : IRedisBackendObserver
+{
+    private int _activeNotificationThreads;
+    private int _createdNotificationThreads;
+
+    public int ActiveNotificationThreads => this._activeNotificationThreads;
+
+    public int CreatedNotificationThreads => this._createdNotificationThreads;
+
+    public void OnNotificationThreadStarted()
+    {
+        Interlocked.Increment( ref this._activeNotificationThreads );
+        Interlocked.Increment( ref this._createdNotificationThreads );
+    }
+
+    public void OnNotificationThreadCompleted() => Interlocked.Decrement( ref this._activeNotificationThreads );
+}
 
 public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisAssemblyFixture>
 {
@@ -25,12 +45,22 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
         this._redisAssemblyFixture = redisAssemblyFixture;
     }
 
+    protected override void AddServices( ServiceCollection serviceCollection )
+    {
+        base.AddServices( serviceCollection );
+        serviceCollection.AddSingleton<IRedisBackendObserver>( this.Observer );
+    }
+
+    internal RedisBackendObserver Observer { get; } = new();
+
     protected virtual bool EnableGarbageCollector => false;
 
     protected override void Cleanup()
     {
         base.Cleanup();
-        AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
+        Assert.NotEqual( 0, this.Observer.CreatedNotificationThreads );
+
+        AssertEx.Equal( 0, this.Observer.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
     protected override TimeSpan GetExpirationQuantum( double multiplier = 1 )
@@ -87,7 +117,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
                          await RedisFactory.CreateBackendAsync(
                              this.ClassFixture,
                              this._redisAssemblyFixture,
-                             this.ServiceProvider, 
+                             this.ServiceProvider,
                              prefix: redisKeyPrefix,
                              locallyCached: false ),
                          b => b.WithProfile( "Issue15680" ) ) )
@@ -101,7 +131,7 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
                          await RedisFactory.CreateBackendAsync(
                              this.ClassFixture,
                              this._redisAssemblyFixture,
-                             this.ServiceProvider, 
+                             this.ServiceProvider,
                              prefix: redisKeyPrefix,
                              locallyCached: true ),
                          b => b.WithProfile( "Issue15680" ) ) )

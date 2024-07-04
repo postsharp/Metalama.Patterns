@@ -18,18 +18,18 @@ internal sealed class RedisNotificationQueue : IDisposable
     private readonly BlockingCollection<RedisNotification> _notificationQueue = new();
     private readonly ManualResetEventSlim _notificationProcessingLock = new( true );
     private readonly TaskCompletionSource<bool> _disposeTask = new();
-    private readonly StackTrace _allocationStackTrace = new();
 
     private readonly Thread _notificationProcessingThread;
     private readonly TaskCompletionSource<bool> _notificationProcessingThreadCompleted = new();
     private readonly ImmutableArray<RedisChannel> _channels;
     private readonly Action<RedisNotification> _handler;
     private readonly TimeSpan _connectionTimeout;
+    private readonly StackTrace _allocationStackTrace = new();
 
     private volatile TaskCompletionSource<bool> _queueEmptyTask = new();
-    private static volatile int _notificationProcessingThreads;
     private readonly string _id;
     private volatile int _status;
+    private readonly IRedisBackendObserver? _observer;
 
     private RedisNotificationQueue(
         string id,
@@ -45,6 +45,7 @@ internal sealed class RedisNotificationQueue : IDisposable
         this._connectionTimeout = connectionTimeout;
         this.Subscriber = connection.GetSubscriber();
         this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
+        this._observer = (IRedisBackendObserver?) serviceProvider?.GetService( typeof(IRedisBackendObserver) );
 
         this._notificationProcessingThread = new Thread( ProcessNotificationQueue )
         {
@@ -189,7 +190,7 @@ internal sealed class RedisNotificationQueue : IDisposable
             return;
         }
 
-        Interlocked.Increment( ref _notificationProcessingThreads );
+        queue._observer?.OnNotificationThreadStarted();
 
         try
         {
@@ -261,13 +262,10 @@ internal sealed class RedisNotificationQueue : IDisposable
             if ( queueRef.TryGetTarget( out queue ) )
             {
                 queue._notificationProcessingThreadCompleted.TrySetResult( true );
+                queue._observer?.OnNotificationThreadCompleted();
             }
-
-            Interlocked.Decrement( ref _notificationProcessingThreads );
         }
     }
-
-    internal static int NotificationProcessingThreads => _notificationProcessingThreads;
 
     internal void SuspendProcessing()
     {

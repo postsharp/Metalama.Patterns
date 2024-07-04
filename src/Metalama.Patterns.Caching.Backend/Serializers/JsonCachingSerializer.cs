@@ -11,8 +11,8 @@ namespace Metalama.Patterns.Caching.Serializers;
 [PublicAPI]
 public class JsonCachingSerializer : ICachingSerializer
 {
-    private const byte _null = 0;
-    private const byte _object = 1;
+    private const byte _nullMarker = 0;
+    private const byte _objectMarker = 1;
 
     private readonly JsonSerializerOptions _options;
 
@@ -25,11 +25,11 @@ public class JsonCachingSerializer : ICachingSerializer
     {
         if ( value == null )
         {
-            writer.Write( _null );
+            writer.Write( _nullMarker );
         }
         else
         {
-            writer.Write( _object );
+            writer.Write( _objectMarker );
 
             // Write the assembly-qualified name.
             writer.Write( this.GetTypeName( value.GetType() ) );
@@ -48,10 +48,10 @@ public class JsonCachingSerializer : ICachingSerializer
     {
         switch ( reader.ReadByte() )
         {
-            case _null:
+            case _nullMarker:
                 return null;
 
-            case _object:
+            case _objectMarker:
                 var typeName = reader.ReadString();
                 var type = this.ResolveTypeName( typeName );
 

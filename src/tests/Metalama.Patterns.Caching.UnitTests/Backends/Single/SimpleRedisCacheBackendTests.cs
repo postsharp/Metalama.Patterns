@@ -3,6 +3,7 @@
 using Metalama.Patterns.Caching.Backends.Redis;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
+using Microsoft.Extensions.DependencyInjection;
 using Xunit;
 using Xunit.Abstractions;
 
@@ -23,10 +24,19 @@ public class SimpleRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixt
         this._redisAssemblyFixture = redisAssemblyFixture;
     }
 
+    protected override void AddServices( ServiceCollection serviceCollection )
+    {
+        base.AddServices( serviceCollection );
+        serviceCollection.AddSingleton<IRedisBackendObserver>( this.Observer );
+    }
+
+    internal RedisBackendObserver Observer { get; } = new();
+
     protected override void Cleanup()
     {
         base.Cleanup();
-        AssertEx.Equal( 0, RedisNotificationQueue.NotificationProcessingThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
+
+        AssertEx.Equal( 0, this.Observer.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
     protected override bool TestDependencies => false;

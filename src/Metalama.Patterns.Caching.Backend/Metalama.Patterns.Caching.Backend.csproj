@@ -20,8 +20,9 @@
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
         <PackageReference Include="System.Collections.Immutable" />
         <PackageReference Include="System.Text.Json" />
-        <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
+        <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
     </ItemGroup>
+
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net471'">
         <PackageReference Include="System.Runtime.Serialization.Xml" />
@@ -42,6 +43,9 @@
         <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" PrivateAssets="all" />
     </ItemGroup>
 
+    <ItemGroup>
+        <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
+    </ItemGroup>
 
     <ItemGroup>
         <Service Include="{508349b6-6b84-4df5-91f0-309beebad82d}" />
