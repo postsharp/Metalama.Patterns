@@ -7,29 +7,10 @@ using Metalama.Patterns.Caching.Implementation;
 using Metalama.Patterns.Caching.TestHelpers;
 using Metalama.Patterns.Caching.Tests.Backends.Distributed;
 using Microsoft.Extensions.DependencyInjection;
-using System.Collections.Concurrent;
 using Xunit;
 using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
-
-internal sealed class RedisBackendObserver : IRedisBackendObserver
-{
-    private int _activeNotificationThreads;
-    private int _createdNotificationThreads;
-
-    public int ActiveNotificationThreads => this._activeNotificationThreads;
-
-    public int CreatedNotificationThreads => this._createdNotificationThreads;
-
-    public void OnNotificationThreadStarted()
-    {
-        Interlocked.Increment( ref this._activeNotificationThreads );
-        Interlocked.Increment( ref this._createdNotificationThreads );
-    }
-
-    public void OnNotificationThreadCompleted() => Interlocked.Decrement( ref this._activeNotificationThreads );
-}
 
 public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisAssemblyFixture>
 {

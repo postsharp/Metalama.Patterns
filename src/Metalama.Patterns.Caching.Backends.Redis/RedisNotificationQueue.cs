@@ -26,10 +26,11 @@ internal sealed class RedisNotificationQueue : IDisposable
     private readonly TimeSpan _connectionTimeout;
     private readonly StackTrace _allocationStackTrace = new();
 
-    private volatile TaskCompletionSource<bool> _queueEmptyTask = new();
     private readonly string _id;
-    private volatile int _status;
     private readonly IRedisBackendObserver? _observer;
+
+    private volatile TaskCompletionSource<bool> _queueEmptyTask = new();
+    private volatile int _status;
 
     private RedisNotificationQueue(
         string id,
