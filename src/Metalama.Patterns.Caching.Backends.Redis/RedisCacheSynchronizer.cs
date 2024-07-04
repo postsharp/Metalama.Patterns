@@ -20,7 +20,7 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
 
     private IConnectionMultiplexer? _connection;
 
-    private RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
+    private RedisNotificationQueueProcessor NotificationQueueProcessor { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     /// <summary>
     /// Gets the Redis <see cref="IConnectionMultiplexer"/> used by the current <see cref="RedisCacheSynchronizer"/>.
@@ -49,7 +49,7 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
             this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
         }
 
-        this.NotificationQueue = RedisNotificationQueue.Create(
+        this.NotificationQueueProcessor = RedisNotificationQueueProcessor.Create(
             this.ToString(),
             this.Connection,
             [this._channel],
@@ -77,7 +77,7 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
             this._connection = this.ServiceProvider.GetRequiredService<IConnectionMultiplexer>();
         }
 
-        this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
+        this.NotificationQueueProcessor = await RedisNotificationQueueProcessor.CreateAsync(
             this.ToString(),
             this.Connection,
             [this._channel],
@@ -102,7 +102,7 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
     /// <inheritdoc />
     protected override async Task SendMessageAsync( string message, CancellationToken cancellationToken )
     {
-        await this.NotificationQueue.Subscriber.PublishAsync( this._channel, message );
+        await this.NotificationQueueProcessor.Subscriber.PublishAsync( this._channel, message );
     }
 
     /// <inheritdoc />
@@ -110,7 +110,7 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
     {
         base.DisposeCore( disposing, cancellationToken );
 
-        this.NotificationQueue.Dispose();
+        this.NotificationQueueProcessor.Dispose();
 
         if ( this._ownsConnection )
         {
@@ -124,7 +124,7 @@ internal sealed class RedisCacheSynchronizer : CacheSynchronizer
     {
         await base.DisposeAsyncCore( cancellationToken );
 
-        await this.NotificationQueue.DisposeAsync( cancellationToken );
+        await this.NotificationQueueProcessor.DisposeAsync( cancellationToken );
 
         if ( this._ownsConnection )
         {

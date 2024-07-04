@@ -190,7 +190,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     /// <remarks>
     /// The default value is 1 minute.
     /// </remarks>
-    public TimeSpan ConnectionTimeout { get; init; } = RedisNotificationQueue.DefaultSubscriptionTimeout;
+    public TimeSpan ConnectionTimeout { get; init; } = RedisNotificationQueueProcessor.DefaultSubscriptionTimeout;
 
     /// <summary>
     /// Gets or sets a value indicating whether the logs of the <see cref="ConnectionMultiplexer"/> should be captured and

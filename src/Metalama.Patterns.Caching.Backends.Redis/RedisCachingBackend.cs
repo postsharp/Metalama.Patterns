@@ -26,7 +26,7 @@ internal class RedisCachingBackend : CachingBackend
     private readonly Func<IConnectionMultiplexer, IDatabase> _databaseFactory;
     private CacheItemSerializer? _serializer;
     private int _backgroundTaskExceptions;
-    private RedisNotificationQueue? _notificationQueue;
+    private RedisNotificationQueueProcessor? _notificationQueue;
     private IConnectionMultiplexer? _connection;
     private IDatabase? _database;
     private RedisKeyBuilder? _keyBuilder;
@@ -34,7 +34,7 @@ internal class RedisCachingBackend : CachingBackend
     /// <summary>
     /// Gets <see cref="_notificationQueue"/> if not null, otherwise throws <see cref="CachingAssertionFailedException"/>.
     /// </summary>
-    private RedisNotificationQueue NotificationQueue
+    private RedisNotificationQueueProcessor NotificationQueueProcessor
         => this._notificationQueue ?? throw new CachingAssertionFailedException( nameof(this._notificationQueue) + " has not been initialized." );
 
     public RedisKeyBuilder KeyBuilder => this._keyBuilder ?? throw new InvalidOperationException( "The component has not been initialized." );
@@ -103,7 +103,7 @@ internal class RedisCachingBackend : CachingBackend
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
 
-        this._notificationQueue = RedisNotificationQueue.Create(
+        this._notificationQueue = RedisNotificationQueueProcessor.Create(
             this.ToString(),
             this.Connection,
             [this.KeyBuilder.EventsChannel, this.KeyBuilder.NotificationChannel],
@@ -124,7 +124,7 @@ internal class RedisCachingBackend : CachingBackend
         this._database = this._databaseFactory( this._connection );
         this._keyBuilder = new RedisKeyBuilder( this.Database, this.Configuration );
 
-        this._notificationQueue = await RedisNotificationQueue.CreateAsync(
+        this._notificationQueue = await RedisNotificationQueueProcessor.CreateAsync(
             this.ToString(),
             this.Connection,
             [
@@ -268,7 +268,7 @@ internal class RedisCachingBackend : CachingBackend
         var value = kind + ":" + this.Id + ":" + key;
         this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
-        return this.NotificationQueue.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
+        return this.NotificationQueueProcessor.Subscriber.PublishAsync( this.KeyBuilder.EventsChannel, value );
     }
 
     /// <summary>
@@ -281,7 +281,7 @@ internal class RedisCachingBackend : CachingBackend
         var value = kind + ":" + this.Id + ":" + key;
         this.LogSource.Debug.Write( Formatted( "Publishing message \"{Message}\" to {Channel}.", value, this.KeyBuilder.EventsChannel ) );
 
-        this.NotificationQueue.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
+        this.NotificationQueueProcessor.Subscriber.Publish( this.KeyBuilder.EventsChannel, value );
     }
 
     /// <exclude />
@@ -587,7 +587,7 @@ internal class RedisCachingBackend : CachingBackend
     }
 
     public override int BackgroundTaskExceptions
-        => base.BackgroundTaskExceptions + this.NotificationQueue.BackgroundTaskExceptions + this._backgroundTaskExceptions;
+        => base.BackgroundTaskExceptions + this.NotificationQueueProcessor.BackgroundTaskExceptions + this._backgroundTaskExceptions;
 
     /// <summary>
     /// Features of <see cref="RedisCachingBackend"/>.

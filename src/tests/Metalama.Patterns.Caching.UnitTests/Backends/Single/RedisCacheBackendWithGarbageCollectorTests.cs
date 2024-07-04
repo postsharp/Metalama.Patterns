@@ -71,7 +71,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
             var dependenciesKey = keyBuilder.GetDependenciesKey( valueSmallKey );
             var dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
 
-            collector.NotificationQueue.SuspendProcessing();
+            collector.NotificationQueueProcessor.SuspendProcessing();
 
             var itemExpiredEvent = new TaskCompletionSource<bool>();
 
@@ -95,7 +95,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
             Assert.True( await redisBackend.Database.KeyExistsAsync( dependenciesKey ) );
             Assert.True( await redisBackend.Database.KeyExistsAsync( dependencyKey ) );
 
-            collector.NotificationQueue.ResumeProcessing();
+            collector.NotificationQueueProcessor.ResumeProcessing();
 
             Assert.True( await itemExpiredEvent.Task.WithTimeout( TimeoutTimeSpan ) );
 
@@ -129,7 +129,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
             string? dependencyKey = keyBuilder.GetDependencyKey( dependencySmallKey );
 
             var collector = cache.Collector!;
-            collector.NotificationQueue.SuspendProcessing();
+            collector.NotificationQueueProcessor.SuspendProcessing();
 
             var expiringCacheItem = new CacheItem(
                 "v",
@@ -158,7 +158,7 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
             Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
             Assert.True( await cache.Database.KeyExistsAsync( dependencyKey ) );
 
-            collector.NotificationQueue.ResumeProcessing();
+            collector.NotificationQueueProcessor.ResumeProcessing();
 
             Assert.True( await cache.Database.KeyExistsAsync( valueKey ) );
             Assert.True( await cache.Database.KeyExistsAsync( dependenciesKey ) );
