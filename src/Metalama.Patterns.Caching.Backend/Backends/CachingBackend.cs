@@ -1064,6 +1064,10 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 {
                     try
                     {
+                        // Reset events to make sure that handlers don't make problems.
+                        this._itemRemoved = null;
+                        this._dependencyInvalidated = null;
+                        
                         this.DisposeCore( disposing, cancellationToken );
 
                         this._initializeSemaphore.Dispose();
@@ -1144,6 +1148,10 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                 {
                     try
                     {
+                        // Reset events to make sure that handlers don't make problems.
+                        this._itemRemoved = null;
+                        this._dependencyInvalidated = null;
+
                         await this.DisposeAsyncCore( cancellationToken );
 
                         if ( !this.TryChangeStatus( CachingBackendStatus.Disposing, CachingBackendStatus.Disposed ) )
