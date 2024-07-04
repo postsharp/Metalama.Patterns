@@ -29,19 +29,19 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
     protected override void AddServices( ServiceCollection serviceCollection )
     {
         base.AddServices( serviceCollection );
-        serviceCollection.AddSingleton<IRedisBackendObserver>( this.Observer );
+        serviceCollection.AddSingleton<IRedisBackendObserver>( this.RedisBackendObserver );
     }
 
-    internal RedisBackendObserver Observer { get; } = new();
-
+    private RedisBackendObserver RedisBackendObserver { get; } = new();
+    
     protected virtual bool EnableGarbageCollector => false;
 
     protected override void Cleanup()
     {
         base.Cleanup();
-        Assert.NotEqual( 0, this.Observer.CreatedNotificationThreads );
+        Assert.NotEqual( 0, this.RedisBackendObserver.CreatedNotificationThreads );
 
-        AssertEx.Equal( 0, this.Observer.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
+        AssertEx.Equal( 0, this.RedisBackendObserver.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
     protected override TimeSpan GetExpirationQuantum( double multiplier = 1 )

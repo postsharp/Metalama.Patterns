@@ -28,7 +28,12 @@ public abstract class BaseCachingTests : ICachingExceptionObserver
         CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
     }
 
-    protected virtual void AddServices( ServiceCollection serviceCollection ) { }
+    protected BackgroundTaskSchedulerObserver BackgroundTaskSchedulerObserver { get; } = new();
+
+    protected virtual void AddServices( ServiceCollection serviceCollection )
+    {
+        serviceCollection.AddSingleton<IBackgroundTaskSchedulerObserver>( this.BackgroundTaskSchedulerObserver );
+    }
 
     private static void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )
     {

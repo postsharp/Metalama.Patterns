@@ -7,37 +7,22 @@ using Metalama.Patterns.Caching.Backends;
 using Microsoft.Extensions.DependencyInjection;
 using System.Globalization;
 
-#if DEBUG
-using System.Collections.Concurrent;
-using System.Diagnostics;
-using System.Diagnostics.CodeAnalysis;
-#endif
-
 namespace Metalama.Patterns.Caching.Implementation;
 
 [PublicAPI]
 public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 {
-    private static volatile int _allBackgroundTaskExceptions;
-
     private readonly FlashtraceSource _logger;
     private readonly AwaitableEvent _backgroundTasksFinishedEvent = new( EventResetMode.ManualReset, true );
     private readonly CancellationTokenSource _disposeCancellationTokenSource = new();
     private readonly bool _sequential;
     private readonly object _sync = new();
     private readonly ICachingExceptionObserver? _exceptionObserver;
-
-#if DEBUG
-    private readonly ConcurrentDictionary<int, PendingTask> _pendingBackgroundTasks = new();
-#endif
+    private readonly IBackgroundTaskSchedulerObserver? _backgroundTaskSchedulerObserver;
 
     private volatile int _backgroundTaskExceptions;
     private volatile int _backgroundTaskCount;
     private bool _backgroundTasksForbidden;
-
-#if DEBUG
-    private volatile int _nextTaskId;
-#endif
 
     // A CancellationToken triggered when the Dispose method is cancelled, i.e. when the caller no longer wants to wait.
     private CancellationToken DisposeCancellationToken => this._disposeCancellationTokenSource.Token;
@@ -50,6 +35,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
     {
         this._sequential = sequential;
         this._exceptionObserver = serviceProvider?.GetService<ICachingExceptionObserver>();
+        this._backgroundTaskSchedulerObserver = serviceProvider?.GetService<IBackgroundTaskSchedulerObserver>();
         this._logger = serviceProvider.GetFlashtraceSource( this.GetType(), FlashtraceRole.Caching );
     }
 
@@ -83,12 +69,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             }
         }
 
-#if DEBUG
-        var taskId = Interlocked.Increment( ref this._nextTaskId );
-        var pendingTask = new PendingTask { StackTrace = new StackTrace(), Id = taskId };
-
-        this._pendingBackgroundTasks.TryAdd( taskId, pendingTask );
-#endif
+        var observedTaskId = this._backgroundTaskSchedulerObserver?.OnTaskEnqueued();
 
         if ( this._sequential )
         {
@@ -104,12 +85,8 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
                 var createdTask = Task.Run(
                     () => this.RunTask(
                         () => task( this.DisposeCancellationToken ),
-                        previousTask
-#if DEBUG
-                       ,
-                        pendingTask
-#endif
-                    ),
+                        previousTask,
+                        observedTaskId ),
                     this.DisposeCancellationToken );
 
                 this._lastTask = createdTask;
@@ -120,24 +97,16 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             Task.Run(
                 () => this.RunTask(
                     () => task( this.DisposeCancellationToken ),
-                    null
-#if DEBUG
-                   ,
-                    pendingTask
-#endif
-                ),
+                    null,
+                    observedTaskId ),
                 this.DisposeCancellationToken );
         }
     }
 
     private async Task RunTask(
         Func<Task> task,
-        Task? lastTask
-#if DEBUG
-       ,
-        PendingTask pendingTask
-#endif
-    )
+        Task? lastTask,
+        int? observedTaskId )
 #pragma warning restore SA1115
 #pragma warning restore SA1113
 #pragma warning restore SA1111
@@ -160,9 +129,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         try
         {
             var t = task();
-#if DEBUG
-            pendingTask.Task = t;
-#endif
+
             await t;
         }
         catch ( Exception e )
@@ -171,11 +138,6 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
             {
                 throw;
             }
-
-#if DEBUG
-            this._logger.Debug.IfEnabled?.Write(
-                FormattedMessageBuilder.Formatted( "Stack trace that created the failing task: {StackTrace}", pendingTask.StackTrace ) );
-#endif
         }
         finally
         {
@@ -190,9 +152,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
                 }
             }
 
-#if DEBUG
-            this._pendingBackgroundTasks.TryRemove( pendingTask.Id, out _ );
-#endif
+            this._backgroundTaskSchedulerObserver?.OnTaskCompleted( observedTaskId!.Value );
         }
     }
 
@@ -205,7 +165,6 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 
         this._logger.Error.Write( FormattedMessageBuilder.Formatted( "{ExceptionType} when executing a background task.", e.GetType().Name ), e );
         Interlocked.Increment( ref this._backgroundTaskExceptions );
-        Interlocked.Increment( ref _allBackgroundTaskExceptions );
 
         return false;
     }
@@ -222,9 +181,7 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
         // AwaitableEvent does not support CancellationToken.
         await this._backgroundTasksFinishedEvent.WaitAsync( CancellationToken.None );
     }
-
-    public static int AllBackgroundTaskExceptions => _allBackgroundTaskExceptions;
-
+    
     public void Dispose() => this.Dispose( default );
 
     public void Dispose( CancellationToken cancellationToken )
@@ -248,16 +205,4 @@ public sealed class BackgroundTaskScheduler : IDisposable, IAsyncDisposable
 
     // ReSharper disable once MethodSupportsCancellation
     ValueTask IAsyncDisposable.DisposeAsync() => new( this.DisposeAsync() );
-
-#if DEBUG
-    [SuppressMessage( "StyleCop.CSharp.MaintainabilityRules", "SA1401:Fields should be private", Justification = "Class is for diagnostic purposes." )]
-    private class PendingTask
-    {
-        public StackTrace? StackTrace;
-
-        // ReSharper disable once NotAccessedField.Local
-        public Task? Task;
-        public int Id;
-    }
-#endif
 }

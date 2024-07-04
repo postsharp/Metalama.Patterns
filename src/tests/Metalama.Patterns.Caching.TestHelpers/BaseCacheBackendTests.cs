@@ -78,12 +78,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
         public void Dispose()
         {
             this.Cleanup();
+            this.TestOutputHelper.WriteLine( "Clean up completed." );
         }
 
         protected virtual void Cleanup()
         {
+            this.TestOutputHelper.WriteLine( "Cleaning up." );
             GC.Collect();
-            AssertEx.Equal( 0, BackgroundTaskScheduler.AllBackgroundTaskExceptions, "CachingBackend.AllBackgroundTaskExceptions" );
+            Assert.Equal( 0, this.BackgroundTaskSchedulerObserver.PendingTasks );
         }
 
         [Fact( Timeout = Timeout )]
