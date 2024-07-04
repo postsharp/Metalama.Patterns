@@ -122,11 +122,14 @@ public sealed partial class CachedMethodMetadata
 
         for ( var i = 0; i < parameterInfos.Length; i++ )
         {
-            var isIgnored = parameterInfos[i].IsDefined( typeof(NotCacheKeyAttribute) );
+            var isIgnored = IsIgnored( parameterInfos[i] );
 
             cachedParameterInfos[i] = new Parameter( isIgnored );
         }
 
         return [..cachedParameterInfos];
     }
+
+    private static bool IsIgnored( ParameterInfo parameter )
+        => parameter.IsDefined( typeof(NotCacheKeyAttribute) ) || parameter.ParameterType == typeof(CancellationToken);
 }
