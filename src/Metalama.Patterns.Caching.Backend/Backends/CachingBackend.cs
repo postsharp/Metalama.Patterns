@@ -967,7 +967,11 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     protected void OnItemRemoved( CacheItemRemovedEventArgs args )
     {
         this.LogSource.Debug.Write( Formatted( "OnItemRemoved( backend=\"{Backend}\", Reason={Reason}, Key=\"{Key}\"", this, args.RemovedReason, args.Key ) );
-        this._itemRemoved?.Invoke( this, args );
+
+        if ( this._itemRemoved != null )
+        {
+            Task.Run( () => this._itemRemoved?.Invoke( this, args ), this.DisposeCancellationToken );
+        }
     }
 
     /// <summary>
@@ -981,7 +985,11 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     protected void OnItemRemoved( string key, CacheItemRemovedReason reason, Guid sourceId )
     {
         this.LogSource.Debug.Write( Formatted( "OnItemRemoved( Backend=\"{Backend}\", Reason={Reason}, Key=\"{Key}\"", this, reason, key ) );
-        this._itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) );
+
+        if ( this._itemRemoved != null )
+        {
+            Task.Run( () => this._itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) ), this.DisposeCancellationToken );
+        }
     }
 
     /// <summary>
@@ -994,7 +1002,13 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
     protected void OnDependencyInvalidated( string key, Guid sourceId )
     {
         this.LogSource.Debug.Write( Formatted( "OnDependencyInvalidated( Backend=\"{Backend}\", source={SourceId}, Key=\"{Key}\"", this, sourceId, key ) );
-        this._dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) );
+
+        if ( this._dependencyInvalidated != null )
+        {
+            Task.Run(
+                () => this._dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) ),
+                this.DisposeCancellationToken );
+        }
     }
 
     /// <summary>
@@ -1006,7 +1020,10 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
         this.LogSource.Debug.Write(
             Formatted( "OnDependencyInvalidated( Backend=\"{Backend}\", source={SourceId}, Key=\"{Key}\"", this, args.SourceId, args.Key ) );
 
-        this._dependencyInvalidated?.Invoke( this, args );
+        if ( this._dependencyInvalidated != null )
+        {
+            Task.Run( () => this._dependencyInvalidated?.Invoke( this, args ), this.DisposeCancellationToken );
+        }
     }
 
     /// <summary>

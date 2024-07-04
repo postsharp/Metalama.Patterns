@@ -380,7 +380,13 @@ internal sealed class RedisNotificationQueueProcessor : IDisposable
                     if ( this._notificationProcessingThread.IsAlive )
                     {
                         this._logger.Trace.IfEnabled?.Write( Formatted( "Waiting for the notification processing thread." ) );
-                        this._notificationProcessingThreadCompleted.Task.Wait();
+
+                        if ( !this._notificationProcessingThreadCompleted.Task.Wait( 5000 ) )
+                        {
+                            this._logger.Warning.IfEnabled?.Write( Formatted( "The notification processing thread takes a long time to close." ) );
+                            this._notificationProcessingThreadCompleted.Task.Wait();
+                        }
+
                         this._logger.Trace.IfEnabled?.Write( Formatted( "Waiting for the notification processing thread: completed." ) );
                     }
 
