@@ -12,16 +12,19 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
-public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
+public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisAssemblyFixture>
 {
-    private readonly RedisSetupFixture _redisSetupFixture;
+    private readonly RedisAssemblyFixture _redisAssemblyFixture;
 
-    public RedisCacheBackendTests( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        cachingTestOptions,
+    public RedisCacheBackendTests(
+        CachingClassFixture cachingClassFixture,
+        RedisAssemblyFixture redisAssemblyFixture,
+        ITestOutputHelper testOutputHelper ) : base(
+        cachingClassFixture,
         testOutputHelper )
     {
-        this._redisSetupFixture = redisSetupFixture;
-        this.TestOptions.Endpoint = redisSetupFixture.TestInstance.Endpoint;
+        this._redisAssemblyFixture = redisAssemblyFixture;
+        this.ClassFixture.Endpoint = redisAssemblyFixture.TestInstance.Endpoint;
     }
 
     protected override void Cleanup()
@@ -38,8 +41,9 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
     protected async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync( string? keyPrefix )
         => await RedisFactory.CreateBackendAsync(
-            this.TestOptions,
-            this._redisSetupFixture,
+            this.ClassFixture,
+            this._redisAssemblyFixture,
+            this.ServiceProvider, 
             keyPrefix,
             supportsDependencies: true,
             collector: this.GarbageCollectorEnabled );
@@ -55,7 +59,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     public void TestDisposeRedisBeforeCaching()
     {
         ServiceCollection serviceCollection = [];
-        var connection = RedisFactory.CreateConnection( this.TestOptions );
+        var connection = RedisFactory.CreateConnection( this.ClassFixture );
         serviceCollection.AddSingleton( connection );
 
         var backend = CachingBackend.Create( b => b.Redis(), serviceCollection.BuildServiceProvider() );
@@ -68,7 +72,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     public async Task TestDisposeRedisBeforeCachingAsync()
     {
         ServiceCollection serviceCollection = [];
-        var connection = RedisFactory.CreateConnection( this.TestOptions );
+        var connection = RedisFactory.CreateConnection( this.ClassFixture );
         serviceCollection.AddSingleton( connection );
 
         var backend = CachingBackend.Create( b => b.Redis(), serviceCollection.BuildServiceProvider() );
@@ -210,7 +214,7 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
 
     protected IList<string> GetAllKeys( string prefix )
     {
-        using var connection = RedisFactory.CreateConnection( this.TestOptions );
+        using var connection = RedisFactory.CreateConnection( this.ClassFixture );
 
         var servers = connection.GetEndPoints().Select( endpoint => connection.GetServer( endpoint ) ).ToList();
         var keys = servers.SelectMany( server => server.Keys( pattern: prefix + "*" ) ).ToList();

@@ -5,7 +5,7 @@ using System.Net;
 namespace Metalama.Patterns.Caching.TestHelpers
 {
     // ReSharper disable once ClassNeverInstantiated.Global
-    public sealed class CachingTestOptions
+    public sealed class CachingClassFixture
     {
         public EndPoint? Endpoint { get; set; }
     }

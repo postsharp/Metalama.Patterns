@@ -371,7 +371,7 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
     }
 
     /// <inheritdoc />
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
+    protected override CacheItem? GetItemCore( string key, bool includeDependencies )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
         RedisValue[] itemList;
@@ -388,35 +388,28 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             if ( !includeDependencies || itemList[_itemVersionIndex] == _noDependencyVersion )
             {
-                goto itemGotten;
+                goto returnItem;
             }
 
             dependencies = this.GetDependencies( key );
 
             if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string?) itemList[_itemVersionIndex] )
             {
-                goto itemGotten;
+                goto returnItem;
             }
         }
 
         throw new CachingException( _tooManyGetItemAttemptsErrorMessage );
 
-    itemGotten:
+    returnItem:
 
-        var cacheValue = this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex] );
+        var dependencyArray = dependencies == null ? default : ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 );
 
-        if ( dependencies == null )
-        {
-            return new CacheValue( cacheValue.Value );
-        }
-        else
-        {
-            return new CacheValue( cacheValue.Value, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
-        }
+        return this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex], dependencyArray );
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async ValueTask<CacheItem?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         var valueKey = this.KeyBuilder.GetValueKey( key );
         RedisValue[] itemList;
@@ -433,31 +426,23 @@ internal sealed class DependenciesRedisCachingBackend : RedisCachingBackend
 
             if ( !includeDependencies || itemList[_itemVersionIndex] == _noDependencyVersion )
             {
-                goto itemGotten;
+                goto returnItem;
             }
 
             dependencies = await this.GetDependenciesAsync( key );
 
             if ( dependencies != null && dependencies[_itemVersionInDependenciesIndex] == (string?) itemList[_itemVersionIndex] )
             {
-                goto itemGotten;
+                goto returnItem;
             }
         }
 
         throw new CachingException( _tooManyGetItemAttemptsErrorMessage );
 
-    itemGotten:
+    returnItem:
+        var dependencyArray = dependencies == null ? default : ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 );
 
-        var cacheValue = this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex] );
-
-        if ( dependencies == null )
-        {
-            return new CacheValue( cacheValue.Value );
-        }
-        else
-        {
-            return new CacheValue( cacheValue.Value, ImmutableArray.Create( dependencies, _firstDependencyIndex, dependencies.Length - 1 ) );
-        }
+        return this.DeserializeAndExpire( valueKey, itemList[_itemValueIndex], dependencyArray );
     }
 
     /// <inheritdoc />

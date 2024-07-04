@@ -164,7 +164,7 @@ internal class MemoryCachingBackend : CachingBackend
         {
             var key = fullKey.Substring( prefix.Length );
 
-            var item = (CacheValue) (value ?? throw new ArgumentNullException( nameof(value) ));
+            var item = (CacheItem) (value ?? throw new ArgumentNullException( nameof(value) ));
             this.CleanDependencies( key, item );
             this.OnItemRemoved( key, CreateRemovalReason( reason ), this.Id );
         }
@@ -226,7 +226,7 @@ internal class MemoryCachingBackend : CachingBackend
     {
         var itemKey = GetItemKey( key );
         var lockTaken = false;
-        var previousValue = (MemoryCacheValue?) this._cache.Get( itemKey );
+        var previousValue = (MemoryCacheItem?) this._cache.Get( itemKey );
 
         try
         {
@@ -241,7 +241,7 @@ internal class MemoryCachingBackend : CachingBackend
                 this.AddDependencies( key, item.Dependencies );
             }
 
-            var cacheValue = this.Serialize( new MemoryCacheValue( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ) );
+            var cacheValue = this.Serialize( new MemoryCacheItem( item.Value, item.Dependencies, previousValue?.Sync ?? new object() ) );
 
             this._cache.Set(
                 itemKey,
@@ -264,54 +264,54 @@ internal class MemoryCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />  
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
+    protected override CacheItem? GetItemCore( string key, bool includeDependencies )
     {
-        return this.Deserialize( (MemoryCacheValue?) this._cache.Get( GetItemKey( key ) ) );
+        return this.Deserialize( (MemoryCacheItem?) this._cache.Get( GetItemKey( key ) ) );
     }
 
-    protected MemoryCacheValue? Deserialize( MemoryCacheValue? cacheValue )
+    protected MemoryCacheItem? Deserialize( MemoryCacheItem? item )
     {
-        if ( cacheValue == null )
+        if ( item == null )
         {
             return null;
         }
-        else if ( cacheValue.Value == null )
+        else if ( item.Value == null )
         {
-            return cacheValue;
+            return item;
         }
         else if ( this._serializer != null )
         {
-            var stream = new MemoryStream( (byte[]) cacheValue.Value! );
+            var stream = new MemoryStream( (byte[]) item.Value! );
             var reader = new BinaryReader( stream );
 
-            return cacheValue with { Value = this._serializer.Deserialize( reader ) };
+            return item with { Value = this._serializer.Deserialize( reader ) };
         }
         else
         {
-            return cacheValue;
+            return item;
         }
     }
 
-    protected MemoryCacheValue Serialize( MemoryCacheValue cacheValue )
+    protected MemoryCacheItem Serialize( MemoryCacheItem item )
     {
         if ( this._serializer != null )
         {
             var stream = new MemoryStream();
             var writer = new BinaryWriter( stream );
-            this._serializer.Serialize( cacheValue.Value!, writer );
+            this._serializer.Serialize( item.Value!, writer );
 
-            return cacheValue with { Value = stream.ToArray() };
+            return item with { Value = stream.ToArray() };
         }
         else
         {
-            return cacheValue;
+            return item;
         }
     }
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key ) => this.InvalidateDependencyImpl( key );
 
-    internal void InvalidateDependencyImpl( string key, MemoryCacheValue? replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
+    internal void InvalidateDependencyImpl( string key, MemoryCacheItem? replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
     {
         var items = (HashSet<string>?) this._cache.Get( GetDependencyKey( key ) );
 
@@ -335,7 +335,7 @@ internal class MemoryCachingBackend : CachingBackend
         this.OnDependencyInvalidated( key, this.Id );
     }
 
-    internal bool RemoveItemImpl( string key, MemoryCacheValue? replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
+    internal bool RemoveItemImpl( string key, MemoryCacheItem? replacementValue = null, DateTimeOffset? replacementValueExpiration = null )
     {
         if ( replacementValue != null && replacementValueExpiration == null )
         {
@@ -345,7 +345,7 @@ internal class MemoryCachingBackend : CachingBackend
 
         var itemKey = GetItemKey( key );
 
-        var cacheValue = (MemoryCacheValue?) this._cache.Get( itemKey );
+        var cacheValue = (MemoryCacheItem?) this._cache.Get( itemKey );
 
         if ( cacheValue == null )
         {
@@ -356,7 +356,7 @@ internal class MemoryCachingBackend : CachingBackend
         {
             if ( replacementValue == null )
             {
-                cacheValue = (MemoryCacheValue?) this._cache.Get( itemKey );
+                cacheValue = (MemoryCacheItem?) this._cache.Get( itemKey );
 
                 if ( cacheValue == null )
                 {
@@ -379,7 +379,7 @@ internal class MemoryCachingBackend : CachingBackend
         return true;
     }
 
-    private void CleanDependencies( string key, CacheValue cacheValue )
+    private void CleanDependencies( string key, CacheItem cacheValue )
     {
         if ( cacheValue.Dependencies == null )
         {
@@ -420,7 +420,14 @@ internal class MemoryCachingBackend : CachingBackend
     {
         if ( this._cache is MemoryCache classicMemoryCache )
         {
-            classicMemoryCache.Compact( 1 );
+            if ( (options & ClearCacheOptions.Compact) != 0 )
+            {
+                classicMemoryCache.Compact( 1 );
+            }
+            else
+            {
+                classicMemoryCache.Clear();
+            }
         }
         else
         {

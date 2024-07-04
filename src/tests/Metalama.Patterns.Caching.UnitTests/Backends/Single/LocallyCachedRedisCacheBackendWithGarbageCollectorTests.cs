@@ -10,9 +10,9 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 public class LocallyCachedRedisCacheBackendWithGarbageCollectorTests : LocallyCachedRedisCacheBackendTests
 {
     public LocallyCachedRedisCacheBackendWithGarbageCollectorTests(
-        CachingTestOptions cachingTestOptions,
-        RedisSetupFixture redisSetupFixture,
-        ITestOutputHelper testOutputHelper ) : base( cachingTestOptions, redisSetupFixture, testOutputHelper ) { }
+        CachingClassFixture cachingClassFixture,
+        RedisAssemblyFixture redisAssemblyFixture,
+        ITestOutputHelper testOutputHelper ) : base( cachingClassFixture, redisAssemblyFixture, testOutputHelper ) { }
 
     protected override bool EnableGarbageCollector => true;
 }

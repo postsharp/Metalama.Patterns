@@ -11,18 +11,18 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 
-public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisSetupFixture>
+public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisAssemblyFixture>
 {
-    private readonly RedisSetupFixture _redisSetupFixture;
+    private readonly RedisAssemblyFixture _redisAssemblyFixture;
 
     public LocallyCachedRedisCacheBackendTests(
-        CachingTestOptions cachingTestOptions,
-        RedisSetupFixture redisSetupFixture,
+        CachingClassFixture cachingClassFixture,
+        RedisAssemblyFixture redisAssemblyFixture,
         ITestOutputHelper testOutputHelper ) : base(
-        cachingTestOptions,
+        cachingClassFixture,
         testOutputHelper )
     {
-        this._redisSetupFixture = redisSetupFixture;
+        this._redisAssemblyFixture = redisAssemblyFixture;
     }
 
     protected virtual bool EnableGarbageCollector => false;
@@ -47,11 +47,11 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
     {
         return new CheckAfterDisposeCachingBackend(
             await RedisFactory.CreateBackendAsync(
-                this.TestOptions,
-                this._redisSetupFixture,
+                this.ClassFixture,
+                this._redisAssemblyFixture,
+                serviceProvider: this.ServiceProvider,
                 supportsDependencies: true,
                 collector: this.EnableGarbageCollector,
-                serviceProvider: this.ServiceProvider,
                 locallyCached: true ) );
     }
 
@@ -78,15 +78,16 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
         var testObject = new Issue15680CachingClass();
 
         CachedValueClass setValue;
-        var redisTestInstance = this._redisSetupFixture.TestInstance;
+        var redisTestInstance = this._redisAssemblyFixture.TestInstance;
 
-        this.TestOptions.Endpoint = redisTestInstance.Endpoint;
+        this.ClassFixture.Endpoint = redisTestInstance.Endpoint;
 
         await using ( this.InitializeTest(
                          "TestIssue15680",
                          await RedisFactory.CreateBackendAsync(
-                             this.TestOptions,
-                             this._redisSetupFixture,
+                             this.ClassFixture,
+                             this._redisAssemblyFixture,
+                             this.ServiceProvider, 
                              prefix: redisKeyPrefix,
                              locallyCached: false ),
                          b => b.WithProfile( "Issue15680" ) ) )
@@ -98,8 +99,9 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
         await using ( this.InitializeTest(
                          "TestIssue15680",
                          await RedisFactory.CreateBackendAsync(
-                             this.TestOptions,
-                             this._redisSetupFixture,
+                             this.ClassFixture,
+                             this._redisAssemblyFixture,
+                             this.ServiceProvider, 
                              prefix: redisKeyPrefix,
                              locallyCached: true ),
                          b => b.WithProfile( "Issue15680" ) ) )

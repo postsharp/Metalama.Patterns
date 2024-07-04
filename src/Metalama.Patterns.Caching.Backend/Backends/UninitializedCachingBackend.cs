@@ -32,7 +32,7 @@ internal sealed class UninitializedCachingBackend : CachingBackend
     }
 
     /// <inheritdoc />
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
+    protected override CacheItem? GetItemCore( string key, bool includeDependencies )
     {
         Throw();
 

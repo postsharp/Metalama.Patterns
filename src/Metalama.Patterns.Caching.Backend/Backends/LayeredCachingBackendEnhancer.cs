@@ -76,9 +76,7 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override void SetItemCore( string key, CacheItem item )
     {
-        var value = new LayeredCacheValue( item );
-
-        var newItem = item with { Value = value, Configuration = item.Configuration.WithoutAutoReload() };
+        var newItem = new MaterializedCacheItem( item );
 
         this.LocalCache.SetItem( key, item );
         this.UnderlyingBackend.SetItem( key, newItem );
@@ -87,9 +85,7 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
     /// <inheritdoc />
     protected override ValueTask SetItemAsyncCore( string key, CacheItem item, CancellationToken cancellationToken )
     {
-        var value = new LayeredCacheValue( item );
-
-        var newItem = item with { Value = value, Configuration = item.Configuration.WithoutAutoReload() };
+        var newItem = new MaterializedCacheItem( item );
 
         this.LocalCache.SetItem( key, item );
 
@@ -159,21 +155,21 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
     }
 
     /// <inheritdoc />
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies )
+    protected override CacheItem? GetItemCore( string key, bool includeDependencies )
     {
-        var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
+        var localCacheItem = this.LocalCache.GetItem( key, includeDependencies );
 
-        if ( localCacheValue == null )
+        if ( localCacheItem == null )
         {
-            var remoteCacheValue = this.GetValueFromUnderlyingBackend( key );
+            var remoteCacheItem = this.GetValueFromUnderlyingBackend( key );
 
-            if ( remoteCacheValue != null )
+            if ( remoteCacheItem != null )
             {
                 // We have a value stored remotely.
                 // Cache in local memory.
-                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+                this.SetMemoryCacheFromRemote( key, remoteCacheItem );
 
-                return GetReturnValue( remoteCacheValue );
+                return remoteCacheItem;
             }
             else
             {
@@ -182,28 +178,25 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
         }
         else
         {
-            switch ( localCacheValue )
+            switch ( localCacheItem )
             {
                 case RemovedValue removedValue:
                     {
                         // We have the magic string meaning that the node has been deleted.
 
-                        var remoteCacheValue = this.GetValueFromUnderlyingBackend( key );
+                        var remoteCacheItem = this.GetValueFromUnderlyingBackend( key );
 
-                        if ( remoteCacheValue == null )
+                        if ( remoteCacheItem == null )
                         {
                             return null;
                         }
                         else
                         {
-                            var multiLayerCacheValue = (LayeredCacheValue) (remoteCacheValue.Value
-                                                                            ?? throw new CachingAssertionFailedException( "null not expected." ));
-
-                            if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
+                            if ( remoteCacheItem.Timestamp > removedValue.Timestamp )
                             {
-                                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+                                this.SetMemoryCacheFromRemote( key, remoteCacheItem );
 
-                                return GetReturnValue( remoteCacheValue );
+                                return remoteCacheItem;
                             }
                             else
                             {
@@ -214,14 +207,14 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
                     }
 
                 default:
-                    return localCacheValue;
+                    return localCacheItem;
             }
         }
     }
 
-    private CacheValue? GetValueFromUnderlyingBackend( string key )
+    private MaterializedCacheItem? GetValueFromUnderlyingBackend( string key )
     {
-        var cacheValue = this.UnderlyingBackend.GetItem( key );
+        var cacheValue = (MaterializedCacheItem?) this.UnderlyingBackend.GetItem( key );
 
         if ( cacheValue == null )
         {
@@ -231,9 +224,9 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
         return cacheValue;
     }
 
-    private async Task<CacheValue?> GetValueFromUnderlyingBackendAsync( string key, CancellationToken cancellationToken )
+    private async Task<MaterializedCacheItem?> GetValueFromUnderlyingBackendAsync( string key, CancellationToken cancellationToken )
     {
-        var cacheValue = await this.UnderlyingBackend.GetItemAsync( key, true, cancellationToken );
+        var cacheValue = (MaterializedCacheItem?) await this.UnderlyingBackend.GetItemAsync( key, true, cancellationToken );
 
         if ( cacheValue == null )
         {
@@ -243,44 +236,28 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
         return cacheValue;
     }
 
-    private static CacheValue GetReturnValue( CacheValue storedCacheValue )
+    private void SetMemoryCacheFromRemote( string key, MaterializedCacheItem remoteCacheValue )
     {
-        var multiLayerCacheValue = (LayeredCacheValue) (
-            storedCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
-
-        return new CacheValue( multiLayerCacheValue.Value, storedCacheValue.Dependencies );
-    }
-
-    private void SetMemoryCacheFromRemote( string key, CacheValue remoteCacheValue )
-    {
-        var multiLayerCacheValue =
-            (LayeredCacheValue) (remoteCacheValue.Value ?? throw new CachingAssertionFailedException( "null not expected." ));
-
-        var cacheItem = new CacheItem(
-            multiLayerCacheValue.Value,
-            remoteCacheValue.Dependencies,
-            multiLayerCacheValue.ToCacheItemConfiguration() );
-
-        this.LocalCache.SetItem( key, cacheItem );
+        this.LocalCache.SetItem( key, remoteCacheValue );
     }
 
     /// <inheritdoc />
-    protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override async ValueTask<CacheItem?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
     {
         // ReSharper disable once MethodHasAsyncOverloadWithCancellation
         var localCacheValue = this.LocalCache.GetItem( key, includeDependencies );
 
         if ( localCacheValue == null )
         {
-            var remoteCacheValue = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
+            var remoteCacheItem = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
 
-            if ( remoteCacheValue != null )
+            if ( remoteCacheItem != null )
             {
                 // We have a value stored remotely.
                 // Cache in local memory.
-                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+                this.SetMemoryCacheFromRemote( key, remoteCacheItem );
 
-                return GetReturnValue( remoteCacheValue );
+                return remoteCacheItem;
             }
             else
             {
@@ -295,22 +272,22 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
                     {
                         // We have the magic string meaning that the node has been deleted.
 
-                        var remoteCacheValue = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
+                        var remoteCacheItem = await this.GetValueFromUnderlyingBackendAsync( key, cancellationToken );
 
-                        if ( remoteCacheValue == null )
+                        if ( remoteCacheItem == null )
                         {
                             return null;
                         }
                         else
                         {
-                            var multiLayerCacheValue = (LayeredCacheValue) (remoteCacheValue.Value
-                                                                            ?? throw new CachingAssertionFailedException( "null not expected." ));
+                            var multiLayerCacheValue = (MaterializedCacheItem) (remoteCacheItem.Value
+                                                                                ?? throw new CachingAssertionFailedException( "null not expected." ));
 
                             if ( multiLayerCacheValue.Timestamp > removedValue.Timestamp )
                             {
-                                this.SetMemoryCacheFromRemote( key, remoteCacheValue );
+                                this.SetMemoryCacheFromRemote( key, remoteCacheItem );
 
-                                return GetReturnValue( remoteCacheValue );
+                                return remoteCacheItem;
                             }
                             else
                             {
@@ -440,7 +417,7 @@ internal sealed class LayeredCachingBackendEnhancer : CachingBackendEnhancer
         public override bool ContainsDependency => this.UnderlyingBackendFeatures is { ContainsDependency: true, Blocking: true };
     }
 
-    private sealed record RemovedValue : MemoryCacheValue
+    private sealed record RemovedValue : MemoryCacheItem
     {
 #pragma warning disable SA1401
         public readonly long Timestamp = GetTimestamp();

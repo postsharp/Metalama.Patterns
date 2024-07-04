@@ -80,7 +80,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
     protected override bool ContainsItemCore( string key ) => this.UnderlyingBackend.ContainsItem( key );
 
     /// <inheritdoc />
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies ) => this.UnderlyingBackend.GetItem( key, includeDependencies );
+    protected override CacheItem? GetItemCore( string key, bool includeDependencies ) => this.UnderlyingBackend.GetItem( key, includeDependencies );
 
     /// <inheritdoc />
     protected override void RemoveItemCore( string key ) => this.UnderlyingBackend.RemoveItem( key );
@@ -108,7 +108,7 @@ public abstract class CachingBackendEnhancer : CachingBackend
         => this.UnderlyingBackend.ContainsDependencyAsync( key, cancellationToken );
 
     /// <inheritdoc />
-    protected override ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+    protected override ValueTask<CacheItem?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         => this.UnderlyingBackend.GetItemAsync( key, includeDependencies, cancellationToken );
 
     /// <inheritdoc />

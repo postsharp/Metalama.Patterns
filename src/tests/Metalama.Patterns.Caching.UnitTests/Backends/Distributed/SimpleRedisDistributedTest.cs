@@ -8,15 +8,18 @@ using Xunit.Abstractions;
 namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 // ReSharper disable once UnusedType.Global
-public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFixture<RedisSetupFixture>
+public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFixture<RedisAssemblyFixture>
 {
-    private readonly RedisSetupFixture _redisSetupFixture;
+    private readonly RedisAssemblyFixture _redisAssemblyFixture;
 
-    public SimpleRedisDistributedTest( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        cachingTestOptions,
+    public SimpleRedisDistributedTest(
+        CachingClassFixture cachingClassFixture,
+        RedisAssemblyFixture redisAssemblyFixture,
+        ITestOutputHelper testOutputHelper ) : base(
+        cachingClassFixture,
         testOutputHelper )
     {
-        this._redisSetupFixture = redisSetupFixture;
+        this._redisAssemblyFixture = redisAssemblyFixture;
     }
 
     protected override bool TestDependencies => false;
@@ -27,8 +30,8 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
 
         return
         [
-            await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, prefix ),
-            await RedisFactory.CreateBackendAsync( this.TestOptions, this._redisSetupFixture, prefix )
+            await RedisFactory.CreateBackendAsync( this.ClassFixture, this._redisAssemblyFixture,this.ServiceProvider, prefix ),
+            await RedisFactory.CreateBackendAsync( this.ClassFixture, this._redisAssemblyFixture, this.ServiceProvider, prefix )
         ];
     }
 
@@ -36,7 +39,7 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
 
     protected override void ConnectToRedisIfRequired()
     {
-        var redisTestInstance = this._redisSetupFixture.TestInstance;
-        this.TestOptions.Endpoint = redisTestInstance.Endpoint;
+        var redisTestInstance = this._redisAssemblyFixture.TestInstance;
+        this.ClassFixture.Endpoint = redisTestInstance.Endpoint;
     }
 }

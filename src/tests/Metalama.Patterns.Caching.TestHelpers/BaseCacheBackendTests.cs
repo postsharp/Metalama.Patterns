@@ -10,19 +10,19 @@ using Xunit.Abstractions;
 
 namespace Metalama.Patterns.Caching.TestHelpers
 {
-    public abstract class BaseCacheBackendTests : BaseCachingTests, IDisposable, IClassFixture<CachingTestOptions>
+    public abstract class BaseCacheBackendTests : BaseCachingTests, IDisposable, IClassFixture<CachingClassFixture>
     {
         protected const int Timeout = 30_000; // 30 seconds ought to be enough to anyone. (otherwise the test should be refactored, anyway).
         protected static readonly TimeSpan TimeoutTimeSpan = TimeSpan.FromMilliseconds( Timeout );
 
-        protected BaseCacheBackendTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
+        protected BaseCacheBackendTests( CachingClassFixture cachingClassFixture, ITestOutputHelper testOutputHelper ) : base( testOutputHelper )
         {
-            this.TestOptions = cachingTestOptions;
+            this.ClassFixture = cachingClassFixture;
         }
 
         protected virtual bool TestDependencies { get; } = true;
 
-        protected CachingTestOptions TestOptions { get; }
+        protected CachingClassFixture ClassFixture { get; }
 
         protected abstract CheckAfterDisposeCachingBackend CreateBackend();
 
@@ -134,6 +134,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 var cacheItem0 = new CacheItem( storedValue0, this.TestDependencies ? ["a", "b", "c"] : default );
 
                 cache.SetItem( key, cacheItem0 );
+                this.GiveChanceToResetLocalCache( cache );
                 var retrievedItem = cache.GetItem( key );
 
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
@@ -172,6 +173,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 // [Porting] Not fixing, can't be certain of original intent.
                 // ReSharper disable once MethodHasAsyncOverload
                 cache.SetItem( key, cacheItem0 );
+                this.GiveChanceToResetLocalCache( cache );
                 var retrievedItem = await cache.GetItemAsync( key );
 
                 AssertEx.NotNull( retrievedItem, "The item has not been stored in the cache." );
@@ -210,8 +212,8 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     var cacheItem = new CacheItem(
                         storedValue,
-                        Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
-                        Dependencies: this.TestDependencies ? ["d"] : default );
+                        configuration: new CacheItemConfiguration { AbsoluteExpiration = offset },
+                        dependencies: this.TestDependencies ? ["d"] : default );
 
                     var itemRemovedEvent = new ManualResetEvent( false );
                     cache.ItemRemoved += ( _, _ ) => itemRemovedEvent.Set();
@@ -278,7 +280,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     var cacheItem = new CacheItem(
                         storedValue,
-                        Configuration:
+                        configuration:
                         new CacheItemConfiguration { SlidingExpiration = expiration } );
 
                     var itemRemoved = new ManualResetEventSlim( false );
@@ -342,7 +344,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                     var cacheItem = new CacheItem(
                         storedValue,
-                        Configuration:
+                        configuration:
                         new CacheItemConfiguration { SlidingExpiration = expiration } );
 
                     var timeWhenSet = DateTime.Now;
@@ -408,7 +410,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 const string key = "0";
                 var offset = this.GetExpirationQuantum();
 
-                var cacheItem = new CacheItem( storedValue, Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
+                var cacheItem = new CacheItem( storedValue, configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
                 cache.SetItem( key, cacheItem );
 
@@ -452,7 +454,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 const string key = "0";
                 var offset = this.GetExpirationQuantum();
 
-                var cacheItem = new CacheItem( storedValue, Configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
+                var cacheItem = new CacheItem( storedValue, configuration: new CacheItemConfiguration { AbsoluteExpiration = offset } );
 
                 await cache.SetItemAsync( key, cacheItem );
 
@@ -494,7 +496,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 var cacheItem = new CacheItem( storedValue );
                 cache.SetItem( key, cacheItem );
 
-                cache.Clear();
+                cache.Clear( ClearCacheOptions.Compact );
 
                 Assert.True( eventRaised.Wait( TimeSpan.FromSeconds( 5 ) ), "The event has not been raised." );
                 AssertEx.NotNull( removalArguments, "The event did not pass any arguments." );
@@ -531,7 +533,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
                 var cacheItem = new CacheItem( storedValue );
                 await cache.SetItemAsync( key, cacheItem );
 
-                await cache.ClearAsync();
+                await cache.ClearAsync( ClearCacheOptions.Compact );
 
                 Assert.True( eventRaised.WaitOne( TimeoutTimeSpan ) );
 
@@ -586,7 +588,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    Dependencies: [dependencyKey] );
+                    dependencies: [dependencyKey] );
 
                 cache.SetItem( key, cacheItem );
                 cache.InvalidateDependency( dependencyKey );
@@ -649,7 +651,7 @@ namespace Metalama.Patterns.Caching.TestHelpers
 
                 var cacheItem = new CacheItem(
                     storedValue,
-                    Dependencies: [dependencyKey] );
+                    dependencies: [dependencyKey] );
 
                 await cache.SetItemAsync( key, cacheItem );
 

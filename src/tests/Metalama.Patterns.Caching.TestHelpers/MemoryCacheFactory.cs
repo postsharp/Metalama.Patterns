@@ -14,7 +14,7 @@ public static class MemoryCacheFactory
     public static CachingBackend CreateBackend( IServiceProvider? serviceProvider, string debugName = "test", bool withSerializer = false )
     {
         var backend = CachingBackend.Create(
-            b => b.Memory( new MemoryCachingBackendConfiguration() { DebugName = debugName, Serializer = withSerializer ? new JsonCachingFormatter() : null } )
+            b => b.Memory( new MemoryCachingBackendConfiguration() { DebugName = debugName, Serializer = withSerializer ? new JsonCachingSerializer() : null } )
                 .WithMemoryCache( CreateCache() ),
             serviceProvider );
 

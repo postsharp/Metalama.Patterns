@@ -9,14 +9,14 @@ namespace Metalama.Patterns.Caching.Serializers;
 /// A serialized based on <c>System.Text.Json</c>.
 /// </summary>
 [PublicAPI]
-public class JsonCachingFormatter : ICachingSerializer
+public class JsonCachingSerializer : ICachingSerializer
 {
     private const byte _null = 0;
     private const byte _object = 1;
 
     private readonly JsonSerializerOptions _options;
 
-    public JsonCachingFormatter( JsonSerializerOptions? options = null )
+    public JsonCachingSerializer( JsonSerializerOptions? options = null )
     {
         this._options = options ?? new JsonSerializerOptions();
     }

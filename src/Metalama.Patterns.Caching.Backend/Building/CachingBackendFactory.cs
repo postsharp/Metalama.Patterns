@@ -33,7 +33,7 @@ public static class CachingBackendFactory
     /// Adds an in-memory, in-process L1 cache in front of another in-memory back-end. This method is used for tests.
     /// </summary>
     [Obsolete( "Adding a memory cache on the top of another memory cache should only be used in tests." )]
-    public static LayeredCachingBackendBuilder WithL1( this MemoryCachingBackendBuilder builder, LayeredCachingBackendConfiguration? configuration = null )
+    public static LayeredCachingBackendBuilder WithL1( this ConcreteCachingBackendBuilder builder, LayeredCachingBackendConfiguration? configuration = null )
         => new( builder, builder.ServiceProvider, configuration );
 
     /// <summary>

@@ -18,7 +18,7 @@ internal class NullCachingBackend : CachingBackend
     protected override bool ContainsItemCore( string key ) => false;
 
     /// <inheritdoc />
-    protected override CacheValue? GetItemCore( string key, bool includeDependencies ) => null;
+    protected override CacheItem? GetItemCore( string key, bool includeDependencies ) => null;
 
     /// <inheritdoc />
     protected override void InvalidateDependencyCore( string key ) { }

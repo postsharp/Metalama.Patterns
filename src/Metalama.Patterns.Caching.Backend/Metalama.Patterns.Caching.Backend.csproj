@@ -20,6 +20,7 @@
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
         <PackageReference Include="System.Collections.Immutable" />
         <PackageReference Include="System.Text.Json" />
+        <InternalsVisibleTo Include="Metalama.Patterns.Caching.UnitTests" />
     </ItemGroup>
 
     <ItemGroup Condition="'$(TargetFramework)' == 'net471'">

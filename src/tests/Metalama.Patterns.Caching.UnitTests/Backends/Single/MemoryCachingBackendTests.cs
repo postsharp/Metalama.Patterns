@@ -9,8 +9,8 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
     [UsedImplicitly]
     public sealed class MemoryCachingBackendTests : BaseCacheBackendTests
     {
-        public MemoryCachingBackendTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
-            cachingTestOptions,
+        public MemoryCachingBackendTests( CachingClassFixture cachingClassFixture, ITestOutputHelper testOutputHelper ) : base(
+            cachingClassFixture,
             testOutputHelper ) { }
 
         protected override CheckAfterDisposeCachingBackend CreateBackend()
@@ -22,8 +22,8 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single
     [UsedImplicitly]
     public sealed class SerializingMemoryCachingBackendTests : BaseCacheBackendTests
     {
-        public SerializingMemoryCachingBackendTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
-            cachingTestOptions,
+        public SerializingMemoryCachingBackendTests( CachingClassFixture cachingClassFixture, ITestOutputHelper testOutputHelper ) : base(
+            cachingClassFixture,
             testOutputHelper ) { }
 
         protected override CheckAfterDisposeCachingBackend CreateBackend()
