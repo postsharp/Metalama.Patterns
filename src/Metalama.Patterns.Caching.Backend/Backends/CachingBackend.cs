@@ -960,6 +960,8 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
         }
     }
 
+    private static void RaiseEvent( WaitCallback action ) => ThreadPool.QueueUserWorkItem( action );
+
     /// <summary>
     /// Raises the <see cref="ItemRemoved"/> event given a <see cref="CacheItemRemovedEventArgs"/>.
     /// </summary>
@@ -970,7 +972,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
         if ( this._itemRemoved != null )
         {
-            Task.Run( () => this._itemRemoved?.Invoke( this, args ), this.DisposeCancellationToken );
+            RaiseEvent( _ => this._itemRemoved?.Invoke( this, args ) );
         }
     }
 
@@ -988,7 +990,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
         if ( this._itemRemoved != null )
         {
-            Task.Run( () => this._itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) ), this.DisposeCancellationToken );
+            RaiseEvent( _ => this._itemRemoved?.Invoke( this, new CacheItemRemovedEventArgs( key, reason, sourceId ) ) );
         }
     }
 
@@ -1005,9 +1007,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
         if ( this._dependencyInvalidated != null )
         {
-            Task.Run(
-                () => this._dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) ),
-                this.DisposeCancellationToken );
+            RaiseEvent( _ => this._dependencyInvalidated?.Invoke( this, new CacheDependencyInvalidatedEventArgs( key, sourceId ) ) );
         }
     }
 
@@ -1022,7 +1022,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
 
         if ( this._dependencyInvalidated != null )
         {
-            Task.Run( () => this._dependencyInvalidated?.Invoke( this, args ), this.DisposeCancellationToken );
+            RaiseEvent( _ => this._dependencyInvalidated?.Invoke( this, args ) );
         }
     }
 
@@ -1067,7 +1067,7 @@ public abstract class CachingBackend : IDisposable, IAsyncDisposable
                         // Reset events to make sure that handlers don't make problems.
                         this._itemRemoved = null;
                         this._dependencyInvalidated = null;
-                        
+
                         this.DisposeCore( disposing, cancellationToken );
 
                         this._initializeSemaphore.Dispose();
