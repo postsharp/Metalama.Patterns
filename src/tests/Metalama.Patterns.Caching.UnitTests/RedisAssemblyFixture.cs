@@ -10,7 +10,7 @@ namespace Metalama.Patterns.Caching.Tests;
 /// Maintains a single instance of a Redis server that's disposed only when all tests finish executing. That way, we don't spend time starting the server
 /// again at the beginning of each test.
 /// </summary>
-public sealed class RedisSetupFixture : IDisposable
+public sealed class RedisAssemblyFixture : IDisposable
 {
     void IDisposable.Dispose() => this.RedisCleanup();
 
@@ -26,11 +26,11 @@ public sealed class RedisSetupFixture : IDisposable
         {
             lock ( this._lock )
             {
-                this._testInstance ??= new RedisTestInstance( nameof(RedisSetupFixture) );
+                this._testInstance ??= new RedisTestInstance( nameof(RedisAssemblyFixture) );
 
                 if ( this._testInstance.IsDisposed )
                 {
-                    throw new ObjectDisposedException( nameof(RedisSetupFixture) + "." + nameof(this.TestInstance) );
+                    throw new ObjectDisposedException( nameof(RedisAssemblyFixture) + "." + nameof(this.TestInstance) );
                 }
             }
 

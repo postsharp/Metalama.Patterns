@@ -15,7 +15,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
     private readonly RedisCachingBackendConfiguration _configuration;
     private readonly FlashtraceSource _logger;
 
-    internal RedisNotificationQueue NotificationQueue { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
+    internal RedisNotificationQueueProcessor NotificationQueueProcessor { get; set; } = null!; // "Guaranteed" to be initialized via Init et al.
 
     private readonly bool _ownsBackend;
     private readonly DependenciesRedisCachingBackend _backend;
@@ -199,7 +199,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
     /// </summary>
     public void Dispose()
     {
-        this.NotificationQueue.Dispose();
+        this.NotificationQueueProcessor.Dispose();
 
         if ( this._ownsBackend )
         {
@@ -216,7 +216,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
     {
         cancellationToken.ThrowIfCancellationRequested();
 
-        await this.NotificationQueue.DisposeAsync( cancellationToken );
+        await this.NotificationQueueProcessor.DisposeAsync( cancellationToken );
 
         cancellationToken.ThrowIfCancellationRequested();
 
@@ -226,7 +226,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
         }
     }
 
-    internal int BackgroundTaskExceptions => this.NotificationQueue.BackgroundTaskExceptions;
+    internal int BackgroundTaskExceptions => this.NotificationQueueProcessor.BackgroundTaskExceptions;
 
     Task IHostedService.StartAsync( CancellationToken cancellationToken ) => this.InitializeAsync( cancellationToken );
 
@@ -244,7 +244,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
         }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        this.NotificationQueue = RedisNotificationQueue.Create(
+        this.NotificationQueueProcessor = RedisNotificationQueueProcessor.Create(
             this.ToString()!,
             this.Connection,
             [this.KeyBuilder.NotificationChannel],
@@ -265,7 +265,7 @@ public sealed class RedisCacheDependencyGarbageCollector : IHostedService, IDisp
         }
 
         // ReSharper disable once RedundantSuppressNullableWarningExpression
-        this.NotificationQueue = await RedisNotificationQueue.CreateAsync(
+        this.NotificationQueueProcessor = await RedisNotificationQueueProcessor.CreateAsync(
             this.ToString()!,
             this.Connection,
             [this.KeyBuilder.NotificationChannel],

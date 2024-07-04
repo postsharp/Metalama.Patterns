@@ -9,23 +9,26 @@ using Xunit.Abstractions;
 namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 // ReSharper disable once UnusedType.Global
-public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixture<RedisSetupFixture>
+public class RedisInvalidationTests : BaseInvalidationBrokerTests, IAssemblyFixture<RedisAssemblyFixture>
 {
-    private readonly RedisSetupFixture _redisSetupFixture;
+    private readonly RedisAssemblyFixture _redisAssemblyFixture;
 
-    public RedisInvalidationTests( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture, ITestOutputHelper testOutputHelper ) : base(
-        cachingTestOptions,
+    public RedisInvalidationTests(
+        CachingClassFixture cachingClassFixture,
+        RedisAssemblyFixture redisAssemblyFixture,
+        ITestOutputHelper testOutputHelper ) : base(
+        cachingClassFixture,
         testOutputHelper )
     {
-        this._redisSetupFixture = redisSetupFixture;
+        this._redisAssemblyFixture = redisAssemblyFixture;
     }
 
     protected override void ConnectToRedisIfRequired()
     {
-        RedisFactory.CreateTestInstance( this.TestOptions, this._redisSetupFixture );
+        RedisFactory.CreateTestInstance( this.ClassFixture, this._redisAssemblyFixture );
     }
 
     protected override ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix )
         => builder.WithRedisSynchronization(
-            new RedisCacheSynchronizerConfiguration() { Connection = RedisFactory.CreateConnection( this.TestOptions ), Prefix = prefix } );
+            new RedisCacheSynchronizerConfiguration() { Connection = RedisFactory.CreateConnection( this.ClassFixture ), Prefix = prefix } );
 }

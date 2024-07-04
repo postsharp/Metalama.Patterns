@@ -11,23 +11,23 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 internal static class RedisFactory
 {
-    public static RedisTestInstance? CreateTestInstance( CachingTestOptions cachingTestOptions, RedisSetupFixture redisSetupFixture )
+    public static RedisTestInstance? CreateTestInstance( CachingClassFixture cachingClassFixture, RedisAssemblyFixture redisAssemblyFixture )
     {
         RedisTestInstance? redisTestInstance = null;
 
-        if ( cachingTestOptions.Endpoint == null )
+        if ( cachingClassFixture.Endpoint == null )
         {
-            redisTestInstance = redisSetupFixture.TestInstance;
-            cachingTestOptions.Endpoint = redisTestInstance.Endpoint;
+            redisTestInstance = redisAssemblyFixture.TestInstance;
+            cachingClassFixture.Endpoint = redisTestInstance.Endpoint;
         }
 
         return redisTestInstance;
     }
 
-    public static IConnectionMultiplexer CreateConnection( CachingTestOptions cachingTestOptions )
+    public static IConnectionMultiplexer CreateConnection( CachingClassFixture cachingClassFixture )
     {
-        var endPoint = cachingTestOptions.Endpoint
-                       ?? throw new ArgumentOutOfRangeException( nameof(cachingTestOptions), "The Endpoint property is null." );
+        var endPoint = cachingClassFixture.Endpoint
+                       ?? throw new ArgumentOutOfRangeException( nameof(cachingClassFixture), "The Endpoint property is null." );
 
         var socketManager = new SocketManager();
 
@@ -41,17 +41,17 @@ internal static class RedisFactory
     }
 
     public static async Task<CheckAfterDisposeCachingBackend> CreateBackendAsync(
-        CachingTestOptions cachingTestOptions,
-        RedisSetupFixture redisSetupFixture,
+        CachingClassFixture cachingClassFixture,
+        RedisAssemblyFixture redisAssemblyFixture,
+        IServiceProvider serviceProvider,
         string? prefix = null,
         bool supportsDependencies = false,
         bool collector = false,
-        IServiceProvider? serviceProvider = null,
         bool locallyCached = false )
     {
-        _ = CreateTestInstance( cachingTestOptions, redisSetupFixture );
+        _ = CreateTestInstance( cachingClassFixture, redisAssemblyFixture );
 
-        var connection = CreateConnection( cachingTestOptions );
+        var connection = CreateConnection( cachingClassFixture );
 
         var configuration =
             new RedisCachingBackendConfiguration

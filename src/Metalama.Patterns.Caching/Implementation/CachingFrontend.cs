@@ -28,7 +28,7 @@ internal sealed class CachingFrontend
         FlashtraceSource logger )
     {
         ILockHandle? lockHandle = null;
-        CacheValue? item = null;
+        CacheItem? item = null;
 
         var profile = this._cachingService.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
         var backend = profile.Backend;
@@ -153,7 +153,7 @@ internal sealed class CachingFrontend
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
 
-        CacheValue? item = null;
+        CacheItem? item = null;
         ILockHandle? lockHandle = null;
 
         var profile = this._cachingService.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
@@ -284,7 +284,7 @@ internal sealed class CachingFrontend
     {
         // Keep any changes in logic in sync with other overloads of GetOrAddAsync.
 
-        CacheValue? item = null;
+        CacheItem? item = null;
         ILockHandle? lockHandle = null;
 
         var profile = this._cachingService.Profiles[configuration.ProfileName ?? CachingProfile.DefaultName];
@@ -403,7 +403,7 @@ internal sealed class CachingFrontend
         }
     }
 
-    private static void AddCacheHitDependencies( CachingBackend backend, string key, CacheValue item )
+    private static void AddCacheHitDependencies( CachingBackend backend, string key, CacheItem item )
     {
         if ( backend.SupportedFeatures.Dependencies )
         {

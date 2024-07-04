@@ -142,7 +142,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
 
     /// <summary>
     /// Gets or sets a function that creates the serializer used to serialize objects into byte arrays (and conversely).
-    /// The default value is <c>null</c>, which means that <see cref="RedisJsonCachingFormatter"/> will be used.
+    /// The default value is <c>null</c>, which means that <see cref="JsonCachingSerializer"/> will be used.
     /// </summary>
     public Func<ICachingSerializer>? CreateSerializer { get; init; }
 
@@ -190,7 +190,7 @@ public record RedisCachingBackendConfiguration : CachingBackendConfiguration
     /// <remarks>
     /// The default value is 1 minute.
     /// </remarks>
-    public TimeSpan ConnectionTimeout { get; init; } = RedisNotificationQueue.DefaultSubscriptionTimeout;
+    public TimeSpan ConnectionTimeout { get; init; } = RedisNotificationQueueProcessor.DefaultSubscriptionTimeout;
 
     /// <summary>
     /// Gets or sets a value indicating whether the logs of the <see cref="ConnectionMultiplexer"/> should be captured and

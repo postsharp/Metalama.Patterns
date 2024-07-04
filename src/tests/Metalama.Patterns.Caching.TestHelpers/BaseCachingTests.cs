@@ -21,8 +21,18 @@ public abstract class BaseCachingTests : ICachingExceptionObserver
         AddLogging( serviceCollection, testOutputHelper );
         serviceCollection.AddSingleton<ICachingExceptionObserver>( this );
 
+        // ReSharper disable once VirtualMemberCallInConstructor
+        this.AddServices( serviceCollection );
+
         this.ServiceProvider = serviceCollection.BuildServiceProvider();
         CachingService.Default = CachingService.CreateUninitialized( this.ServiceProvider );
+    }
+
+    protected BackgroundTaskSchedulerObserver BackgroundTaskSchedulerObserver { get; } = new();
+
+    protected virtual void AddServices( ServiceCollection serviceCollection )
+    {
+        serviceCollection.AddSingleton<IBackgroundTaskSchedulerObserver>( this.BackgroundTaskSchedulerObserver );
     }
 
     private static void AddLogging( IServiceCollection serviceCollection, ITestOutputHelper testOutputHelper )

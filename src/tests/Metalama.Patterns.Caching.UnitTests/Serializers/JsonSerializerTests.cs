@@ -8,5 +8,5 @@ namespace Metalama.Patterns.Caching.Tests.Serializers;
 [UsedImplicitly]
 public sealed class JsonSerializerTests : SerializerBaseTests
 {
-    public JsonSerializerTests() : base( new JsonCachingFormatter() ) { }
+    public JsonSerializerTests() : base( new JsonCachingSerializer() ) { }
 }

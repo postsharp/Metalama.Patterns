@@ -126,14 +126,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
             return await this._backend.ContainsItemAsync( key, cancellationToken );
         }
 
-        protected override CacheValue? GetItemCore( string key, bool includeDependencies )
+        protected override CacheItem? GetItemCore( string key, bool includeDependencies )
         {
             ++this._actualGetCount;
 
             return this._backend.GetItem( key, includeDependencies );
         }
 
-        protected override async ValueTask<CacheValue?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
+        protected override async ValueTask<CacheItem?> GetItemAsyncCore( string key, bool includeDependencies, CancellationToken cancellationToken )
         {
             ++this._actualGetCount;
 

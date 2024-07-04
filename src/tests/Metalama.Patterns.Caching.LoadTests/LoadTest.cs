@@ -202,7 +202,7 @@ internal sealed class LoadTest : IDisposable
 
             if ( dependenciesCount == 0 )
             {
-                item = new CacheItem( payload, Configuration: configuration );
+                item = new CacheItem( payload, configuration: configuration );
             }
             else
             {

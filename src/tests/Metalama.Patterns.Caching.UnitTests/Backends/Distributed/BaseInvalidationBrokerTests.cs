@@ -9,8 +9,8 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Distributed;
 
 public abstract class BaseInvalidationBrokerTests : BaseDistributedCacheTests
 {
-    protected BaseInvalidationBrokerTests( CachingTestOptions cachingTestOptions, ITestOutputHelper testOutputHelper ) : base(
-        cachingTestOptions,
+    protected BaseInvalidationBrokerTests( CachingClassFixture cachingClassFixture, ITestOutputHelper testOutputHelper ) : base(
+        cachingClassFixture,
         testOutputHelper ) { }
 
     protected abstract ConcreteCachingBackendBuilder AddInvalidationBroker( MemoryCachingBackendBuilder builder, string prefix );
