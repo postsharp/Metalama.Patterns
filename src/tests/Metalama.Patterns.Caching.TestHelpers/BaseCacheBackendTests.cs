@@ -94,7 +94,14 @@ namespace Metalama.Patterns.Caching.TestHelpers
         protected virtual void Cleanup()
         {
             GC.Collect();
-            Assert.Equal( 0, this.BackgroundTaskSchedulerObserver.PendingTasks );
+
+            foreach ( var pendingTask in this.BackgroundTaskSchedulerObserver.PendingTasks )
+            {
+                this.TestOutputHelper.WriteLine( "Pending task:" );
+                this.TestOutputHelper.WriteLine( pendingTask.ToString() );
+            }
+
+            Assert.Empty( this.BackgroundTaskSchedulerObserver.PendingTasks );
         }
 
         [Fact( Timeout = Timeout )]

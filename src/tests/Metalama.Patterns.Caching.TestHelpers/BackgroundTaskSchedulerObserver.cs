@@ -2,18 +2,19 @@
 
 using Metalama.Patterns.Caching.Implementation;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Caching.TestHelpers;
 
 public sealed class BackgroundTaskSchedulerObserver : IBackgroundTaskSchedulerObserver
 {
-    private readonly ConcurrentDictionary<int, int> _pendingBackgroundTasks = new();
+    private readonly ConcurrentDictionary<int, StackTrace> _pendingBackgroundTasks = new();
     private volatile int _nextTaskId;
 
     public int OnTaskEnqueued()
     {
         var id = Interlocked.Increment( ref this._nextTaskId );
-        this._pendingBackgroundTasks.TryAdd( id, id );
+        this._pendingBackgroundTasks.TryAdd( id, new StackTrace() );
 
         return id;
     }
@@ -23,5 +24,5 @@ public sealed class BackgroundTaskSchedulerObserver : IBackgroundTaskSchedulerOb
         this._pendingBackgroundTasks.TryRemove( observedTaskId, out _ );
     }
 
-    public int PendingTasks => this._pendingBackgroundTasks.Count;
+    public IEnumerable<StackTrace> PendingTasks => this._pendingBackgroundTasks.Values;
 }
