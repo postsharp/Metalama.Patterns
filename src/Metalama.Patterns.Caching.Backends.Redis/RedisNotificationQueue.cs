@@ -311,13 +311,13 @@ internal sealed class RedisNotificationQueue : IDisposable
 
     private void Dispose( bool disposing )
     {
-        using ( var activity = this._logger.Default.OpenActivity( Formatted( "Disposing" ) ) )
+        using ( var activity = this._logger.Default.IfEnabled?.OpenActivity( Formatted( "Disposing( queue: {Queue} )", this._id ) ) )
         {
             try
             {
                 if ( !this.TryChangeStatus( Status.Default, Status.DisposingPhase1 ) )
                 {
-                    activity.SetOutcome( FlashtraceLevel.Debug, Formatted( "The method was already called." ) );
+                    activity?.SetOutcome( FlashtraceLevel.Debug, Formatted( "The method was already called." ) );
                     this._disposeTask.Task.Wait();
 
                     return;
@@ -365,7 +365,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
                     this.ChangeStatus( Status.Disposed );
 
-                    activity.SetSuccess();
+                    activity?.SetSuccess();
                     this._disposeTask.SetResult( true );
                 }
                 catch ( Exception e )
@@ -377,7 +377,7 @@ internal sealed class RedisNotificationQueue : IDisposable
             }
             catch ( Exception e )
             {
-                activity.SetException( e );
+                activity?.SetException( e );
 
                 throw;
             }
@@ -391,7 +391,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
     public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
-        using ( var activity = this._logger.Default.IfEnabled?.OpenAsyncActivity( Formatted( "Disposing" ) ) )
+        using ( var activity = this._logger.Default.IfEnabled?.OpenAsyncActivity( Formatted( "Disposing( queue: {Queue} )", this._id ) ) )
         {
             try
             {
