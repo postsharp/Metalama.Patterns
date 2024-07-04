@@ -183,7 +183,7 @@ internal sealed class RedisNotificationQueue : IDisposable
     {
         if ( state is not WeakReference<RedisNotificationQueue> queueRef )
         {
-            throw new CachingAssertionFailedException( "null was not expected." );
+            throw new CachingAssertionFailedException( "Did not get a WeakReference<RedisNotificationQueue>." );
         }
 
         if ( !queueRef.TryGetTarget( out var queue ) )
@@ -223,7 +223,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
                     using ( var activity =
                            logger.Default.OpenActivity(
-                               Formatted( "Processing notification {Value} received on channel {Channel}", notification.Value, notification.Channel ) ) )
+                               Formatted( "Processing notification '{Value}' received on channel '{Channel}'", notification.Value, notification.Channel ) ) )
                     {
                         try
                         {
@@ -248,7 +248,7 @@ internal sealed class RedisNotificationQueue : IDisposable
                 {
                     // If we have any unhandled exception here, don't want to crash the process, but instead
                     // we want to continue processing other queue items.
-                    logger.Error.Write( Formatted( "Exception while processing the notification {Notification}.", notification ), e );
+                    logger.Error.Write( Formatted( "Exception while processing the notification '{Notification}'.", notification ), e );
                     queue.BackgroundTaskExceptions++;
                 }
 
@@ -311,7 +311,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
     private void Dispose( bool disposing )
     {
-        using ( var activity = this._logger.Default.OpenActivity( Formatted( "Disposing( queue: {Queue} )", this._id ) ) )
+        using ( var activity = this._logger.Default.OpenActivity( Formatted( "Dispose( queue: {Queue} )", this._id ) ) )
         {
             try
             {
@@ -331,6 +331,7 @@ internal sealed class RedisNotificationQueue : IDisposable
                         {
                             try
                             {
+                                this._logger.Trace.IfEnabled?.Write( Formatted( "Unsubscribing." ) );
                                 this.Subscriber.UnsubscribeAll();
                             }
                             catch ( ObjectDisposedException ) { }
@@ -346,6 +347,7 @@ internal sealed class RedisNotificationQueue : IDisposable
                         // Redis resources are being finalized in the wrong order.
                     }
 
+                    this._logger.Trace.IfEnabled?.Write( Formatted( "NotificationQueue: CompleteAdding." ) );
                     this._notificationProcessingLock.Set();
                     this._notificationQueue.CompleteAdding();
 
@@ -353,13 +355,16 @@ internal sealed class RedisNotificationQueue : IDisposable
 
                     if ( this._notificationProcessingThread.IsAlive )
                     {
+                        this._logger.Trace.IfEnabled?.Write( Formatted( "Waiting for the notification processing thread." ) );
                         this._notificationProcessingThreadCompleted.Task.Wait();
+                        this._logger.Trace.IfEnabled?.Write( Formatted( "Waiting for the notification processing thread: completed." ) );
                     }
 
                     // All messages are processed at this point.
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 
+                    this._logger.Trace.IfEnabled?.Write( Formatted( "Disposing the notification queue." ) );
                     this._notificationQueue.Dispose();
                     this._notificationProcessingLock.Dispose();
 
@@ -391,7 +396,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
     public async ValueTask DisposeAsync( CancellationToken cancellationToken = default )
     {
-        using ( var activity = this._logger.Default.IfEnabled?.OpenAsyncActivity( Formatted( "Disposing( queue: {Queue} )", this._id ) ) )
+        using ( var activity = this._logger.Default.IfEnabled?.OpenAsyncActivity( Formatted( "DisposeAsync( queue: {Queue} )", this._id ) ) )
         {
             try
             {
@@ -411,6 +416,7 @@ internal sealed class RedisNotificationQueue : IDisposable
                     {
                         try
                         {
+                            this._logger.Trace.IfEnabled?.Write( Formatted( "Unsubscribing" ) );
                             await this.Subscriber.UnsubscribeAllAsync();
                         }
                         catch ( ObjectDisposedException ) { }
@@ -422,6 +428,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
                     cancellationToken.ThrowIfCancellationRequested();
 
+                    this._logger.Trace.IfEnabled?.Write( Formatted( "NotificationQueue: CompleteAdding." ) );
                     this._notificationProcessingLock.Set();
                     this._notificationQueue.CompleteAdding();
 
@@ -437,7 +444,9 @@ internal sealed class RedisNotificationQueue : IDisposable
 #endif
                             using ( cancellationToken.Register( () => this._notificationProcessingThreadCompleted.SetCanceled() ) )
                         {
+                            this._logger.Trace.IfEnabled?.Write( Formatted( "Waiting for the notification processing thread." ) );
                             await this._notificationProcessingThreadCompleted.Task;
+                            this._logger.Trace.IfEnabled?.Write( Formatted( "Waiting for the notification processing thread: completed." ) );
 
                             // All messages are processed at this point.\
                         }
@@ -445,6 +454,7 @@ internal sealed class RedisNotificationQueue : IDisposable
 
                     this.ChangeStatus( Status.DisposingPhase2 );
 
+                    this._logger.Trace.IfEnabled?.Write( Formatted( "Disposing the notification queue." ) );
                     this._notificationQueue.Dispose();
                     this._notificationProcessingLock.Dispose();
 

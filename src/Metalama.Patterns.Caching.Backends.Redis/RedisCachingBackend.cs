@@ -249,7 +249,7 @@ internal class RedisCachingBackend : CachingBackend
                 return true;
 
             default:
-                this.LogSource.Debug.Write( Formatted( "Event {Kind} ignored.", kind ) );
+                this.LogSource.Debug.Write( Formatted( "Event '{Kind}' ignored.", kind ) );
 
                 break;
         }

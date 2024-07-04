@@ -15,6 +15,7 @@ namespace Metalama.Patterns.Caching.Tests.Backends.Single;
 public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<RedisAssemblyFixture>
 {
     private readonly RedisAssemblyFixture _redisAssemblyFixture;
+    private readonly RedisBackendObserver _observer = new();
 
     public RedisCacheBackendTests(
         CachingClassFixture cachingClassFixture,
@@ -30,17 +31,15 @@ public class RedisCacheBackendTests : BaseCacheBackendTests, IAssemblyFixture<Re
     protected override void AddServices( ServiceCollection serviceCollection )
     {
         base.AddServices( serviceCollection );
-        serviceCollection.AddSingleton<IRedisBackendObserver>( this.Observer );
+        serviceCollection.AddSingleton<IRedisBackendObserver>( this._observer );
     }
-
-    internal RedisBackendObserver Observer { get; } = new();
 
     protected override void Cleanup()
     {
         base.Cleanup();
-        Assert.NotEqual( 0, this.Observer.CreatedNotificationThreads );
-
-        AssertEx.Equal( 0, this.Observer.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
+        
+        Assert.NotEqual( 0, this._observer.CreatedNotificationThreads );
+        AssertEx.Equal( 0, this._observer.ActiveNotificationThreads, "RedisNotificationQueue.NotificationProcessingThreads" );
     }
 
     protected virtual bool GarbageCollectorEnabled => false;
