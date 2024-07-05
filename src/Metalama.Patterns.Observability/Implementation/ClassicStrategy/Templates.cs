@@ -34,17 +34,19 @@ internal sealed class Templates : ITemplateProvider
         var inpcImplementationKind = rootReference.InpcInstrumentationKind;
         var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
 
-        if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity! > 0 )
+        if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity > 0 )
         {
             meta.InsertComment( "Template: " + nameof(OverrideInpcRefTypePropertySetter) );
 
-            if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity! > 1 )
+            if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity > 1 )
             {
                 meta.InsertComment(
                     "Dependency graph (current node highlighted if defined):",
                     "\n" + templateArgs.ObservableTypeInfo.ToString( rootReference ) );
             }
         }
+
+        var isReadOnly = propertyInfo.FieldOrProperty.Writeability != Writeability.All;
 
         if ( !ReferenceEquals( value, meta.Target.FieldOrProperty.Value ) )
         {
@@ -69,36 +71,37 @@ internal sealed class Templates : ITemplateProvider
 
                 meta.Target.FieldOrProperty.Value = value;
 
-#pragma warning disable IDE0031
-                if ( templateArgs.OnObservablePropertyChangedMethod != null )
+                if ( !isReadOnly && templateArgs.OnObservablePropertyChangedMethod != null )
                 {
                     templateArgs.OnObservablePropertyChangedMethod.With( InvokerOptions.Final )
                         .Invoke( meta.Target.FieldOrProperty.Name, oldValue, value );
                 }
-#pragma warning restore IDE0031
             }
             else
             {
                 meta.Target.FieldOrProperty.Value = value;
             }
 
-            // Update methods will deal with notifications - * for those children which have update methods *
-            foreach ( var method in rootReference.ChildUpdateMethods )
+            if ( !isReadOnly )
             {
-                method.With( InvokerOptions.Final ).Invoke();
-            }
+                // Update methods will deal with notifications - * for those children which have update methods *
+                foreach ( var method in rootReference.ChildUpdateMethods )
+                {
+                    method.With( InvokerOptions.Final ).Invoke();
+                }
 
-            // Notify refs to the current node and any children without an update method.
-            foreach ( var r in rootReference.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                         .OrderBy( n => n.Name ) )
-            {
-                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
-            }
+                // Notify refs to the current node and any children without an update method.
+                foreach ( var r in rootReference.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
+                             .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
+                             .OrderBy( n => n.Name ) )
+                {
+                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                }
 
-            if ( propertyInfo.FieldOrProperty.DeclarationKind != DeclarationKind.Field && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
-            {
-                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                if ( propertyInfo.FieldOrProperty.DeclarationKind != DeclarationKind.Field && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
+                {
+                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                }
             }
 
 #pragma warning disable IDE0031 // Use null propagation

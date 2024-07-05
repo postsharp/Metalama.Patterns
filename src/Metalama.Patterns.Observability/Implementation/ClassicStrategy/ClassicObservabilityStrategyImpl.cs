@@ -91,46 +91,48 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
         // Transform, if valid. By design, aim to minimise diagnostic reporting that only occurs during
         // the transform phase.
-        if ( v1 && v2 && v3 )
+        if ( !v1 || !v2 || !v3 )
         {
-            this.IntroduceInterfaceIfRequired();
-
-            // Introduce methods like UpdateA1B1()
-            this.IntroduceUpdateMethods();
-
-            this.ProcessAutoPropertiesAndReferencedFields();
-
-            this.AddPropertyPathsForOnChildPropertyChangedMethodAttribute();
-
-            if ( !this.TryIntroduceOnPropertyChangedMethod() )
-            {
-                return;
-            }
-
-            if ( !this.TryIntroduceOnChildPropertyChangedMethod() )
-            {
-                return;
-            }
-
-            if ( !this.TryIntroduceOnObservablePropertyChanged() )
-            {
-                return;
-            }
-
-            this._templateArgs.Value = new ObservabilityTemplateArgs(
-                this._commonOptions,
-                this._classicOptions,
-                this.CurrentType,
-                this._assets,
-                this.InpcInstrumentationKindLookup,
-                this.ObservableTypeInfo,
-                this._onObservablePropertyChangedMethod?.Value,
-                this._onPropertyChangedMethod.Value,
-                this._onChildPropertyChangedMethod.Value,
-                this._baseOnPropertyChangedMethod,
-                this._baseOnChildPropertyChangedMethod,
-                this._baseOnObservablePropertyChangedMethod );
+            return;
         }
+
+        this.IntroduceInterfaceIfRequired();
+
+        // Introduce methods like UpdateA1B1()
+        this.IntroduceUpdateMethods();
+
+        this.ProcessAutoPropertiesAndReferencedFields();
+
+        this.AddPropertyPathsForOnChildPropertyChangedMethodAttribute();
+
+        if ( !this.TryIntroduceOnPropertyChangedMethod() )
+        {
+            return;
+        }
+
+        if ( !this.TryIntroduceOnChildPropertyChangedMethod() )
+        {
+            return;
+        }
+
+        if ( !this.TryIntroduceOnObservablePropertyChanged() )
+        {
+            return;
+        }
+
+        this._templateArgs.Value = new ObservabilityTemplateArgs(
+            this._commonOptions,
+            this._classicOptions,
+            this.CurrentType,
+            this._assets,
+            this.InpcInstrumentationKindLookup,
+            this.ObservableTypeInfo,
+            this._onObservablePropertyChangedMethod?.Value,
+            this._onPropertyChangedMethod.Value,
+            this._onChildPropertyChangedMethod.Value,
+            this._baseOnPropertyChangedMethod,
+            this._baseOnChildPropertyChangedMethod,
+            this._baseOnObservablePropertyChangedMethod );
     }
 
     private bool ValidateRootAutoProperties()
@@ -501,11 +503,11 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
         var properties =
             target.Properties
-                .Where( p => p is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: Writeability.All } )
+                .Where( p => p is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: not Writeability.None } )
                 .Select( p => (ClassicObservablePropertyInfo) this.ObservableTypeInfo.GetOrAddProperty( p ) )
                 .Concat(
                     target.Fields
-                        .Where( f => f is { IsStatic: false, IsImplicitlyDeclared: false, Writeability: Writeability.All } )
+                        .Where( f => f is { IsStatic: false, IsImplicitlyDeclared: false } )
                         .Select( p => (ClassicObservablePropertyInfo) this.ObservableTypeInfo.GetOrAddProperty( p ) ) )
                 .Where( node => !node.FieldOrProperty.Attributes.Any( this._assets.NotObservableAttribute ) )
                 .ToList();
@@ -515,6 +517,9 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             var fieldOrProperty = propertyInfo.FieldOrProperty;
             var propertyTypeInstrumentationKind = this.InpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
             var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit;
+
+            // We don't report writes to non-INPC members, if the member can only be written from the constructor, or if it's an init-only property.
+            var propertyIsWriteable = fieldOrProperty.Writeability is Writeability.All;
 
             switch ( fieldOrProperty.Type.IsReferenceType )
             {
@@ -569,30 +574,36 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                     }
                     else
                     {
-                        var comparer = fieldOrProperty.Type.IsReferenceType == null
-                            ? EqualityComparisonKind.DefaultEqualityComparer
-                            : EqualityComparisonKind.ReferenceEquals;
+                        if ( propertyIsWriteable )
+                        {
+                            var comparer = fieldOrProperty.Type.IsReferenceType == null
+                                ? EqualityComparisonKind.DefaultEqualityComparer
+                                : EqualityComparisonKind.ReferenceEquals;
 
-                        this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
-                            .OverrideAccessors(
-                                fieldOrProperty,
-                                setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                                args: new { templateArgs = this._templateArgs, propertyInfo, compareUsing = comparer, propertyTypeInstrumentationKind } );
+                            this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
+                                .OverrideAccessors(
+                                    fieldOrProperty,
+                                    setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
+                                    args: new { templateArgs = this._templateArgs, propertyInfo, compareUsing = comparer, propertyTypeInstrumentationKind } );
+                        }
                     }
 
                     break;
 
                 case false:
 
-                    var comparisonKind = fieldOrProperty.Type is INamedType nt && nt.SpecialType != SpecialType.ValueTask_T
-                        ? EqualityComparisonKind.EqualityOperator
-                        : EqualityComparisonKind.DefaultEqualityComparer;
+                    if ( propertyIsWriteable )
+                    {
+                        var comparisonKind = fieldOrProperty.Type is INamedType nt && nt.SpecialType != SpecialType.ValueTask_T
+                            ? EqualityComparisonKind.EqualityOperator
+                            : EqualityComparisonKind.DefaultEqualityComparer;
 
-                    this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
-                        .OverrideAccessors(
-                            fieldOrProperty,
-                            setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
-                            args: new { templateArgs = this._templateArgs, propertyInfo, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
+                        this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
+                            .OverrideAccessors(
+                                fieldOrProperty,
+                                setTemplate: nameof(Templates.OverrideUninstrumentedTypePropertySetter),
+                                args: new { templateArgs = this._templateArgs, propertyInfo, compareUsing = comparisonKind, propertyTypeInstrumentationKind } );
+                    }
 
                     break;
             }
