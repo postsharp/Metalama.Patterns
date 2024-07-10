@@ -19,7 +19,7 @@
         <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
         <PackageReference Include="System.Collections.Immutable" />
-        <PackageReference Include="System.Text.Json" />
+        <PackageReference Include="System.Text.Json" NoWarn="NU1903" />
         <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
     </ItemGroup>
 
