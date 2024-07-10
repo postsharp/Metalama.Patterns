@@ -345,7 +345,17 @@ internal partial class DependencyGraphBuilder
             }
             else
             {
-                base.VisitBinaryExpression( node );
+                // Process each operand in its own context.
+
+                using ( this._gatherManager.UseNewRootContext() )
+                {
+                    this.Visit( node.Left );
+                }
+
+                using ( this._gatherManager.UseNewRootContext() )
+                {
+                    this.Visit( node.Right );
+                }
             }
         }
 

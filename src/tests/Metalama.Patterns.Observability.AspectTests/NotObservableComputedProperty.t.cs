@@ -16,12 +16,14 @@ public class DateTimeViewModel : INotifyPropertyChanged
       if (_dateTime != value)
       {
         _dateTime = value;
+        OnPropertyChanged("ObservableMinutesFromNow");
         OnPropertyChanged("DateTime");
       }
     }
   }
+  public double ObservableMinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
   [NotObservable]
-  public double MinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
+  public double NotObservableMinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
   protected virtual void OnPropertyChanged(string propertyName)
   {
     PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
