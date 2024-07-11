@@ -1,9 +1,9 @@
 <?xml version="1.0"?>
 <project>
   <modelVersion>4.0.0</modelVersion>
-  <name>PostSharpEngineering Config DSL Script</name>
-  <groupId>PostSharpEngineering</groupId>
-  <artifactId>PostSharpEngineering_dsl</artifactId>
+  <name>Metalama_Metalama20242_MetalamaPatterns Config DSL Script</name>
+  <groupId>Metalama_Metalama20242_MetalamaPatterns</groupId>
+  <artifactId>Metalama_Metalama20242_MetalamaPatterns_dsl</artifactId>
   <version>1.0-SNAPSHOT</version>
 
   <parent>
@@ -22,7 +22,7 @@
     </repository>
     <repository>
       <id>teamcity-server</id>
-      <url>https://tc.postsharp.net/app/dsl-plugins-repository</url>
+      <url>https://postsharp.teamcity.com/app/dsl-plugins-repository</url>
       <snapshots>
         <enabled>true</enabled>
       </snapshots>
@@ -77,13 +77,13 @@
   <dependencies>
     <dependency>
       <groupId>org.jetbrains.teamcity</groupId>
-      <artifactId>configs-dsl-kotlin</artifactId>
+      <artifactId>configs-dsl-kotlin-latest</artifactId>
       <version>${teamcity.dsl.version}</version>
       <scope>compile</scope>
     </dependency>
     <dependency>
       <groupId>org.jetbrains.teamcity</groupId>
-      <artifactId>configs-dsl-kotlin-plugins</artifactId>
+      <artifactId>configs-dsl-kotlin-plugins-latest</artifactId>
       <version>1.0-SNAPSHOT</version>
       <type>pom</type>
       <scope>compile</scope>
