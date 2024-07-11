@@ -9,6 +9,8 @@ public class DateTimeViewModel
 {
     public DateTime DateTime { get; set; }
 
+    public double ObservableMinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
+
     [NotObservable]
-    public double MinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
+    public double NotObservableMinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
 }

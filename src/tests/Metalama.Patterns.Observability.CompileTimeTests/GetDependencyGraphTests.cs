@@ -1530,6 +1530,48 @@ public class A
         this.TestOutput.WriteLine( result.ToString() );
     }
 
+    [Trait( "Supported", "Yes" )]
+    [Fact]
+    public void BinaryOperatorInExpression()
+    {
+        using var testContext = this.CreateTestContext();
+
+        const string code = """
+            using System;
+
+            public class DateTimeViewModel
+            {
+                public DateTime DateTime { get; set; }
+
+                public double MinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
+            }
+            """;
+
+        var compilation = testContext.CreateCompilation( code );
+
+        var type = compilation.Types.OfName( "DateTimeViewModel" ).Single();
+
+        var diagnostics = new List<string>();
+
+        var result = new DependencyGraphBuilder().GetDependencyGraph(
+            type,
+            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+
+        this.TestOutput.WriteLines( diagnostics );
+        this.TestOutput.WriteLine( result.ToString() );
+
+        const string expected = """
+            <root>
+              DateTime [ MinutesFromNow ]
+              MinutesFromNow
+            
+            """;
+
+        result.ToString().Should().Be( NormalizeEOL( expected ) );
+
+        diagnostics.Should().BeEmpty();
+    }
+
     // ReSharper disable once InconsistentNaming
     private static string NormalizeEOL( string text )
     {

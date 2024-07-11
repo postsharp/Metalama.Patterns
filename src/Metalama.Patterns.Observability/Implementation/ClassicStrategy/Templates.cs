@@ -91,9 +91,7 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var r in rootReference.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                             .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                             .OrderBy( n => n.Name ) )
+                foreach ( var r in GetReferencingProperties( templateArgs, rootReference, excludeChildrenWithUpdateMethod: true ) )
                 {
                     templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
@@ -220,9 +218,7 @@ internal sealed class Templates : ITemplateProvider
             }
 
             // Notify refs to the current node and any children without an update method.
-            foreach ( var r in node.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                         .OrderBy( n => n.Name ) )
+            foreach ( var r in GetReferencingProperties( templateArgs, node, excludeChildrenWithUpdateMethod: true ) )
             {
                 templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
@@ -296,9 +292,7 @@ internal sealed class Templates : ITemplateProvider
 
             if ( propertyInfo != null )
             {
-                foreach ( var r in propertyInfo.RootReferenceNode.GetAllReferencingProperties()
-                             .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                             .OrderBy( n => n.Name ) )
+                foreach ( var r in GetReferencingProperties( templateArgs, propertyInfo.RootReferenceNode ) )
                 {
                     templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
@@ -317,9 +311,7 @@ internal sealed class Templates : ITemplateProvider
 
                 if ( propertyInfo != null )
                 {
-                    foreach ( var r in propertyInfo.RootReferenceNode.GetAllReferencingProperties()
-                                 .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                                 .OrderBy( n => n.Name ) )
+                    foreach ( var r in GetReferencingProperties( templateArgs, propertyInfo.RootReferenceNode ) )
                     {
                         templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                     }
@@ -331,6 +323,20 @@ internal sealed class Templates : ITemplateProvider
                 }
             }
         }
+    }
+
+    private static IReadOnlyCollection<ClassicObservablePropertyInfo> GetReferencingProperties(
+        ObservabilityTemplateArgs templateArgs,
+        ClassicObservableExpression expression,
+        bool excludeChildrenWithUpdateMethod = false )
+    {
+        Func<ClassicObservableExpression, bool>? shouldIncludeImmediateChild = excludeChildrenWithUpdateMethod ? n => n.UpdateMethod.Value == null : null;
+
+        return expression.GetAllReferencingProperties( shouldIncludeImmediateChild )
+            .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
+            .Where( n => !n.FieldOrProperty.Attributes.Any( templateArgs.Assets.NotObservableAttribute ) )
+            .OrderBy( n => n.Name )
+            .ToArray();
     }
 
     [Template]
@@ -373,7 +379,7 @@ internal sealed class Templates : ITemplateProvider
                     }
             }
 
-            IEnumerable<ClassicObservablePropertyInfo> refsToNotify;
+            IReadOnlyCollection<ClassicObservablePropertyInfo> refsToNotify;
 
             // When a base supports OnChildPropertyChanged for a root property, changes to the ref itself will
             // be notified by OnPropertyChanged (the base won't call OnChildPropertyChanged for each child property
@@ -394,18 +400,18 @@ internal sealed class Templates : ITemplateProvider
                 else
                 {
                     // Only notify references to the node itself, child node changes will be handled via OnChildPropertyChanged.
-                    refsToNotify = node.GetAllReferencingProperties();
+                    refsToNotify = GetReferencingProperties( templateArgs, node );
                 }
             }
             else
             {
                 // Notify refs to the current node and any children without an update method.
-                refsToNotify = node.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null );
+                refsToNotify = GetReferencingProperties( templateArgs, node, excludeChildrenWithUpdateMethod: true );
             }
 
             var childUpdateMethods = node.ChildUpdateMethods;
 
-            if ( refsToNotify.Any( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
+            if ( refsToNotify.Any()
                  || childUpdateMethods.Count > 0
                  || node is
                  {
@@ -413,9 +419,7 @@ internal sealed class Templates : ITemplateProvider
                  } )
             {
                 var rootPropertyNamesToNotify = refsToNotify
-                    .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
                     .Select( n => n.Name )
-                    .OrderBy( s => s )
                     .ToList();
 
                 switchBuilder.AddCase(
@@ -649,9 +653,7 @@ internal sealed class Templates : ITemplateProvider
         else
         {
             // No update method, notify here.
-            foreach ( var r in node.GetAllReferencingProperties()
-                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                         .OrderBy( n => n.Name ) )
+            foreach ( var r in GetReferencingProperties( templateArgs, node ) )
             {
                 templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
@@ -747,9 +749,7 @@ internal sealed class Templates : ITemplateProvider
                 }
 
                 // Notify refs to the current node and any children without an update method.
-                foreach ( var r in node.GetAllReferencingProperties( shouldIncludeImmediateChild: n => n.UpdateMethod.Value == null )
-                             .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                             .OrderBy( n => n.Name ) )
+                foreach ( var r in GetReferencingProperties( templateArgs, node, excludeChildrenWithUpdateMethod: true ) )
                 {
                     templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
@@ -847,9 +847,7 @@ internal sealed class Templates : ITemplateProvider
         else
         {
             // No update method, notify here.
-            foreach ( var r in childNode.GetAllReferencingProperties()
-                         .Where( n => n.FieldOrProperty.Accessibility != Accessibility.Private )
-                         .OrderBy( n => n.Name ) )
+            foreach ( var r in GetReferencingProperties( templateArgs, childNode ) )
             {
                 templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }

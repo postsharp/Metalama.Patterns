@@ -1,4 +1,4 @@
-<Project Sdk="Microsoft.NET.Sdk">
+﻿<Project Sdk="Microsoft.NET.Sdk">
 
     <PropertyGroup>
         <TargetFrameworks>net471;net6.0;netstandard2.0</TargetFrameworks>
@@ -19,7 +19,7 @@
         <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
         <PackageReference Include="Microsoft.Extensions.Caching.Memory" />
         <PackageReference Include="System.Collections.Immutable" />
-        <PackageReference Include="System.Text.Json" NoWarn="NU1903" />
+        <PackageReference Include="System.Text.Json" />
         <PackageReference Include="Microsoft.IO.RecyclableMemoryStream" />
     </ItemGroup>
 
