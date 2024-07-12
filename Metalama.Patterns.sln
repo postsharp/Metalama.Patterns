@@ -49,13 +49,13 @@ Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Memoizati
 EndProject
 Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Memoization.AspectTests", "src\tests\Metalama.Patterns.Memoization.AspectTests\Metalama.Patterns.Memoization.AspectTests.csproj", "{E158B92E-F006-4DC7-A0F8-0B46F7A16A14}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml", "src\Metalama.Patterns.Xaml\Metalama.Patterns.Xaml.csproj", "{3AE09DAA-B059-4062-80D2-6427B45BD7B7}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Wpf", "src\Metalama.Patterns.Wpf\Metalama.Patterns.Wpf.csproj", "{3AE09DAA-B059-4062-80D2-6427B45BD7B7}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.AspectTests", "src\tests\Metalama.Patterns.Xaml.AspectTests\Metalama.Patterns.Xaml.AspectTests.csproj", "{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Wpf.AspectTests", "src\tests\Metalama.Patterns.Wpf.AspectTests\Metalama.Patterns.Wpf.AspectTests.csproj", "{B6335A0E-B9DE-45A6-8A33-308C3FF327DE}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.UnitTests", "src\tests\Metalama.Patterns.Xaml.UnitTests\Metalama.Patterns.Xaml.UnitTests.csproj", "{50756B08-7B60-4B7C-BB38-065413A8E818}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Wpf.UnitTests", "src\tests\Metalama.Patterns.Wpf.UnitTests\Metalama.Patterns.Wpf.UnitTests.csproj", "{50756B08-7B60-4B7C-BB38-065413A8E818}"
 EndProject
-Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Xaml.CompileTimeTests", "src\tests\Metalama.Patterns.Xaml.CompileTimeTests\Metalama.Patterns.Xaml.CompileTimeTests.csproj", "{AFEBA594-BD9E-468F-8C44-6EC028D9D497}"
+Project("{9A19103F-16F7-4668-BE54-9A1E7A4F7556}") = "Metalama.Patterns.Wpf.CompileTimeTests", "src\tests\Metalama.Patterns.Wpf.CompileTimeTests\Metalama.Patterns.Wpf.CompileTimeTests.csproj", "{AFEBA594-BD9E-468F-8C44-6EC028D9D497}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Caching", "Caching", "{F255E50D-E07B-4A45-BA47-C730C4A6D9BC}"
 EndProject
@@ -67,7 +67,7 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Flashtrace", "Flashtrace", 
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Observability", "Observability", "{8FC0FBE5-8C4C-46A8-9A14-86216D07E331}"
 EndProject
-Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Xaml", "Xaml", "{1F68574A-CD56-4767-AED4-A25E6CB16A6E}"
+Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Wpf", "Wpf", "{1F68574A-CD56-4767-AED4-A25E6CB16A6E}"
 EndProject
 Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Common", "Common", "{1EA09610-68D7-4A19-BF36-C6FF0B3AB67E}"
 EndProject
