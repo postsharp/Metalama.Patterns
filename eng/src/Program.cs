@@ -28,7 +28,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         "Metalama.Patterns.Memoization.$(PackageVersion).nupkg",
         "Metalama.Patterns.Immutability.$(PackageVersion).nupkg",
         "Metalama.Patterns.Observability.$(PackageVersion).nupkg",
-        "Metalama.Patterns.Xaml.$(PackageVersion).nupkg",
+        "Metalama.Patterns.Wpf.$(PackageVersion).nupkg",
         "Flashtrace.$(PackageVersion).nupkg",
         "Flashtrace.Formatters.$(PackageVersion).nupkg" ),
     Dependencies = [DevelopmentDependencies.PostSharpEngineering, MetalamaDependencies.MetalamaExtensions],
