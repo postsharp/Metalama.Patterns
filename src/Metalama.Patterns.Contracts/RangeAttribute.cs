@@ -206,7 +206,7 @@ public class RangeAttribute : ContractBaseAttribute
 
     private void BuildAspect( IAspectBuilder builder, IType targetType )
     {
-        var resolvedRange = this.ResolveRange( new ContractContext( builder.Target ) );
+        var resolvedRange = this.ResolveRange( new ContractContext( builder.Target, ContractDirection.None ) );
 
         if ( resolvedRange.Ambiguity != null )
         {
