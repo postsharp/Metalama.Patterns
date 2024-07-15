@@ -36,7 +36,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnCreditCardContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException( $"The {context.TargetDisplayName} must be a valid credit card number.", context.TargetParameterName );
         }
@@ -52,7 +52,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnInvalidEnumValue( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException(
                 $"The {context.TargetDisplayName} must be a valid {context.Type.ToDisplayString()}.",
@@ -70,7 +70,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnNotEmptyContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException(
                 $"The {context.TargetDisplayName} must not be null or empty.",
@@ -88,7 +88,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnNotNullContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentNullException(
                 context.TargetParameterName,
@@ -106,7 +106,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnRegularExpressionContractViolated( dynamic? value, dynamic? pattern, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException( $"The {context.TargetDisplayName} must match the regular expression '{pattern}'.", context.TargetParameterName );
         }
@@ -122,7 +122,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnPhoneContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException( $"The {context.TargetDisplayName} must be a valid phone number.", context.TargetParameterName );
         }
@@ -138,7 +138,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnEmailAddressContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException( $"The {context.TargetDisplayName} must be a valid email address.", context.TargetParameterName );
         }
@@ -154,7 +154,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnUrlContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException( $"The {context.TargetDisplayName} must be a valid URL.", context.TargetParameterName );
         }
@@ -170,7 +170,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnStringMaxLengthContractViolated( dynamic? value, int maximumLength, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException(
                 $"The  {context.TargetDisplayName} must be a string with a maximum length of {maximumLength}.",
@@ -188,7 +188,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnStringMinLengthContractViolated( dynamic? value, int minimumLength, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException(
                 $"The  {context.TargetDisplayName} must be a string with a minimum length of {minimumLength}.",
@@ -206,7 +206,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnStringLengthContractViolated( dynamic? value, int minimumLength, int maximumLength, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentException(
                 $"The  {context.TargetDisplayName} must be a string with length between {minimumLength} and {maximumLength}.",
@@ -225,7 +225,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnRangeContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException( $"The {context.TargetDisplayName} must be in the range {range}.", context.TargetParameterName );
         }
@@ -241,7 +241,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnGreaterThanOrEqualToContractViolated( dynamic? value, [CompileTime] object minValue, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
@@ -259,7 +259,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnLessThanOrEqualToContractViolated( dynamic? value, [CompileTime] object maxValue, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
@@ -277,7 +277,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnStrictlyGreaterThanContractViolated( dynamic? value, [CompileTime] object minValue, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
@@ -295,7 +295,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnStrictlyLessThanContractViolated( dynamic? value, [CompileTime] object maxValue, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
@@ -313,7 +313,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnStrictRangeContractViolated( dynamic? value, [CompileTime] NumericRange range, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException( $"The {context.TargetDisplayName} must be strictly in the range {range}.", context.TargetParameterName );
         }
@@ -329,7 +329,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnRequiredContractViolated( dynamic? value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentNullException( context.TargetParameterName, $"The {context.TargetDisplayName} is required." );
         }
@@ -345,7 +345,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     [Template]
     public virtual void OnRequiredContractViolatedBecauseOfEmptyString( dynamic value, ContractContext context )
     {
-        if ( meta.Target.ContractDirection == ContractDirection.Input )
+        if ( context.Direction == ContractDirection.Input )
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,

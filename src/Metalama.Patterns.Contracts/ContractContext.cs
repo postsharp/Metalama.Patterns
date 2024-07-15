@@ -14,12 +14,13 @@ namespace Metalama.Patterns.Contracts;
 [PublicAPI]
 public sealed class ContractContext
 {
-    public ContractContext( IMetaTarget target ) : this( target.Declaration ) { }
+    public ContractContext( IMetaTarget target ) : this( target.Declaration, target.ContractDirection ) { }
 
-    public ContractContext( IDeclaration target )
+    public ContractContext( IDeclaration target, ContractDirection direction )
     {
         this.TargetDeclaration = target;
         this.Options = target.GetContractOptions();
+        this.Direction = direction;
     }
 
     /// <summary>
@@ -36,6 +37,11 @@ public sealed class ContractContext
     /// Gets the type of the <see cref="TargetDeclaration"/>.
     /// </summary>
     public IType Type => ((IHasType) this.TargetDeclaration).Type;
+    
+    /// <summary>
+    /// Gets the <see cref="ContractDirection"/>.
+    /// </summary>
+    public ContractDirection Direction { get; }
 
     /// <summary>
     /// Gets the display name of the <see cref="TargetDeclaration"/>.
