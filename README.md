@@ -22,5 +22,6 @@ Below is a list of packages originating from this repository:
 | [Metalama.Patterns.Contracts](https://www.nuget.org/packages/Metalama.Patterns.Contracts)             | MIT     | Code contract aspects like `[NotNull]`, `[Url]` for contract-based programming.                             |
 | [Metalama.Patterns.Memoization](https://www.nuget.org/packages/Metalama.Patterns.Memoization)         | MIT     | Implements a memoization aspect, i.e. simple and super-fast caching. |
 | [Metalama.Patterns.Observability](https://www.nuget.org/packages/Metalama.Patterns.Observability)     | MIT     | A Metalama aspect implementing `INotifyPropertyChanged`.         |
-| [Flashtrace](https://www.nuget.org/packages/Flashtrace)                                               | MIT     | A structured tracing library used by `Metalama.Patterns.Caching`.                                    |
+| [Metalama.Patterns.Wpf](https://www.nuget.org/packages/Metalama.Patterns.Wpf) | MIT | Aspects that implement WPF dependency properties and commands.
+| [Flashtrace](https://www.nuget.org/packages/) | MIT     | A structured tracing library used by `Metalama.Patterns.Caching`.                                    |
 | [Flashtrace.Formatters](https://www.nuget.org/packages/Flashtrace.Formatters)                         | MIT     | Object formatters used in caching and logging.                                          |

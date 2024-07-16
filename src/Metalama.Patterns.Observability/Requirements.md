@@ -12,6 +12,6 @@
 * 
 ## Next
 
-* Support named events e.g. XAML-style `ColorChanged`.
+* Support named events e.g. WPF-style `ColorChanged`.
 * Support for functions
 * Cross-project

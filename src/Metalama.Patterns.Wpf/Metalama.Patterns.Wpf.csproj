@@ -8,10 +8,12 @@
     <Configurations>Debug;Release;LamaDebug</Configurations>
     <!-- Support unit testing -->
     <MetalamaRemoveCompileTimeOnlyCode>false</MetalamaRemoveCompileTimeOnlyCode>
+    <PackageReadmeFile>README.md</PackageReadmeFile>
     <PackageDescription>
-      Provides custom
+      Automatically implements WPF dependency properties from a C# automatic property and WPF commands from a C# method
+      thanks to Metalama.
     </PackageDescription>
-    <PackageTags>Metalama PostSharp observable observability INotifyPropertyChanged INPC PropertyChanged OnPropertyChanged</PackageTags>    
+    <PackageTags>Metalama PostSharp WPF dependency property DependencyProperty command</PackageTags>    
 
   </PropertyGroup>
 

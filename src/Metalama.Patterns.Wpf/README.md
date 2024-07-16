@@ -2,15 +2,15 @@
 
 ## About
 
-The `Metalama.Patterns.Wpf` contains aspects that implement XAML dependency properties and commands.
+The `Metalama.Patterns.Wpf` contains aspects that implement WPF dependency properties and commands.
 
 ## Key Features
 
-*  Generates XAML **dependency properties** from C# automatic properties:
+*  Generates WPF **dependency properties** from C# automatic properties:
   * Integrates with `Metalama.Patterns.Contracts`.
   * Supports custom property-changing and property-changed methods.
   * Turns property initializer values into default values.
-* Generates XAML **commands** from C# methods :
+* Generates WPF **commands** from C# methods :
   * Supports a `CanExecute` method or property.
   * Integrates with `Metalama.Patterns.Observability` to support `INotifyPropertyChanged`.
 * Supports custom naming conventions.
@@ -19,8 +19,8 @@ The `Metalama.Patterns.Wpf` contains aspects that implement XAML dependency prop
 
 The primary types in this package are:
 
-* `DependencyPropertyAttribute` is an aspect that generates a XAML dependency property from a plain automatic property.
-* `CommandAttribute` is an aspect that exposes generates a XAML command property from a plain C# method.
+* `DependencyPropertyAttribute` is an aspect that generates a WPF dependency property from a plain automatic property.
+* `CommandAttribute` is an aspect that exposes generates a WPF command property from a plain C# method.
 * `DependencyPropertyExtensions.ConfigureDependencyProperty` is a fabric extension method that configures the `DependencyPropertyAttribute` aspect.
 * `CommandExtensions.ConfigureCommand` is a fabric extension method that configures the `CommandAttribute` aspect.
 
