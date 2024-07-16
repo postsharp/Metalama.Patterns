@@ -33,12 +33,9 @@ public sealed class EnumDataTypeTests
     {
         var cut = new EnumTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntEnum = 10 );
+        var e = Assert.Throws<ArgumentException>( () => cut.IntEnum = 10 );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "IntEnum", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "IntEnum", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -46,12 +43,9 @@ public sealed class EnumDataTypeTests
     {
         var cut = new EnumTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringEnum = "asd" );
+        var e = Assert.Throws<ArgumentException>( () => cut.StringEnum = "asd" );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "StringEnum", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "StringEnum", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -59,12 +53,9 @@ public sealed class EnumDataTypeTests
     {
         var cut = new EnumTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.ObjectEnum = new object() );
+        var e = Assert.Throws<ArgumentException>( () => cut.ObjectEnum = new object() );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "ObjectEnum", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "ObjectEnum", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -79,11 +70,8 @@ public sealed class EnumDataTypeTests
     {
         var cut = new EnumTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.IntFlag = 10 );
+        var e = Assert.Throws<ArgumentException>( () => cut.IntFlag = 10 );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "IntFlag", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "IntFlag", e.Message, StringComparison.Ordinal );
     }
 }
