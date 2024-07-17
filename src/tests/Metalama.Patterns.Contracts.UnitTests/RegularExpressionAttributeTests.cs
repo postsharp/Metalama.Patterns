@@ -22,10 +22,9 @@ public sealed class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.SetEmail( "asd" ) );
+        var e = Assert.Throws<ArgumentException>( () => cut.SetEmail( "asd" ) );
 
-        Assert.NotNull( e );
-        Assert.Contains( "email", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "email", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -41,10 +40,9 @@ public sealed class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.Email = "asd" );
+        var e = Assert.Throws<ArgumentException>( () => cut.Email = "asd" );
 
-        Assert.NotNull( e );
-        Assert.Contains( "Email", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "Email", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -60,10 +58,9 @@ public sealed class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.Email2 = "asd" );
+        var e = Assert.Throws<ArgumentException>( () => cut.Email2 = "asd" );
 
-        Assert.NotNull( e );
-        Assert.Contains( "Email2", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "Email2", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -79,10 +76,9 @@ public sealed class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.PhoneField = "a123" );
+        var e = Assert.Throws<ArgumentException>( () => cut.PhoneField = "a123" );
 
-        Assert.NotNull( e );
-        Assert.Contains( "PhoneField", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "PhoneField", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -99,10 +95,9 @@ public sealed class RegularExpressionAttributeTests
         var cut = new RegexTestClass();
 
         // ReSharper disable once StringLiteralTypo
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.UrlField = "dslkfusd" );
+        var e = Assert.Throws<ArgumentException>( () => cut.UrlField = "dslkfusd" );
 
-        Assert.NotNull( e );
-        Assert.Contains( "UrlField", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "UrlField", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -110,10 +105,9 @@ public sealed class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.PatternEscaping1 = "hello" );
+        var e = Assert.Throws<ArgumentException>( () => cut.PatternEscaping1 = "hello" );
 
-        Assert.NotNull( e );
-        Assert.Contains( "must match the regular expression '^[a-z]{4}$'.", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "must match the regular expression '^[a-z]{4}$'.", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -121,9 +115,8 @@ public sealed class RegularExpressionAttributeTests
     {
         var cut = new RegexTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.PatternEscaping2 = "{hello}" );
+        var e = Assert.Throws<ArgumentException>( () => cut.PatternEscaping2 = "{hello}" );
 
-        Assert.NotNull( e );
-        Assert.Contains( "must match the regular expression '^\\{[a-z]{4}}$'.", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "must match the regular expression '^\\{[a-z]{4}}$'.", e.Message, StringComparison.Ordinal );
     }
 }

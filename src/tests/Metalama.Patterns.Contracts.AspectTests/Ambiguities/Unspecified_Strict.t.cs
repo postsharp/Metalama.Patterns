@@ -15,7 +15,7 @@ public class C
     {
       if (value <= 0)
       {
-        throw new ArgumentOutOfRangeException("value", "The 'A' property must be strictly greater than 0.");
+        throw new ArgumentOutOfRangeException("value", value, "The 'A' property must be strictly greater than 0.");
       }
       _a = value;
     }
@@ -32,7 +32,7 @@ public class C
     {
       if (value >= 0)
       {
-        throw new ArgumentOutOfRangeException("value", "The 'B' property must be strictly less than 0.");
+        throw new ArgumentOutOfRangeException("value", value, "The 'B' property must be strictly less than 0.");
       }
       _b = value;
     }
@@ -49,7 +49,7 @@ public class C
     {
       if (value <= 5)
       {
-        throw new ArgumentOutOfRangeException("value", "The 'D' property must be strictly greater than 5.");
+        throw new ArgumentOutOfRangeException("value", value, "The 'D' property must be strictly greater than 5.");
       }
       _d = value;
     }
@@ -66,7 +66,7 @@ public class C
     {
       if (value >= 5)
       {
-        throw new ArgumentOutOfRangeException("value", "The 'E' property must be strictly less than 5.");
+        throw new ArgumentOutOfRangeException("value", value, "The 'E' property must be strictly less than 5.");
       }
       _e = value;
     }

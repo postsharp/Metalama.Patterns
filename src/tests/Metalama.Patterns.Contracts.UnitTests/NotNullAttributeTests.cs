@@ -20,15 +20,10 @@ public sealed class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectParameterMethod( null! ) );
+        var e = Assert.Throws<ArgumentNullException>( () => cut.ObjectParameterMethod( null! ) );
 
-        Assert.NotNull( e );
-
-        // Resharper disable RedundantSuppressNullableWarningExpression
-        Assert.Equal( "parameter", e!.ParamName );
-        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
-
-        // Resharper restore RedundantSuppressNullableWarningExpression
+        Assert.Equal( "parameter", e.ParamName );
+        Assert.Contains( "parameter", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -36,15 +31,10 @@ public sealed class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ClassParameterMethod( null! ) );
+        var e = Assert.Throws<ArgumentNullException>( () => cut.ClassParameterMethod( null! ) );
 
-        Assert.NotNull( e );
-
-        // Resharper disable RedundantSuppressNullableWarningExpression
-        Assert.Equal( "parameter", e!.ParamName );
-        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
-
-        // Resharper restore RedundantSuppressNullableWarningExpression
+        Assert.Equal( "parameter", e.ParamName );
+        Assert.Contains( "parameter", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -52,15 +42,10 @@ public sealed class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectProperty = null! );
+        var e = Assert.Throws<ArgumentNullException>( () => cut.ObjectProperty = null! );
 
-        Assert.NotNull( e );
-
-        // Resharper disable RedundantSuppressNullableWarningExpression
-        Assert.Equal( "value", e!.ParamName );
-        Assert.Contains( "ObjectProperty", e!.Message, StringComparison.Ordinal );
-
-        // Resharper restore RedundantSuppressNullableWarningExpression
+        Assert.Equal( "value", e.ParamName );
+        Assert.Contains( "ObjectProperty", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -84,15 +69,10 @@ public sealed class NotNullAttributeTests
     {
         var cut = new NotNullTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.ObjectField = null! );
+        var e = Assert.Throws<ArgumentNullException>( () => cut.ObjectField = null! );
 
-        Assert.NotNull( e );
-
-        // Resharper disable RedundantSuppressNullableWarningExpression
-        Assert.Equal( "value", e!.ParamName );
-        Assert.Contains( "ObjectField", e!.Message, StringComparison.Ordinal );
-
-        // Resharper restore RedundantSuppressNullableWarningExpression
+        Assert.Equal( "value", e.ParamName );
+        Assert.Contains( "ObjectField", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -105,14 +85,9 @@ public sealed class NotNullAttributeTests
     public void Given_MethodWithNotNullGenericParameter_When_NotNullPassed_Then_ExceptionIsThrown()
     {
         // Resharper disable once ObjectCreationAsStatement
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => new NotNullTestClass.B<NotNullTestClass.A>( null! ) );
+        var e = Assert.Throws<ArgumentNullException>( () => new NotNullTestClass.B<NotNullTestClass.A>( null! ) );
 
-        Assert.NotNull( e );
-
-        // Resharper disable RedundantSuppressNullableWarningExpression
-        Assert.Equal( "x", e!.ParamName );
-        Assert.Contains( "x", e!.Message, StringComparison.Ordinal );
-
-        // Resharper restore RedundantSuppressNullableWarningExpression
+        Assert.Equal( "x", e.ParamName );
+        Assert.Contains( "x", e.Message, StringComparison.Ordinal );
     }
 }

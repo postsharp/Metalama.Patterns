@@ -83,9 +83,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( -10 ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( -10 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -94,9 +93,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( 20 ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenMethod( 20 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -105,9 +103,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( 10.1 ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( 10.1 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -116,9 +113,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( -10.0 ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenDouble( -10.0 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -127,9 +123,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( 10.1f ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( 10.1f ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -138,9 +133,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( -10.0f ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenFloat( -10.0f ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -149,9 +143,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( 20.0m ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( 20.0m ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -160,9 +153,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( -10.0m ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenDecimal( -10.0m ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -171,9 +163,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( 20.0m ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableDecimal( 20.0m ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -182,11 +173,9 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>(
-            () =>
-                cut.ZeroToTenNullableDecimal( -10.0m ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>(
+            () => cut.ZeroToTenNullableDecimal( -10.0m ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -195,9 +184,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( 20 ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( 20 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -206,9 +194,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( -10 ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableInt( -10 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -217,9 +204,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.GreaterThanZeroField = -10 );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.GreaterThanZeroField = -10 );
 
-        Assert.NotNull( e );
         Assert.Contains( "GreaterThanZeroField", e!.Message, StringComparison.Ordinal );
     }
 
@@ -228,9 +214,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.LessThanZeroField = 20 );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.LessThanZeroField = 20 );
 
-        Assert.NotNull( e );
         Assert.Contains( "LessThanZeroField", e!.Message, StringComparison.Ordinal );
     }
 
@@ -240,9 +225,8 @@ public sealed class RangeAttributeTests
         var cut = new RangeTestClass();
 
         long? p = -1;
-        var e = TestHelpers.RecordException<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
+        var e = Assert.Throws<ArgumentOutOfRangeException>( () => cut.ZeroToTenNullableIntRef( 1, ref p ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -253,11 +237,9 @@ public sealed class RangeAttributeTests
 
         long? p = 1;
 
-        var e = TestHelpers.RecordException<PostconditionViolationException>(
-            () =>
-                cut.ZeroToTenNullableIntRef( -1, ref p ) );
+        var e = Assert.Throws<PostconditionViolationException>(
+            () => cut.ZeroToTenNullableIntRef( -1, ref p ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -266,11 +248,10 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionViolationException>(
+        var e = Assert.Throws<PostconditionViolationException>(
             () =>
                 cut.ZeroToTenNullableIntOut( -1, out _ ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
     }
 
@@ -279,9 +260,8 @@ public sealed class RangeAttributeTests
     {
         var cut = new RangeTestClass();
 
-        var e = TestHelpers.RecordException<PostconditionViolationException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
+        var e = Assert.Throws<PostconditionViolationException>( () => cut.ZeroToTenNullableIntRetVal( -1 ) );
 
-        Assert.NotNull( e );
         Assert.Contains( "return value", e!.Message, StringComparison.Ordinal );
     }
 }

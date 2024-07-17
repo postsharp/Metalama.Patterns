@@ -227,11 +227,14 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( context.Direction == ContractDirection.Input )
         {
-            throw new ArgumentOutOfRangeException( $"The {context.TargetDisplayName} must be in the range {range}.", context.TargetParameterName );
+            throw new ArgumentOutOfRangeException(
+                context.TargetParameterName,
+                value,
+                $"The {context.TargetDisplayName} must be in the range {range}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be in the range {range}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be in the range {range}.", value );
         }
     }
 
@@ -245,11 +248,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
+                value,
                 $"The {context.TargetDisplayName} must be greater than or equal to {minValue}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be greater than or equal to {minValue}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be greater than or equal to {minValue}.", value );
         }
     }
 
@@ -263,11 +267,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
+                value,
                 $"The {context.TargetDisplayName} must be less than or equal to {maxValue}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be less than or equal to {maxValue}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be less than or equal to {maxValue}.", value );
         }
     }
 
@@ -281,11 +286,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
+                value,
                 $"The {context.TargetDisplayName} must be strictly greater than {minValue}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be strictly greater than {minValue}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be strictly greater than {minValue}.", value );
         }
     }
 
@@ -299,11 +305,12 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
         {
             throw new ArgumentOutOfRangeException(
                 context.TargetParameterName,
+                value,
                 $"The {context.TargetDisplayName} must be strictly less than {maxValue}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be strictly less than {maxValue}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be strictly less than {maxValue}.", value );
         }
     }
 
@@ -315,11 +322,14 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( context.Direction == ContractDirection.Input )
         {
-            throw new ArgumentOutOfRangeException( $"The {context.TargetDisplayName} must be strictly in the range {range}.", context.TargetParameterName );
+            throw new ArgumentOutOfRangeException(
+                context.TargetParameterName,
+                value,
+                $"The {context.TargetDisplayName} must be strictly in the range {range}." );
         }
         else
         {
-            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be strictly  in the range {range}." );
+            throw new PostconditionViolationException( $"The {context.TargetDisplayName} must be strictly  in the range {range}.", value );
         }
     }
 
@@ -347,9 +357,7 @@ public class ContractTemplates : ITemplateProvider, ICompileTimeSerializable
     {
         if ( context.Direction == ContractDirection.Input )
         {
-            throw new ArgumentOutOfRangeException(
-                context.TargetParameterName,
-                $"The {context.TargetDisplayName} is required." );
+            throw new ArgumentException( $"The {context.TargetDisplayName} is required.", context.TargetParameterName );
         }
         else
         {

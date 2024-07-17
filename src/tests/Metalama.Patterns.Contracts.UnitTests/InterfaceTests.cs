@@ -10,8 +10,7 @@ public sealed class InterfaceTests
     public void TestInterfaceImpl()
     {
         var cut = new Foo();
-        var e = TestHelpers.RecordException<ArgumentNullException>( () => cut.Bar( null! ) );
-        Assert.NotNull( e );
+        Assert.Throws<ArgumentNullException>( () => cut.Bar( null! ) );
     }
 
     // Resharper disable UnusedMemberInSuper.Global

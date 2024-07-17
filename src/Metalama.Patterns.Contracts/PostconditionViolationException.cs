@@ -11,6 +11,11 @@ namespace Metalama.Patterns.Contracts;
 public class PostconditionViolationException : ApplicationException
 {
     /// <summary>
+    /// Gets the value that caused this exception, when applicable.
+    /// </summary>
+    public object? ActualValue { get; }
+
+    /// <summary>
     /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class.
     /// </summary>
     public PostconditionViolationException() { }
@@ -24,11 +29,23 @@ public class PostconditionViolationException : ApplicationException
 
     /// <summary>
     /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class with a specified error message
+    /// and actual value.
+    /// </summary>
+    /// <param name="message">Exception message.</param>
+    /// <param name="actualValue">The value that caused the exception.</param>
+    public PostconditionViolationException( string message, object? actualValue )
+        : base( message )
+    {
+        this.ActualValue = actualValue;
+    }
+
+    /// <summary>
+    /// Initializes a new instance of the <see cref="PostconditionViolationException"/> class with a specified error message
     /// and a reference to the inner exception that is the cause of this exception.
     /// </summary>
     /// <param name="message">Exception message.</param>
     /// <param name="innerException">Inner exception.</param>
-    public PostconditionViolationException( string message, Exception innerException )
+    public PostconditionViolationException( string message, Exception? innerException )
         : base( message, innerException ) { }
 
     /// <summary>

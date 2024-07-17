@@ -20,12 +20,9 @@ public sealed class StringLengthAttributeTests
     {
         var cut = new StringLengthTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringMethod( "12345678901" ) );
+        var e = Assert.Throws<ArgumentException>( () => cut.StringMethod( "12345678901" ) );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "parameter", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "parameter", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -41,12 +38,9 @@ public sealed class StringLengthAttributeTests
     {
         var cut = new StringLengthTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "12345678901" );
+        var e = Assert.Throws<ArgumentException>( () => cut.StringField = "12345678901" );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "StringField", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -54,12 +48,9 @@ public sealed class StringLengthAttributeTests
     {
         var cut = new StringLengthTestClass();
 
-        var e = TestHelpers.RecordException<ArgumentException>( () => cut.StringField = "1234" );
+        var e = Assert.Throws<ArgumentException>( () => cut.StringField = "1234" );
 
-        Assert.NotNull( e );
-
-        // ReSharper disable once RedundantSuppressNullableWarningExpression
-        Assert.Contains( "StringField", e!.Message, StringComparison.Ordinal );
+        Assert.Contains( "StringField", e.Message, StringComparison.Ordinal );
     }
 
     [Fact]
@@ -67,8 +58,6 @@ public sealed class StringLengthAttributeTests
     {
         var cut = new StringLengthTestClass();
 
-        var e = TestHelpers.RecordException<NullReferenceException>( () => cut.StringField = null! );
-
-        Assert.NotNull( e );
+        Assert.Throws<NullReferenceException>( () => cut.StringField = null! );
     }
 }
