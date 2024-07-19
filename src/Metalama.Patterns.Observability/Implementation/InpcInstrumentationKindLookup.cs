@@ -31,18 +31,17 @@ internal sealed class InpcInstrumentationKindLookup
                     // None of the special types implement INPC.
                     return InpcInstrumentationKind.None;
                 }
-                else if ( namedType.Equals( this._assets.INotifyPropertyChanged ) )
-                {
-                    return InpcInstrumentationKind.Aspect;
-                }
                 else if ( namedType.Is( this._assets.INotifyPropertyChanged ) )
                 {
-                    if ( namedType.TryFindImplementationForInterfaceMember( this._assets.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
+                    if ( namedType.TryFindImplementationForInterfaceMember( this._assets.PropertyChangedEventOfINotifyPropertyChanged, out var member )
+                         && member.IsExplicitInterfaceImplementation )
                     {
-                        return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Aspect;
+                        return InpcInstrumentationKind.InpcPrivateImplementation;
                     }
-
-                    throw new InvalidOperationException( "Could not find implementation of interface member." );
+                    else
+                    {
+                        return InpcInstrumentationKind.InpcPublicImplementation;
+                    }
                 }
                 else if ( !namedType.BelongsToCurrentProject )
                 {
@@ -72,7 +71,7 @@ internal sealed class InpcInstrumentationKindLookup
                         case InpcInstrumentationKind.Aspect:
                             return InpcInstrumentationKind.Aspect;
 
-                        case InpcInstrumentationKind.Explicit:
+                        case InpcInstrumentationKind.InpcPublicImplementation:
                             hasImplicit = true;
 
                             break;

@@ -20,13 +20,13 @@ internal static class DiagnosticDescriptors
     /// <summary>
     /// Class {0} implements INotifyPropertyChanged but does not define an OnPropertyChanged method with the following signature: void OnPropertyChanged(string propertyName).
     /// </summary>
-    public static readonly DiagnosticDefinition<INamedType> ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged =
+    public static readonly DiagnosticDefinition<INamedType> ErrorClassImplementsInpcButDoesNotDefineOnOverridablePropertyChanged =
         new(
             "LAMA5150",
             Error,
-            "Class '{0}' implements INotifyPropertyChanged but does not define a public or protected OnPropertyChanged method with the following signature: "
+            "Class '{0}' implements INotifyPropertyChanged but does not define an overridable OnPropertyChanged method with the following signature: "
             +
-            "virtual void OnPropertyChanged(string propertyName). The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
+            "`protected virtual void OnPropertyChanged(string)` or `protected virtual void OnPropertyChanged(PropertyChangedEventArgs)`. The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
             "OnPropertyChanged is not defined.",
             _category );
 
@@ -123,5 +123,15 @@ internal static class DiagnosticDescriptors
             Warning,
             "The '{0}' local variable cannot be analysed: variables of types other than primitive types are not supported.",
             "Variables of types other than primitive types and types configured as deeply immutable are not supported.",
+            _category );
+
+    public static readonly DiagnosticDefinition<INamedType> ErrorClassImplementsInpcButDoesNotDefineOnInvocablePropertyChanged =
+        new(
+            "LAMA5156",
+            Error,
+            "Class '{0}' implements INotifyPropertyChanged but does not define an OnPropertyChanged method with the following signature: "
+            +
+            "`protected void OnPropertyChanged(string)`. The method name can also be NotifyOfPropertyChange or RaisePropertyChanged.",
+            "OnPropertyChanged is not defined.",
             _category );
 }

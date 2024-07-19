@@ -31,8 +31,9 @@ internal sealed class Templates : ITemplateProvider
     {
         var rootReference = propertyInfo.RootReferenceNode;
 
-        var inpcImplementationKind = rootReference.InpcInstrumentationKind;
-        var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
+        meta.DebugBreak();
+
+        var eventRequiresCast = templateArgs.InpcInstrumentationKindLookup.Get( propertyInfo.FieldOrProperty.Type ).RequiresCast();
 
         if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity > 0 )
         {
@@ -93,12 +94,13 @@ internal sealed class Templates : ITemplateProvider
                 // Notify refs to the current node and any children without an update method.
                 foreach ( var r in GetReferencingProperties( templateArgs, rootReference, excludeChildrenWithUpdateMethod: true ) )
                 {
-                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                    templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
 
-                if ( propertyInfo.FieldOrProperty.DeclarationKind != DeclarationKind.Field && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
+                if ( propertyInfo.FieldOrProperty.DeclarationKind != DeclarationKind.Field
+                     && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
                 {
-                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                    templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
                 }
             }
 
@@ -119,8 +121,7 @@ internal sealed class Templates : ITemplateProvider
         [CompileTime] IField handlerField )
         where TValue : class, INotifyPropertyChanged
     {
-        var inpcImplementationKind = propertyInfo.RootReferenceNode.InpcInstrumentationKind;
-        var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
+        var eventRequiresCast = templateArgs.InpcInstrumentationKindLookup.Get( propertyInfo.FieldOrProperty.Type ).RequiresCast();
 
         if ( value != null )
         {
@@ -220,7 +221,7 @@ internal sealed class Templates : ITemplateProvider
             // Notify refs to the current node and any children without an update method.
             foreach ( var r in GetReferencingProperties( templateArgs, node, excludeChildrenWithUpdateMethod: true ) )
             {
-                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
 
             var parentNode = (ClassicObservableExpression) node.Parent!;
@@ -294,13 +295,13 @@ internal sealed class Templates : ITemplateProvider
             {
                 foreach ( var r in GetReferencingProperties( templateArgs, propertyInfo.RootReferenceNode ) )
                 {
-                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                    templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
             }
 
             if ( !isField && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
             {
-                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
             }
         }
         else
@@ -313,13 +314,13 @@ internal sealed class Templates : ITemplateProvider
                 {
                     foreach ( var r in GetReferencingProperties( templateArgs, propertyInfo.RootReferenceNode ) )
                     {
-                        templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                        templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                     }
                 }
 
                 if ( !isField && meta.Target.FieldOrProperty.Accessibility != Accessibility.Private )
                 {
-                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
+                    templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( meta.Target.FieldOrProperty.Name );
                 }
             }
         }
@@ -339,9 +340,25 @@ internal sealed class Templates : ITemplateProvider
             .ToArray();
     }
 
+    [Template( Name = "OnPropertyChanged" )]
+    internal void OnPropertyChangedString( string propertyName, [CompileTime] ObservabilityTemplateArgs templateArgs )
+    {
+        this.OnPropertyChanged(
+            ExpressionFactory.Capture( propertyName ),
+            ExpressionFactory.Capture( new PropertyChangedEventArgs( propertyName ) ),
+            templateArgs );
+    }
+
+    [Template( Name = "OnPropertyChanged" )]
+    internal void OnPropertyChangedObject( PropertyChangedEventArgs args, [CompileTime] ObservabilityTemplateArgs templateArgs )
+    {
+        this.OnPropertyChanged( ExpressionFactory.Capture( args.PropertyName ), ExpressionFactory.Capture( args ), templateArgs );
+    }
+
     [Template]
-    internal void OnPropertyChanged(
-        string propertyName,
+    private void OnPropertyChanged(
+        IExpression propertyNameExpression,
+        IExpression propertyEventArgsExpression,
         [CompileTime] ObservabilityTemplateArgs templateArgs )
     {
         var templateArgsValue = templateArgs;
@@ -356,7 +373,7 @@ internal sealed class Templates : ITemplateProvider
             }
         }
 
-        var switchBuilder = new SwitchStatementBuilder( ExpressionFactory.Capture( propertyName ) );
+        var switchBuilder = new SwitchStatementBuilder( propertyNameExpression );
 
         foreach ( var propertyNode in templateArgsValue.ObservableTypeInfo.Properties )
         {
@@ -445,7 +462,7 @@ internal sealed class Templates : ITemplateProvider
 
         if ( templateArgsValue.BaseOnPropertyChangedMethod == null )
         {
-            this.PropertyChanged?.Invoke( meta.This, new PropertyChangedEventArgs( propertyName ) );
+            this.PropertyChanged?.Invoke( meta.This, propertyEventArgsExpression.Value );
         }
         else
         {
@@ -499,7 +516,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         var lastValueField = node.LastValueField.Value;
-                        var eventRequiresCast = node.InpcInstrumentationKind is InpcInstrumentationKind.Explicit;
+                        var eventRequiresCast = node.InpcInstrumentationKind.RequiresCast();
 
                         var oldValue = lastValueField.Value;
                         var newValue = node.ReferencedFieldOrProperty.Value;
@@ -530,7 +547,7 @@ internal sealed class Templates : ITemplateProvider
                             // ReSharper disable once PossibleMultipleEnumeration
                             foreach ( var name in rootPropertyNamesToNotify )
                             {
-                                templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                                templateArgsValue.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( name );
                             }
 
                             if ( newValue != null )
@@ -563,7 +580,7 @@ internal sealed class Templates : ITemplateProvider
                 {
                     foreach ( var name in rootPropertyNamesToNotify )
                     {
-                        templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                        templateArgsValue.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( name );
                     }
                 }
 
@@ -587,7 +604,7 @@ internal sealed class Templates : ITemplateProvider
             // ReSharper disable once PossibleMultipleEnumeration
             foreach ( var name in rootPropertyNamesToNotify )
             {
-                templateArgsValue.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( name );
+                templateArgsValue.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( name );
             }
         }
     }
@@ -655,7 +672,7 @@ internal sealed class Templates : ITemplateProvider
             // No update method, notify here.
             foreach ( var r in GetReferencingProperties( templateArgs, node ) )
             {
-                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
         }
 
@@ -751,7 +768,7 @@ internal sealed class Templates : ITemplateProvider
                 // Notify refs to the current node and any children without an update method.
                 foreach ( var r in GetReferencingProperties( templateArgs, node, excludeChildrenWithUpdateMethod: true ) )
                 {
-                    templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                    templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
                 }
             }
         }
@@ -849,7 +866,7 @@ internal sealed class Templates : ITemplateProvider
             // No update method, notify here.
             foreach ( var r in GetReferencingProperties( templateArgs, childNode ) )
             {
-                templateArgs.OnPropertyChangedMethod.With( InvokerOptions.Final ).Invoke( r.Name );
+                templateArgs.OnPropertyChangedInvocableMethod.With( InvokerOptions.Final ).Invoke( r.Name );
             }
 
             if ( nodeIsAccessible )

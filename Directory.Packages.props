@@ -32,5 +32,6 @@
     <PackageVersion Include="System.Threading.Tasks.Extensions" Version="4.5.4" />
     <PackageVersion Include="System.Threading.Thread" Version="4.3.0" />
     <PackageVersion Include="System.Threading.ThreadPool" Version="4.3.0" />
+    <PackageVersion Include="CommunityToolkit.Mvvm"  Version="8.1.0"/>
   </ItemGroup>
 </Project>

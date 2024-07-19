@@ -9,19 +9,22 @@ using Metalama.Framework.Code.SyntaxBuilders;
 using Metalama.Framework.Utilities;
 using Metalama.Patterns.Observability.Configuration;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
+using System.ComponentModel;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 {
+    // The order in the array determines the priority.
     private static readonly string[] _onPropertyChangedMethodNames = ["OnPropertyChanged", "NotifyOfPropertyChange", "RaisePropertyChanged"];
 
     private readonly Promise<ObservabilityTemplateArgs> _templateArgs = new();
     private readonly ObservabilityOptions _commonOptions;
     private readonly ClassicObservabilityStrategyOptions _classicOptions;
     private readonly Dictionary<IFieldOrProperty, bool> _validateFieldOrPropertyResults = new();
-    private readonly IMethod? _baseOnPropertyChangedMethod;
+    private readonly IMethod? _baseOnPropertyChangedInvocableMethod;
+    private readonly IMethod? _baseOnPropertyChangedOverridableMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnObservablePropertyChangedMethod;
     private readonly Assets _assets;
@@ -30,7 +33,8 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     // Useful to see when debugging:
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
     private readonly bool _baseImplementsInpc;
-    private readonly Promise<IMethod> _onPropertyChangedMethod = new();
+    private readonly Promise<IMethod> _onPropertyChangedInvocableMethod = new();
+    private readonly Promise<IMethod> _onPropertyChangedOverridableMethod = new();
     private readonly Promise<IMethod?> _onChildPropertyChangedMethod = new();
     private readonly Promise<IMethod?>? _onObservablePropertyChangedMethod;
     private readonly List<string> _propertyPathsForOnChildPropertyChangedMethod = [];
@@ -62,7 +66,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                     && target.BaseType.Definition.Enhancements().HasAspect( typeof(ObservableAttribute) )));
 
         this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._assets.INotifyPropertyChanged );
-        this._baseOnPropertyChangedMethod = GetOnPropertyChangedMethod( target );
+        (this._baseOnPropertyChangedInvocableMethod, this._baseOnPropertyChangedOverridableMethod) = GetOnPropertyChangedMethods( target );
         this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
         this._baseOnObservablePropertyChangedMethod = GetOnObservablePropertyChangedMethod( target, this._assets );
 
@@ -128,9 +132,9 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             this.InpcInstrumentationKindLookup,
             this.ObservableTypeInfo,
             this._onObservablePropertyChangedMethod?.Value,
-            this._onPropertyChangedMethod.Value,
+            this._onPropertyChangedInvocableMethod.Value,
             this._onChildPropertyChangedMethod.Value,
-            this._baseOnPropertyChangedMethod,
+            this._baseOnPropertyChangedOverridableMethod,
             this._baseOnChildPropertyChangedMethod,
             this._baseOnObservablePropertyChangedMethod );
     }
@@ -181,28 +185,33 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
     private bool TryIntroduceOnPropertyChangedMethod()
     {
-        var isOverride = this._baseOnPropertyChangedMethod != null;
+        var isOverride = this._baseOnPropertyChangedOverridableMethod != null;
+
+        var template = this._baseOnPropertyChangedOverridableMethod == null
+                       || this._baseOnPropertyChangedOverridableMethod.Parameters[0].Type.Is( SpecialType.String )
+            ? nameof(Templates.OnPropertyChangedString)
+            : nameof(Templates.OnPropertyChangedObject);
 
         var result = this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
             .IntroduceMethod(
                 this.CurrentType,
-                nameof(Templates.OnPropertyChanged),
+                template,
                 IntroductionScope.Instance,
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Fail,
                 b =>
                 {
                     if ( isOverride )
                     {
-                        b.Name = this._baseOnPropertyChangedMethod!.Name;
+                        b.Name = this._baseOnPropertyChangedOverridableMethod!.Name;
                     }
 
                     if ( this.CurrentType.IsSealed )
                     {
-                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                        b.Accessibility = this._baseOnPropertyChangedOverridableMethod?.Accessibility ?? Accessibility.Private;
                     }
                     else
                     {
-                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.Accessibility = this._baseOnPropertyChangedOverridableMethod?.Accessibility ?? Accessibility.Protected;
                         b.IsVirtual = !isOverride;
                     }
                 },
@@ -213,7 +222,16 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             return false;
         }
 
-        this._onPropertyChangedMethod.Value = result.Declaration;
+        this._onPropertyChangedOverridableMethod.Value = result.Declaration;
+
+        if ( this._baseOnPropertyChangedOverridableMethod == this._baseOnPropertyChangedInvocableMethod )
+        {
+            this._onPropertyChangedInvocableMethod.Value = result.Declaration;
+        }
+        else
+        {
+            this._onPropertyChangedInvocableMethod.Value = this._baseOnPropertyChangedInvocableMethod!;
+        }
 
         // Ensure that all required fields are generated in advance of template execution.
         // The node selection logic mirrors that of the template's loops and conditions.
@@ -400,13 +418,25 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     {
         var isValid = true;
 
-        if ( this._targetImplementsInpc && this._baseOnPropertyChangedMethod == null )
+        if ( this._targetImplementsInpc )
         {
-            this.AspectBuilder.Diagnostics.Report(
-                DiagnosticDescriptors.ErrorClassImplementsInpcButDoesNotDefineOnPropertyChanged
-                    .WithArguments( this.CurrentType ) );
+            // For clarity, we report just one error.
+            if ( this._baseOnPropertyChangedOverridableMethod == null )
+            {
+                this.AspectBuilder.Diagnostics.Report(
+                    DiagnosticDescriptors.ErrorClassImplementsInpcButDoesNotDefineOnOverridablePropertyChanged
+                        .WithArguments( this.CurrentType ) );
 
-            isValid = false;
+                isValid = false;
+            }
+            else if ( this._baseOnPropertyChangedInvocableMethod == null )
+            {
+                this.AspectBuilder.Diagnostics.Report(
+                    DiagnosticDescriptors.ErrorClassImplementsInpcButDoesNotDefineOnInvocablePropertyChanged
+                        .WithArguments( this.CurrentType ) );
+
+                isValid = false;
+            }
         }
 
         return isValid;
@@ -445,7 +475,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-            if ( node.InpcInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit
+            if ( node.InpcInstrumentationKind.IsImplemented() == true
                  && !this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath ) )
             {
                 var lastValueField = this.GetOrCreateLastValueField( node );
@@ -516,7 +546,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         {
             var fieldOrProperty = propertyInfo.FieldOrProperty;
             var propertyTypeInstrumentationKind = this.InpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
-            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit;
+            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind.IsImplemented() == true;
 
             // We don't report writes to non-INPC members, if the member can only be written from the constructor, or if it's an init-only property.
             var propertyIsWriteable = fieldOrProperty.Writeability is Writeability.All;
@@ -796,32 +826,68 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                 .Where( s => !string.IsNullOrWhiteSpace( s ) )!;
     }
 
-    internal static IMethod? GetOnPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault(
-            m =>
-                !m.IsStatic
-                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
-                && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters is [{ Type.SpecialType: SpecialType.String }]
-                && _onPropertyChangedMethodNames.Contains( m.Name ) );
+    internal static (IMethod? Invocable, IMethod? Overridable) GetOnPropertyChangedMethods( INamedType type )
+    {
+        // Select methods of correct name, accessibility, and return type.
+        var methodsOfCorrectName = type.AllMethods
+            .Where(
+                m => m is
+                {
+                    IsStatic: false,
+                    Accessibility: Accessibility.Public or Accessibility.Protected,
+                    ReturnType.SpecialType: SpecialType.Void
+                } )
+            .Select( m => (MethodNameIndex: Array.IndexOf( _onPropertyChangedMethodNames, m.Name ), Method: m) )
+            .Where( x => x.MethodNameIndex >= 0 )
+            .ToList();
+
+        // In case of inheritance, we must have a method that accepts a string as a parameter, and
+        // this is the method we use to notify changes.
+        var invocableMethod = methodsOfCorrectName
+            .OrderBy( x => x.MethodNameIndex )
+            .FirstOrDefault( m => m.Method.Parameters is [{ Type.SpecialType: SpecialType.String }] )
+            .Method;
+
+        // We must also have a method that we are able to override, and here we support either string or PropertyChangedEventArgs. 
+        // We give priority to PropertyChangedEventArgs.
+        var overridableMethod = methodsOfCorrectName.Where(
+                m =>
+                    (m.Method.IsVirtual || m.Method.IsOverride)
+                    && !m.Method.IsSealed
+                    && m.Method.Parameters[0].Type is { SpecialType: SpecialType.String } or INamedType { Name: nameof(PropertyChangedEventArgs) } )
+            .OrderBy( m => m.Method.Parameters[0].Type is { SpecialType: SpecialType.String } ? 0 : 1 )
+            .ThenBy( m => m.MethodNameIndex )
+            .FirstOrDefault()
+            .Method;
+
+        return (invocableMethod, overridableMethod);
+    }
 
     internal static IMethod? GetOnChildPropertyChangedMethod( INamedType type )
-        => type.AllMethods.FirstOrDefault(
+        => type.AllMethods.SingleOrDefault(
             m =>
                 !m.IsStatic
-                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
-                && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }] );
+                && m is
+                {
+                    Name: "OnChildPropertyChanged",
+                    Accessibility: Accessibility.Public or Accessibility.Protected,
+                    ReturnType.SpecialType: SpecialType.Void,
+                    Parameters: [{ Type.SpecialType: SpecialType.String }, { Type.SpecialType: SpecialType.String }]
+                } );
 
     internal static IMethod? GetOnObservablePropertyChangedMethod( INamedType type, Assets assets )
-        => type.AllMethods.FirstOrDefault(
+        => type.AllMethods.SingleOrDefault(
             m =>
                 !m.IsStatic
-                && (type.IsSealed || ((m.IsVirtual || m.IsOverride) && m.Accessibility is Accessibility.Public or Accessibility.Protected))
-                && m.ReturnType.SpecialType == SpecialType.Void
-                && m.Parameters is [{ Type.SpecialType: SpecialType.String }, _, _]
-                && m.Parameters[1].Type == assets.NullableINotifyPropertyChanged
-                && m.Parameters[2].Type == assets.NullableINotifyPropertyChanged );
+                && m is
+                {
+                    Name: "OnObservablePropertyChanged",
+                    Accessibility: Accessibility.Public or Accessibility.Protected,
+                    ReturnType.SpecialType: SpecialType.Void,
+                    Parameters: [{ Type.SpecialType: SpecialType.String }, { } p1, { } p2]
+                }
+                && p1.Type == assets.NullableINotifyPropertyChanged
+                && p2.Type == assets.NullableINotifyPropertyChanged );
 
     /// <summary>
     /// Validates the the intrinsic characteristics of the given <see cref="IFieldOrProperty"/>, reporting diagnostics if applicable. 
@@ -841,7 +907,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         bool IsValid( IFieldOrProperty fp )
         {
             var typeImplementsInpc =
-                this.InpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Aspect;
+                this.InpcInstrumentationKindLookup.Get( fp.Type ).IsImplemented() == true;
 
             var isValid = true;
 

@@ -25,7 +25,7 @@ internal sealed record ObservabilityTemplateArgs(
     InpcInstrumentationKindLookup InpcInstrumentationKindLookup,
     ClassicObservableTypeInfo ObservableTypeInfo,
     IMethod? OnObservablePropertyChangedMethod,
-    IMethod OnPropertyChangedMethod,
+    IMethod OnPropertyChangedInvocableMethod,
     IMethod? OnChildPropertyChangedMethod,
     IMethod? BaseOnPropertyChangedMethod,
     IMethod? BaseOnChildPropertyChangedMethod,

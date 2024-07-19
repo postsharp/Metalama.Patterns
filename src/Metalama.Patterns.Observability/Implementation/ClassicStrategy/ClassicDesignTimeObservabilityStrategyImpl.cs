@@ -10,7 +10,8 @@ namespace Metalama.Patterns.Observability.Implementation.ClassicStrategy;
 
 internal sealed class ClassicDesignTimeObservabilityStrategyImpl : DesignTimeObservabilityStrategy
 {
-    private readonly IMethod? _baseOnPropertyChangedMethod;
+    private readonly IMethod? _baseOnPropertyChangedInvocableMethod;
+    private readonly IMethod? _baseOnPropertyChangedOverridableMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnObservablePropertyChangedMethod;
 
@@ -22,7 +23,10 @@ internal sealed class ClassicDesignTimeObservabilityStrategyImpl : DesignTimeObs
 
         var target = builder.Target;
         var elements = builder.Target.Compilation.Cache.GetOrAdd( _ => new Assets() );
-        this._baseOnPropertyChangedMethod = ClassicObservabilityStrategyImpl.GetOnPropertyChangedMethod( target );
+
+        (this._baseOnPropertyChangedInvocableMethod, this._baseOnPropertyChangedOverridableMethod) =
+            ClassicObservabilityStrategyImpl.GetOnPropertyChangedMethods( target );
+
         this._baseOnChildPropertyChangedMethod = ClassicObservabilityStrategyImpl.GetOnChildPropertyChangedMethod( target );
 
         this._baseOnObservablePropertyChangedMethod =
@@ -42,28 +46,33 @@ internal sealed class ClassicDesignTimeObservabilityStrategyImpl : DesignTimeObs
 
     private void IntroduceOnPropertyChangedMethod()
     {
-        var isOverride = this._baseOnPropertyChangedMethod != null;
+        var isOverride = this._baseOnPropertyChangedOverridableMethod != null;
+
+        var template = this._baseOnPropertyChangedOverridableMethod == null
+                       || this._baseOnPropertyChangedOverridableMethod.Parameters[0].Type.Is( SpecialType.String )
+            ? nameof(OnPropertyChangedString)
+            : nameof(OnPropertyChangedObject);
 
         this.Builder.Advice.WithTemplateProvider( this )
             .IntroduceMethod(
                 this.Builder.Target,
-                nameof(OnPropertyChanged),
+                template,
                 IntroductionScope.Instance,
                 isOverride ? OverrideStrategy.Override : OverrideStrategy.Ignore,
                 b =>
                 {
                     if ( isOverride )
                     {
-                        b.Name = this._baseOnPropertyChangedMethod!.Name;
+                        b.Name = this._baseOnPropertyChangedOverridableMethod!.Name;
                     }
 
                     if ( this.Builder.Target.IsSealed )
                     {
-                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Private;
+                        b.Accessibility = this._baseOnPropertyChangedOverridableMethod?.Accessibility ?? Accessibility.Private;
                     }
                     else
                     {
-                        b.Accessibility = isOverride ? this._baseOnPropertyChangedMethod!.Accessibility : Accessibility.Protected;
+                        b.Accessibility = this._baseOnPropertyChangedOverridableMethod?.Accessibility ?? Accessibility.Protected;
                         b.IsVirtual = !isOverride;
                     }
                 } );
@@ -134,8 +143,12 @@ internal sealed class ClassicDesignTimeObservabilityStrategyImpl : DesignTimeObs
     }
 
     [UsedImplicitly]
-    [Template]
-    private static void OnPropertyChanged( string propertyName ) { }
+    [Template( Name = "OnPropertyChanged" )]
+    private static void OnPropertyChangedString( string propertyName ) { }
+
+    [UsedImplicitly]
+    [Template( Name = "OnPropertyChanged" )]
+    private static void OnPropertyChangedObject( PropertyChangedEventArgs args ) { }
 
     [UsedImplicitly]
     [Template]
