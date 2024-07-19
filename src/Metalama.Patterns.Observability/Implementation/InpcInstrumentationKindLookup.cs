@@ -42,7 +42,7 @@ internal sealed class InpcInstrumentationKindLookup
                         return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Aspect;
                     }
 
-                    throw new InvalidOperationException( "Could not find implementation of interface member." );
+                    throw new ObservabilityAssertionFailedException( $"Could not find implementation of interface member '{this._assets.PropertyChangedEventOfINotifyPropertyChanged}' in type '{namedType}'." );
                 }
                 else if ( !namedType.BelongsToCurrentProject )
                 {
