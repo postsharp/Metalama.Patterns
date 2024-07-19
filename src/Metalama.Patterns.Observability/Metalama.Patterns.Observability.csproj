@@ -26,6 +26,7 @@
     <PackageReference Include="Metalama.Framework" />
     <PackageReference Include="Metalama.Framework.Sdk" PrivateAssets="all" />
     <PackageReference Include="JetBrains.Annotations" PrivateAssets="all" />
+
     <InternalsVisibleTo Include="Metalama.Patterns.Observability.CompileTimeTests" />
   </ItemGroup>
 
