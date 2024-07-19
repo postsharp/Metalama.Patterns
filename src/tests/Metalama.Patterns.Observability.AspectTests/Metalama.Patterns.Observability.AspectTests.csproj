@@ -24,6 +24,10 @@
         <DependentUpon>$([System.String]::Copy('ObservableRecipientBase').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
         <SubType>Code</SubType>
       </Compile>
+      <Compile Update="IntermediateInterface_ExplicitImpl.cs">
+        <DependentUpon>$([System.String]::Copy('IntermediateInterface').Substring( %(Filename.IndexOf('.') ).cs</DependentUpon>
+        <SubType>Code</SubType>
+      </Compile>
     </ItemGroup>
 
 </Project>

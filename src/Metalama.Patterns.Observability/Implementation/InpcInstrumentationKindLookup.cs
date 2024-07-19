@@ -3,6 +3,7 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Collections.Concurrent;
+using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation;
 
@@ -23,6 +24,8 @@ internal sealed class InpcInstrumentationKindLookup
 
     private InpcInstrumentationKind GetCore( IType type )
     {
+        Debugger.Break();
+
         switch ( type )
         {
             case INamedType namedType:
@@ -31,18 +34,17 @@ internal sealed class InpcInstrumentationKindLookup
                     // None of the special types implement INPC.
                     return InpcInstrumentationKind.None;
                 }
-                else if ( namedType.Equals( this._assets.INotifyPropertyChanged ) )
-                {
-                    return InpcInstrumentationKind.Aspect;
-                }
                 else if ( namedType.Is( this._assets.INotifyPropertyChanged ) )
                 {
-                    if ( namedType.TryFindImplementationForInterfaceMember( this._assets.PropertyChangedEventOfINotifyPropertyChanged, out var member ) )
+                    if ( namedType.TryFindImplementationForInterfaceMember( this._assets.PropertyChangedEventOfINotifyPropertyChanged, out var member )
+                         && member.IsExplicitInterfaceImplementation )
                     {
-                        return member.IsExplicitInterfaceImplementation ? InpcInstrumentationKind.Explicit : InpcInstrumentationKind.Aspect;
+                        return InpcInstrumentationKind.InpcPrivateImplementation;
                     }
-
-                    throw new ObservabilityAssertionFailedException( $"Could not find implementation of interface member '{this._assets.PropertyChangedEventOfINotifyPropertyChanged}' in type '{namedType}'." );
+                    else
+                    {
+                        return InpcInstrumentationKind.InpcPublicImplementation;
+                    }
                 }
                 else if ( !namedType.BelongsToCurrentProject )
                 {
@@ -72,7 +74,7 @@ internal sealed class InpcInstrumentationKindLookup
                         case InpcInstrumentationKind.Aspect:
                             return InpcInstrumentationKind.Aspect;
 
-                        case InpcInstrumentationKind.Explicit:
+                        case InpcInstrumentationKind.InpcPublicImplementation:
                             hasImplicit = true;
 
                             break;

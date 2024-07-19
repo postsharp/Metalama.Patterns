@@ -31,8 +31,9 @@ internal sealed class Templates : ITemplateProvider
     {
         var rootReference = propertyInfo.RootReferenceNode;
 
-        var inpcImplementationKind = rootReference.InpcInstrumentationKind;
-        var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
+        meta.DebugBreak();
+
+        var eventRequiresCast = templateArgs.InpcInstrumentationKindLookup.Get( propertyInfo.FieldOrProperty.Type ).RequiresCast();
 
         if ( templateArgs.CommonOptions.DiagnosticCommentVerbosity > 0 )
         {
@@ -120,8 +121,7 @@ internal sealed class Templates : ITemplateProvider
         [CompileTime] IField handlerField )
         where TValue : class, INotifyPropertyChanged
     {
-        var inpcImplementationKind = propertyInfo.RootReferenceNode.InpcInstrumentationKind;
-        var eventRequiresCast = inpcImplementationKind == InpcInstrumentationKind.Explicit;
+        var eventRequiresCast = templateArgs.InpcInstrumentationKindLookup.Get( propertyInfo.FieldOrProperty.Type ).RequiresCast();
 
         if ( value != null )
         {
@@ -516,7 +516,7 @@ internal sealed class Templates : ITemplateProvider
                     else
                     {
                         var lastValueField = node.LastValueField.Value;
-                        var eventRequiresCast = node.InpcInstrumentationKind is InpcInstrumentationKind.Explicit;
+                        var eventRequiresCast = node.InpcInstrumentationKind.RequiresCast();
 
                         var oldValue = lastValueField.Value;
                         var newValue = node.ReferencedFieldOrProperty.Value;

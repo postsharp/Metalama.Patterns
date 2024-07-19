@@ -475,7 +475,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             IMethod? thisUpdateMethod = null;
 
             // Don't add fields and update methods for properties handled by base, or for root properties of the target type, or for properties of types that don't implement INPC.
-            if ( node.InpcInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit
+            if ( node.InpcInstrumentationKind.IsImplemented() == true
                  && !this.HasInheritedOnChildPropertyChangedPropertyPath( node.DottedPropertyPath ) )
             {
                 var lastValueField = this.GetOrCreateLastValueField( node );
@@ -546,7 +546,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         {
             var fieldOrProperty = propertyInfo.FieldOrProperty;
             var propertyTypeInstrumentationKind = this.InpcInstrumentationKindLookup.Get( fieldOrProperty.Type );
-            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind is InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit;
+            var propertyTypeImplementsInpc = propertyTypeInstrumentationKind.IsImplemented() == true;
 
             // We don't report writes to non-INPC members, if the member can only be written from the constructor, or if it's an init-only property.
             var propertyIsWriteable = fieldOrProperty.Writeability is Writeability.All;
@@ -907,7 +907,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         bool IsValid( IFieldOrProperty fp )
         {
             var typeImplementsInpc =
-                this.InpcInstrumentationKindLookup.Get( fp.Type ) is InpcInstrumentationKind.Explicit or InpcInstrumentationKind.Aspect;
+                this.InpcInstrumentationKindLookup.Get( fp.Type ).IsImplemented() == true;
 
             var isValid = true;
 

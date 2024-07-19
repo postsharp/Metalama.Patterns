@@ -90,13 +90,13 @@ internal sealed class ClassicObservableExpression : ObservableExpression
         var fieldOrProperty = referencedPropertyInfo.FieldOrProperty;
 
         this.InpcBaseHandling =
-            ((ClassicObservableTypeInfo) this.ReferencedPropertyInfo.DeclaringTypeInfo).InpcInstrumentationKind switch
+            ((ClassicObservableTypeInfo) this.ReferencedPropertyInfo.DeclaringTypeInfo).InpcInstrumentationKind.IsImplemented() switch
             {
-                InpcInstrumentationKind.Unknown => InpcBaseHandling.Unknown,
+                null => InpcBaseHandling.Unknown,
 
-                InpcInstrumentationKind.None => InpcBaseHandling.NotApplicable,
+                false => InpcBaseHandling.NotApplicable,
 
-                InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit when this.IsRoot =>
+                true when this.IsRoot =>
                     fieldOrProperty.DeclaringType == builder.CurrentType
                         ? InpcBaseHandling.NotApplicable
                         : builder.Context.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
@@ -104,7 +104,7 @@ internal sealed class ClassicObservableExpression : ObservableExpression
                             : builder.Context.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
                                 ? InpcBaseHandling.OnObservablePropertyChanged
                                 : InpcBaseHandling.OnPropertyChanged,
-                InpcInstrumentationKind.Aspect or InpcInstrumentationKind.Explicit when !this.IsRoot =>
+                true when !this.IsRoot =>
                     builder.Context.HasInheritedOnChildPropertyChangedPropertyPath( this.DottedPropertyPath )
                         ? InpcBaseHandling.OnChildPropertyChanged
                         : builder.Context.HasInheritedOnObservablePropertyChangedProperty( this.DottedPropertyPath )
