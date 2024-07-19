@@ -230,7 +230,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         }
         else
         {
-            this._onPropertyChangedInvocableMethod.Value = this._baseOnPropertyChangedInvocableMethod;
+            this._onPropertyChangedInvocableMethod.Value = this._baseOnPropertyChangedInvocableMethod!;
         }
 
         // Ensure that all required fields are generated in advance of template execution.
