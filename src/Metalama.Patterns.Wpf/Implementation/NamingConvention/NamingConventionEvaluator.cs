@@ -2,7 +2,6 @@
 
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
-using System.Diagnostics;
 using System.Diagnostics.CodeAnalysis;
 
 namespace Metalama.Patterns.Wpf.Implementation.NamingConvention;
@@ -18,8 +17,6 @@ internal static class NamingConventionEvaluator
         where TMatch : NamingConventionMatch
         where TDeclaration : IDeclaration
     {
-        Debugger.Break();
-
         foreach ( var namingConvention in namingConventions )
         {
             var result = namingConvention.Match( target );

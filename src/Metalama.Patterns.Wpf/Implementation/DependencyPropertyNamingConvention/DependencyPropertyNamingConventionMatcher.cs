@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using Metalama.Patterns.Wpf.Implementation.NamingConvention;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Wpf.Implementation.DependencyPropertyNamingConvention;
 
@@ -141,8 +140,6 @@ internal static class DependencyPropertyNamingConventionMatcher
         IProperty targetProperty,
         DependencyPropertyAssets assets )
     {
-        Debugger.Break();
-
         var declaringType = targetProperty.DeclaringType;
         var propertyType = targetProperty.Type;
 

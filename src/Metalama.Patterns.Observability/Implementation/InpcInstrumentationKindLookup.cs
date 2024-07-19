@@ -3,7 +3,6 @@
 using Metalama.Framework.Aspects;
 using Metalama.Framework.Code;
 using System.Collections.Concurrent;
-using System.Diagnostics;
 
 namespace Metalama.Patterns.Observability.Implementation;
 
@@ -24,8 +23,6 @@ internal sealed class InpcInstrumentationKindLookup
 
     private InpcInstrumentationKind GetCore( IType type )
     {
-        Debugger.Break();
-
         switch ( type )
         {
             case INamedType namedType:
