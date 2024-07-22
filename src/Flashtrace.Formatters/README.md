@@ -17,7 +17,7 @@ The `Flashtrace.Formatters` package is designed to solve the problem of formatti
 
 ## Additional Documentation
 
-* API Documentation: https://doc.postsharp.net/metalama/api/flashtrace-formatters
+* [API Documentation](https://doc.postsharp.net/metalama/api/flashtrace-formatters)
 
 ## Related Packages
 

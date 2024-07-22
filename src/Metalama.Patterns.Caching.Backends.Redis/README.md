@@ -19,10 +19,10 @@ The `Metalama.Patterns.Caching.Backends.Redis` package complements the `Metalama
 
 ## Additional Documentation
 
-* API Documentation: https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-redis.
 * Conceptual documentation:
-    * Distributed caching with Redis: https://doc.postsharp.net/metalama/patterns/caching/redis.
-    * Synchronizing local in-memory caches with Redis Pub/Sub: https://doc.postsharp.net/metalama/patterns/caching/pubsub.
+    * [Distributed caching with Redis](https://doc.postsharp.net/metalama/patterns/caching/redis)
+    * [Synchronizing local in-memory caches with Redis Pub/Sub](https://doc.postsharp.net/metalama/patterns/caching/pubsub)
+* [API Documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-redis)
 
 ## Related Packages
 

@@ -1,1 +1,0 @@
-﻿# Metalama.Patterns.Wpf

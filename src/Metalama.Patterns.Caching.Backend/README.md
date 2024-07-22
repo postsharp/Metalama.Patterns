@@ -17,8 +17,8 @@ The `Metalama.Patterns.Caching.Backend` package provides an abstraction for a ca
 
 ## Additional Documentation
 
-* Conceptual documentation: https://doc.postsharp.net/metalama/patterns/caching.
-* API documentation: https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends.
+* [Conceptual documentation](https://doc.postsharp.net/metalama/patterns/caching)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends)
 
 ## Related Packages
 

@@ -26,12 +26,12 @@ The primary types in this package are:
 
 ## Additional Documentation
 
-* Conceptual documentation: TODO.
-* API documentation: TODO.
+* Conceptual documentation:
+  * [Command](https://doc.postsharp.net/metalama/patterns/wpf/command)
+  * [Dependency Property](https://doc.postsharp.net/metalama/patterns/wpf/dependency-property)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-wpf)
 
 ## Related Packages
 
 * `Metalama.Patterns.Contracts` provides contract attributes such as `[NotNull]` or `[Url]`. They integrate with the `DependencyPropertyAttribute` aspect.
 * `Metalama.Patterns.Observability` can implement `INotifyPropertyChanged` for the `CanExecute` property supported by the `CommandAttribute` aspect.
-
-

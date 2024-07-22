@@ -14,8 +14,8 @@ The `Metalama.Patterns.Caching.Backends.Azure` package enhances the `Metalama.Pa
 
 ## Additional Documentation
 
-* Conceptual documentation: [https://doc.postsharp.net/metalama/patterns/caching/pubsub](https://doc.postsharp.net/metalama/patterns/caching/pubsub)
-* API reference: [https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-azure](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-azure)
+* [Conceptual documentation](https://doc.postsharp.net/metalama/patterns/caching/pubsub)
+* [API reference](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-backends-azure)
 
 ## Related Packages
 

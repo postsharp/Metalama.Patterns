@@ -32,8 +32,8 @@ The primary types in this package are:
 
 ## Additional Documentation
 
-* Conceptual documentation: https://doc.postsharp.net/metalama/patterns/caching.
-* API documentation: https://doc.postsharp.net/metalama/api/metalama-patterns-caching.
+* [Conceptual documentation](https://doc.postsharp.net/metalama/patterns/caching)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-caching)
 
 ## Related Packages
 
