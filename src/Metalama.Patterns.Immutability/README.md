@@ -23,8 +23,8 @@ The primary types in this package are:
 
 ## Additional Documentation
 
-* Conceptual documentation: TODO.
-* API documentation: TODO.
+* [Conceptual documentation](https://doc.postsharp.net/metalama/patterns/immutability)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-immutability)
 
 ## Related Packages
 

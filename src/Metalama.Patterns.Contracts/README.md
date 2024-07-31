@@ -58,6 +58,6 @@ The following contracts can be used to verify that a value falls within a specif
 ## Additional Documentation
 
 * Conceptual documentation:
-    * Preconditions and postconditions: https://doc.postsharp.net/metalama/patterns/contracts/adding-contracts
-    * Invariants: https://doc.postsharp.net/metalama/patterns/contracts/invariants
-* API documentation: https://doc.postsharp.net/metalama/api/metalama-patterns-contracts
+    * [Preconditions and postconditions](https://doc.postsharp.net/metalama/patterns/contracts/adding-contracts)
+    * [Invariants](https://doc.postsharp.net/metalama/patterns/contracts/invariants)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-contracts)

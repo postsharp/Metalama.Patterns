@@ -14,8 +14,8 @@ The `Metalama.Patterns.Memoization` package introduces a memoization aspect via 
 
 ## Additional Documentation
 
-* Conceptual Documentation: https://doc.postsharp.net/metalama/patterns/memoization
-* API Documentation: https://doc.postsharp.net/metalama/api/metalama-patterns-memoization
+* [Conceptual Documentation](https://doc.postsharp.net/metalama/patterns/memoization)
+* [API Documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-memoization)
 
 ## Related Packages
 

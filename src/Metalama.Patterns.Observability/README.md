@@ -24,11 +24,9 @@ The primary types in this package are:
 
 ## Additional Documentation
 
-* Conceptual documentation: TODO.
-* API documentation: TODO.
+* [Conceptual documentation](https://doc.postsharp.net/metalama/patterns/observability)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-observability)
 
 ## Related Packages
 
 * `Metalama.Patterns.Immutability` implements the immutability concept used by the current package to decide which method calls are supported in property getters.
-
-

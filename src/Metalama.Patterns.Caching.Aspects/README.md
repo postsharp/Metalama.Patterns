@@ -19,8 +19,8 @@ The `Metalama.Patterns.Caching.Aspects` package provides an aspect-oriented API 
 
 ## Additional Documentation
 
-* Reference documentation: https://doc.postsharp.net/metalama/patterns/caching
-* API documentation: https://doc.postsharp.net/metalama/api/metalama-patterns-caching-aspects.
+* [Reference documentation](https://doc.postsharp.net/metalama/patterns/caching)
+* [API documentation](https://doc.postsharp.net/metalama/api/metalama-patterns-caching-aspects)
 
 ## Related Packages
 
