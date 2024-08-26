@@ -13,7 +13,7 @@ internal sealed class ClassicDependencyGraphBuilder : DependencyGraphBuilder
 
     public INamedType CurrentType { get; }
 
-    public ClassicDependencyGraphBuilder( ClassicGraphBuildingContext context, INamedType currentType )
+    public ClassicDependencyGraphBuilder( ClassicGraphBuildingContext context, INamedType currentType ) : base( context.Assets )
     {
         this.Context = context;
         this.CurrentType = currentType;

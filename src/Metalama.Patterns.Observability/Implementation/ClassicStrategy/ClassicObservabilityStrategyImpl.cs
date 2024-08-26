@@ -27,8 +27,9 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     private readonly IMethod? _baseOnPropertyChangedOverridableMethod;
     private readonly IMethod? _baseOnChildPropertyChangedMethod;
     private readonly IMethod? _baseOnObservablePropertyChangedMethod;
-    private readonly Assets _assets;
     private readonly bool _targetImplementsInpc;
+
+    public Assets Assets { get; }
 
     // Useful to see when debugging:
     // ReSharper disable once PrivateFieldCanBeConvertedToLocalVariable
@@ -52,8 +53,8 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         var target = aspectBuilder.Target;
 
         this.AspectBuilder = aspectBuilder;
-        this._assets = target.Compilation.Cache.GetOrAdd( _ => new Assets() );
-        this.InpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this.CurrentType, this._assets );
+        this.Assets = target.Compilation.Cache.GetOrAdd( _ => new Assets() );
+        this.InpcInstrumentationKindLookup = new InpcInstrumentationKindLookup( this.CurrentType, this.Assets );
         this._commonOptions = this.CurrentType.Enhancements().GetOptions<ObservabilityOptions>();
         this._classicOptions = this.CurrentType.Enhancements().GetOptions<ClassicObservabilityStrategyOptions>();
 
@@ -61,14 +62,14 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
 
         this._baseImplementsInpc =
             target.BaseType != null && (
-                target.BaseType.Is( this._assets.INotifyPropertyChanged )
+                target.BaseType.Is( this.Assets.INotifyPropertyChanged )
                 || (target.BaseType is { BelongsToCurrentProject: true }
                     && target.BaseType.Definition.Enhancements().HasAspect( typeof(ObservableAttribute) )));
 
-        this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this._assets.INotifyPropertyChanged );
+        this._targetImplementsInpc = this._baseImplementsInpc || target.Is( this.Assets.INotifyPropertyChanged );
         (this._baseOnPropertyChangedInvocableMethod, this._baseOnPropertyChangedOverridableMethod) = GetOnPropertyChangedMethods( target );
         this._baseOnChildPropertyChangedMethod = GetOnChildPropertyChangedMethod( target );
-        this._baseOnObservablePropertyChangedMethod = GetOnObservablePropertyChangedMethod( target, this._assets );
+        this._baseOnObservablePropertyChangedMethod = GetOnObservablePropertyChangedMethod( target, this.Assets );
 
         var useOnObservablePropertyChangedMethod =
             this._classicOptions.EnableOnObservablePropertyChangedMethod == true &&
@@ -128,7 +129,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             this._commonOptions,
             this._classicOptions,
             this.CurrentType,
-            this._assets,
+            this.Assets,
             this.InpcInstrumentationKindLookup,
             this.ObservableTypeInfo,
             this._onObservablePropertyChangedMethod?.Value,
@@ -154,7 +155,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                 .Where(
                     p =>
                         p is { IsStatic: false, IsAutoPropertyOrField: true }
-                        && !p.Attributes.Any( this._assets.NotObservableAttribute ) );
+                        && !p.Attributes.Any( this.Assets.NotObservableAttribute ) );
 
         var allValid = true;
 
@@ -316,7 +317,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                     {
                         b.AddAttribute(
                             AttributeConstruction.Create(
-                                this._assets.InvokedForAttribute,
+                                this.Assets.InvokedForAttribute,
                                 this._propertyPathsForOnChildPropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
                     }
 
@@ -383,7 +384,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                     {
                         b.AddAttribute(
                             AttributeConstruction.Create(
-                                this._assets.InvokedForAttribute,
+                                this.Assets.InvokedForAttribute,
                                 this._propertyNamesForOnObservablePropertyChangedMethod.OrderBy( s => s ).ToArray() ) );
                     }
 
@@ -447,7 +448,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         if ( !this._targetImplementsInpc )
         {
             this.AspectBuilder.Advice.WithTemplateProvider( Templates.Provider )
-                .ImplementInterface( this.CurrentType, this._assets.INotifyPropertyChanged );
+                .ImplementInterface( this.CurrentType, this.Assets.INotifyPropertyChanged );
         }
     }
 
@@ -539,7 +540,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                     target.Fields
                         .Where( f => f is { IsStatic: false, IsImplicitlyDeclared: false } )
                         .Select( p => (ClassicObservablePropertyInfo) this.ObservableTypeInfo.GetOrAddProperty( p ) ) )
-                .Where( node => !node.FieldOrProperty.Attributes.Any( this._assets.NotObservableAttribute ) )
+                .Where( node => !node.FieldOrProperty.Attributes.Any( this.Assets.NotObservableAttribute ) )
                 .ToList();
 
         foreach ( var propertyInfo in properties )
@@ -645,7 +646,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
     public bool HasInheritedOnChildPropertyChangedPropertyPath( string parentPropertyPath )
     {
         this._inheritedOnChildPropertyChangedPropertyPaths ??=
-            BuildPropertyPathLookup( GetPropertyPaths( this._assets.InvokedForAttribute, this._baseOnChildPropertyChangedMethod ) );
+            BuildPropertyPathLookup( GetPropertyPaths( this.Assets.InvokedForAttribute, this._baseOnChildPropertyChangedMethod ) );
 
         return this._inheritedOnChildPropertyChangedPropertyPaths.Contains( parentPropertyPath );
     }
@@ -657,7 +658,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
         this._inheritedOnObservablePropertyChangedPropertyNames ??=
             BuildPropertyPathLookup(
                 GetPropertyPaths(
-                    this._assets.InvokedForAttribute,
+                    this.Assets.InvokedForAttribute,
                     this._baseOnObservablePropertyChangedMethod ) );
 
         return this._inheritedOnObservablePropertyChangedPropertyNames.Contains( propertyName );
@@ -721,7 +722,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
                 .IntroduceField(
                     this.CurrentType,
                     handlerFieldName,
-                    this._assets.NullablePropertyChangedEventHandler,
+                    this.Assets.NullablePropertyChangedEventHandler,
                     IntroductionScope.Instance,
                     OverrideStrategy.Fail,
                     b => b.Accessibility = Accessibility.Private );

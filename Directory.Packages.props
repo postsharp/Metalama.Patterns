@@ -6,6 +6,7 @@
   <!-- Set versions of dependencies that need special treatment or consist of multiple packages of the same version. -->
   <PropertyGroup>
     <PostSharpEngineeringVersion Condition="'$(PostSharpEngineeringVersion)'==''">2023.2.111</PostSharpEngineeringVersion>
+    <StyleCopVersion>1.2.0-beta.556</StyleCopVersion>
   </PropertyGroup>
   <ItemGroup>
     <PackageVersion Include="Azure.Identity" Version="1.11.4" />
