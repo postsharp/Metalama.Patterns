@@ -17,10 +17,7 @@ internal partial class DependencyGraphBuilder
 
     private readonly Assets _assets;
 
-    // For tests only.
-    public DependencyGraphBuilder() : this( new Assets() ) { }
-
-    protected DependencyGraphBuilder( Assets assets )
+    public DependencyGraphBuilder( Assets assets )
     {
         this._assets = assets;
     }

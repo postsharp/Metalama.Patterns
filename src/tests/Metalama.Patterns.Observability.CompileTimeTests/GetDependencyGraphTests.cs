@@ -1,6 +1,8 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using FluentAssertions;
+using Metalama.Framework.Code;
+using Metalama.Patterns.Observability.Implementation;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Metalama.Testing.UnitTesting;
 using Microsoft.CodeAnalysis;
@@ -17,6 +19,32 @@ public sealed class GetDependencyGraphTests : UnitTestClass
     private static bool AlwaysTreatAsInpc( ITypeSymbol type ) => true;
 
     private static bool NeverTreatAsInpc( ITypeSymbol type ) => false;
+
+    private static ObservableTypeInfo CreateDependencyGraph(
+        TestContext context,
+        INamedType type,
+        Func<ISymbol, bool>? isConfiguredAsSafe = null,
+        Action<string>? reportDiagnostic = null,
+        Func<ITypeSymbol, bool>? treatAsImplementingInpc = null )
+    {
+        using ( context.WithExecutionContext( type.Compilation ) )
+        {
+            var assets = new Assets();
+
+            return new DependencyGraphBuilder( assets )
+                .GetDependencyGraph(
+                    type,
+                    new TestGraphBuildingContext(
+                        type.Compilation,
+                        assets,
+                        isConfiguredAsSafe,
+                        reportDiagnostic,
+                        treatAsImplementingInpc: treatAsImplementingInpc ) );
+        }
+    }
+
+    private static ICompilation CreateCompilation( TestContext testContext, string code )
+        => testContext.CreateCompilation( code, additionalReferences: [MetadataReference.CreateFromFile( typeof(ObservableAttribute).Assembly.Location )] );
 
     [Trait( "Supported", "Yes" )]
     [Fact]
@@ -87,15 +115,13 @@ class D
     public int D1 { get; set; }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   A1
@@ -144,15 +170,13 @@ public class A
     public DateTime Z => DateTime.Now.AddTicks( X ).AddMinutes( Y );
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -191,15 +215,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -245,15 +267,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -289,15 +309,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -330,15 +348,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -374,15 +390,13 @@ public class A
     static int Method( int arg1 ) => arg1 * 2;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -411,15 +425,13 @@ public class A
     public long Y => DateTime.Now.AddTicks( this.X ).Ticks;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -448,15 +460,13 @@ public class A
     public long Y => DateTime.Now.Add( this.X ).Ticks;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -485,15 +495,13 @@ public class A
     public string Y => string.Join( '|', X.Split( ',' ) );
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -532,15 +540,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -580,15 +586,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -628,15 +632,13 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -674,15 +676,13 @@ public class A
     public int Y => this.GetZ() + X;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -724,15 +724,13 @@ public class A
     private static int Fn( A v ) => v.Z * 2;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -772,15 +770,13 @@ public class A
     private static int Fn( int v ) => v * 2;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -822,19 +818,18 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
+        var result = CreateDependencyGraph(
+            testContext,
             type,
-            new TestGraphBuildingContext(
-                compilation,
-                isConfiguredAsSafe: _ => true,
-                reportDiagnostic: diagnostics.Add,
-                treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            isConfiguredAsSafe: _ => true,
+            reportDiagnostic: diagnostics.Add,
+            treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -875,19 +870,18 @@ public class A
     }
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
+        var result = CreateDependencyGraph(
+            testContext,
             type,
-            new TestGraphBuildingContext(
-                compilation,
-                isConfiguredAsSafe: _ => true,
-                reportDiagnostic: diagnostics.Add,
-                treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+            isConfiguredAsSafe: _ => true,
+            reportDiagnostic: diagnostics.Add,
+            treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -940,15 +934,13 @@ public class A
     public int R => ((this.A1 ?? this.A2)?.B2 ?? (this.A1 ?? this.A2)?.B3!).C1;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1012,15 +1004,13 @@ public class A
     public int? Q => (A3 ? A1 : A2)?.B2?.C1;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1091,15 +1081,13 @@ public class A
     public int R => (((A3 ? A1 : A2)?.B2 ?? (A4 ? A5 : A6)?.B3) ?? A7?.B3)?.C1 ?? A8;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1152,15 +1140,13 @@ public class A
     public int? A2 => A1?.B1;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: NeverTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: NeverTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
@@ -1196,15 +1182,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1240,15 +1224,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1289,15 +1271,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1332,15 +1312,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1373,15 +1351,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1416,15 +1392,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   _foo [ X, Z ]
@@ -1462,15 +1436,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   _foo
@@ -1505,15 +1477,13 @@ public class A
     public int Z => this.X + this.Y;
 }";
 
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "A" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         const string expected = @"<root>
   X [ Z ]
@@ -1537,35 +1507,33 @@ public class A
         using var testContext = this.CreateTestContext();
 
         const string code = """
-            using System;
+                            using System;
 
-            public class DateTimeViewModel
-            {
-                public DateTime DateTime { get; set; }
+                            public class DateTimeViewModel
+                            {
+                                public DateTime DateTime { get; set; }
+                            
+                                public double MinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
+                            }
+                            """;
 
-                public double MinutesFromNow => (DateTime.Now - this.DateTime).TotalMinutes;
-            }
-            """;
-
-        var compilation = testContext.CreateCompilation( code );
+        var compilation = CreateCompilation( testContext, code );
 
         var type = compilation.Types.OfName( "DateTimeViewModel" ).Single();
 
         var diagnostics = new List<string>();
 
-        var result = new DependencyGraphBuilder().GetDependencyGraph(
-            type,
-            new TestGraphBuildingContext( compilation, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc ) );
+        var result = CreateDependencyGraph( testContext, type, reportDiagnostic: diagnostics.Add, treatAsImplementingInpc: AlwaysTreatAsInpc );
 
         this.TestOutput.WriteLines( diagnostics );
         this.TestOutput.WriteLine( result.ToString() );
 
         const string expected = """
-            <root>
-              DateTime [ MinutesFromNow ]
-              MinutesFromNow
-            
-            """;
+                                <root>
+                                  DateTime [ MinutesFromNow ]
+                                  MinutesFromNow
+
+                                """;
 
         result.ToString().Should().Be( NormalizeEOL( expected ) );
 
