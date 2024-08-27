@@ -3,6 +3,7 @@
 using Metalama.Framework.Code;
 using Metalama.Framework.Diagnostics;
 using Metalama.Patterns.Observability.Configuration;
+using Metalama.Patterns.Observability.Implementation;
 using Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 using Microsoft.CodeAnalysis;
 
@@ -23,9 +24,10 @@ internal sealed class TestGraphBuildingContext : GraphBuildingContext
     /// <param name="isAutoPropertyOrField">If <see langword="null"/>, <see cref="GraphBuildingContext.IsAutoPropertyOrField(ISymbol)"/> will return <see langword="true"/> for any field or property.</param>
     public TestGraphBuildingContext(
         ICompilation compilation,
+        Assets assets,
         Func<ISymbol, bool>? isConfiguredAsSafe = null,
         Action<string>? reportDiagnostic = null,
-        Func<ITypeSymbol, bool>? treatAsImplementingInpc = null ) : base( compilation )
+        Func<ITypeSymbol, bool>? treatAsImplementingInpc = null ) : base( compilation, assets )
     {
         this._isConfiguredAsSafe = isConfiguredAsSafe;
         this._reportDiagnostic = reportDiagnostic;

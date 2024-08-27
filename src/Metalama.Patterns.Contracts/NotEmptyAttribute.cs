@@ -136,7 +136,7 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
 
         if ( targetType.Is( typeOfICollection ) )
         {
-            var countProperty = typeOfICollection.Properties.Single( p => p.Name == nameof(ICollection.Count) );
+            var countProperty = typeOfICollection.Properties.OfName( nameof(ICollection.Count) ).Single();
             targetType.TryFindImplementationForInterfaceMember( countProperty, out var countPropertyImpl );
 
             interfaceType = typeOfICollection;
@@ -169,7 +169,7 @@ public sealed class NotEmptyAttribute : ContractBaseAttribute
 
             if ( foundInterface != null )
             {
-                var countProperty = foundInterface.Properties.Single( p => p.Name == "Count" );
+                var countProperty = foundInterface.Properties.OfName( "Count" ).Single();
                 targetType.TryFindImplementationForInterfaceMember( countProperty, out var countPropertyImpl );
 
                 interfaceType = foundInterface;

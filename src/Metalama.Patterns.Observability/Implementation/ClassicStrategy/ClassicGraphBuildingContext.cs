@@ -15,7 +15,7 @@ internal sealed class ClassicGraphBuildingContext : GraphBuildingContext
 {
     private readonly ClassicObservabilityStrategyImpl _strategy;
 
-    public ClassicGraphBuildingContext( ClassicObservabilityStrategyImpl strategy ) : base( strategy.CurrentType.Compilation )
+    public ClassicGraphBuildingContext( ClassicObservabilityStrategyImpl strategy ) : base( strategy.CurrentType.Compilation, strategy.Assets )
     {
         this._strategy = strategy;
     }

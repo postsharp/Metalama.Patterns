@@ -14,7 +14,14 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 internal partial class DependencyGraphBuilder
 {
     private readonly Dictionary<INamedType, ObservableTypeInfo> _types = new();
-    
+
+    private readonly Assets _assets;
+
+    public DependencyGraphBuilder( Assets assets )
+    {
+        this._assets = assets;
+    }
+
     protected virtual ObservableTypeInfo CreateTypeInfo( INamedType type ) => new( this, type );
 
     public virtual ObservablePropertyInfo CreatePropertyInfo( IFieldOrProperty fieldOrProperty, ObservableTypeInfo parent ) => new( fieldOrProperty, parent );
@@ -50,10 +57,16 @@ internal partial class DependencyGraphBuilder
 
         foreach ( var p in type.Properties )
         {
+            if ( p.IsStatic || p.IsImplicitlyDeclared || p.Attributes.Any( this._assets.NotObservableAttribute ) )
+            {
+                continue;
+            }
+
             var propertySymbol = p.GetSymbol();
 
             if ( propertySymbol == null )
             {
+                // Only source-defined properties are supported.
                 continue;
             }
 

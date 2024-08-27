@@ -14,10 +14,13 @@ namespace Metalama.Patterns.Observability.Implementation.DependencyAnalysis;
 [CompileTime]
 internal abstract class GraphBuildingContext
 {
+    public Assets Assets { get; }
+
     private readonly ICompilation _compilation;
 
-    protected GraphBuildingContext( ICompilation compilation )
+    protected GraphBuildingContext( ICompilation compilation, Assets assets )
     {
+        this.Assets = assets;
         this._compilation = compilation;
     }
 

@@ -391,7 +391,7 @@ public sealed class InvalidateCacheAttribute : MethodAspect
 
                 // Match parameter by name.
                 var invalidatingMethodParameter =
-                    invalidatingMethodParameters.FirstOrDefault( p => p.Name == invalidatedMethodParameter.Name );
+                    invalidatingMethodParameters.OfName( invalidatedMethodParameter.Name );
 
                 if ( invalidatingMethodParameter == null )
                 {

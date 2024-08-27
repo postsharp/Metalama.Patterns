@@ -42,5 +42,5 @@ internal sealed class Assets
     /// Gets the <see cref="IProperty"/> for property <c>EqualityComparer<paramref name="type"/>>.Default</c>.
     /// </summary>
     public IProperty GetDefaultEqualityComparerForType( IType type )
-        => this.EqualityComparerOfT.WithTypeArguments( type ).Properties.Single( p => p.Name == "Default" );
+        => this.EqualityComparerOfT.WithTypeArguments( type ).Properties.OfName( "Default" ).Single();
 }
