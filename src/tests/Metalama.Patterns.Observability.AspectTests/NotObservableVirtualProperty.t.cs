@@ -1,11 +1,3 @@
-using System;
-using System.Collections.Generic;
-using System.ComponentModel;
-using System.Linq;
-using System.Text;
-using System.Threading.Tasks;
-namespace Metalama.Patterns.Observability.AspectTests.NotObservableVirtualProperty
-{
   [Observable]
   public class TestClass : INotifyPropertyChanged
   {
@@ -16,5 +8,4 @@ namespace Metalama.Patterns.Observability.AspectTests.NotObservableVirtualProper
       PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
     public event PropertyChangedEventHandler? PropertyChanged;
-  }
 }
