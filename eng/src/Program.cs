@@ -5,7 +5,6 @@ using PostSharp.Engineering.BuildTools.Build;
 using PostSharp.Engineering.BuildTools.Build.Model;
 using PostSharp.Engineering.BuildTools.Build.Solutions;
 using PostSharp.Engineering.BuildTools.Dependencies.Definitions;
-using Spectre.Console.Cli;
 using MetalamaDependencies = PostSharp.Engineering.BuildTools.Dependencies.Definitions.MetalamaDependencies.V2024_2;
 
 var product = new Product( MetalamaDependencies.MetalamaPatterns )
@@ -15,7 +14,7 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         new DotNetSolution( "Metalama.Patterns.sln" )
         { 
             CanFormatCode = true,
-            FormatExclusions = new[] { "src\\tests\\*AspectTests\\**\\*" },
+            FormatExclusions = ["src\\tests\\*AspectTests\\**\\*"]
         },
     ],
     PublicArtifacts = Pattern.Create(
@@ -43,8 +42,4 @@ var product = new Product( MetalamaDependencies.MetalamaPatterns )
         } )
 };
 
-var commandApp = new CommandApp();
-
-commandApp.AddProductCommands( product );
-
-return commandApp.Run( args );
+return new EngineeringApp( product ).Run( args );
