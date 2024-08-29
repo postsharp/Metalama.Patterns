@@ -64,6 +64,22 @@ public sealed class RegularExpressionAttributeTests
     }
 
     [Fact]
+    public void Given_FieldEmail_When_ValidValueWithSingleQuote_Then_Success()
+    {
+        var cut = new RegexTestClass();
+
+        cut.Email2 = "Spirit.O'Crowd@foobusiness.borg.uk";
+    }
+
+    [Fact]
+    public void Given_FieldEmail_When_ValidValueWithDoubleQuote_Then_Success()
+    {
+        var cut = new RegexTestClass();
+
+        cut.Email2 = "\"Spirit O'Crowd\"@foobusiness.borg.uk";
+    }
+
+    [Fact]
     public void Given_FieldWithPhone_When_CorrectValuePassed_Then_Success()
     {
         var cut = new RegexTestClass();
