@@ -8,7 +8,8 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="61d49c8d-47c1-4f86-a0c9-487ba53ff573" name="Changes" comment="">
-      <change beforePath="$PROJECT_DIR$/BuildMetalamaPatterns.csproj" beforeDir="false" afterPath="$PROJECT_DIR$/BuildMetalamaPatterns.csproj" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/../../Directory.Packages.props" beforeDir="false" afterPath="$PROJECT_DIR$/../../Directory.Packages.props" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/.idea/.idea.BuildMetalamaPatterns/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/.idea.BuildMetalamaPatterns/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/Program.cs" beforeDir="false" afterPath="$PROJECT_DIR$/Program.cs" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/../../global.json" beforeDir="false" afterPath="$PROJECT_DIR$/../../global.json" afterDir="false" />
     </list>
@@ -37,7 +38,7 @@
     "RunOnceActivity.OpenProjectViewOnStart": "true",
     "RunOnceActivity.ShowReadmeOnStart": "true",
     "WebServerToolWindowFactoryState": "false",
-    "git-widget-placeholder": "develop/2024.0",
+    "git-widget-placeholder": "develop/2024.2",
     "node.js.detected.package.eslint": "true",
     "node.js.detected.package.tslint": "true",
     "node.js.selected.package.eslint": "(autodetect)",
@@ -83,6 +84,7 @@
       <updated>1692960421703</updated>
       <workItem from="1692960422839" duration="458000" />
       <workItem from="1718086352555" duration="67000" />
+      <workItem from="1724874881938" duration="903000" />
     </task>
     <task id="LOCAL-00001" summary="Updated build script.">
       <option name="closed" value="true" />
