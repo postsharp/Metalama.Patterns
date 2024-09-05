@@ -10,19 +10,7 @@ namespace Metalama.Patterns.Wpf.Implementation;
 /// An implementation of <see cref="ICommand"/> which uses delegates to access callbacks. This class supports
 /// the <see cref="CommandAttribute"/> aspect infrastructure and should not be used directly.
 /// </summary>
-/// <remarks>
-/// <para>
-/// This class is inspired by PostSharp.Patterns.Wpf.CommandAttribute.CommandImpl, notably as regards
-/// the use of <see cref="SynchronizationContext"/>.
-/// </para>
-/// <para>
-/// As and when Metalama supports type introduction, this class could be replaced by generated nested types which
-/// could call the callbacks directly rather than via delegates, the delegates themselves must presently originate
-/// from generated local functions.
-/// </para>
-/// </remarks>
 [PublicAPI]
-[EditorBrowsable( EditorBrowsableState.Never )]
 public sealed class DelegateCommand : ICommand
 {
     /* Original comment from PostSharp:

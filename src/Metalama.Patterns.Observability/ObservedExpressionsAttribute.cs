@@ -1,7 +1,6 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
 using JetBrains.Annotations;
-using System.ComponentModel;
 
 namespace Metalama.Patterns.Observability;
 
@@ -10,7 +9,6 @@ namespace Metalama.Patterns.Observability;
 /// are observed using these methods.
 /// </summary>
 [PublicAPI]
-[EditorBrowsable( EditorBrowsableState.Never )]
 [AttributeUsage( AttributeTargets.Method )]
 public sealed class ObservedExpressionsAttribute : Attribute
 {
