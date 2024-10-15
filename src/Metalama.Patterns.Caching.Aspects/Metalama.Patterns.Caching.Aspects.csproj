@@ -20,6 +20,7 @@
     </ItemGroup>    
 
     <ItemGroup>
+        <PackageReference Include="JetBrains.Annotations" />
         <PackageReference Include="Metalama.Extensions.DependencyInjection" />
         <!-- We need a non-private reference to Metalama.Patterns.Contracts because it is required by Metalama.-->
         <ProjectReference Include="..\Metalama.Patterns.Contracts\Metalama.Patterns.Contracts.csproj" />
