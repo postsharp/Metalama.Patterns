@@ -66,7 +66,7 @@ internal class Target
       typeof(Target).GetMethod("GetResourceName2", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(string), typeof(int) }, null)!.ThrowIfMissing("Target.GetResourceName2(int, string, int)")
     };
   }
-  public Target(ICachingService? cachingService = default)
+  public Target(ICachingService? cachingService = null)
   {
     this._cachingService = cachingService ?? throw new System.ArgumentNullException(nameof(cachingService));
   }

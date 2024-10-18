@@ -39,7 +39,7 @@ internal class TheClass
   {
     _cacheRegistration_CachedMethod = CachedMethodMetadata.Register(typeof(TheClass).GetMethod("CachedMethod", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(IDisposable) }, null)!.ThrowIfMissing("TheClass.CachedMethod(int, IDisposable)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
   }
-  public TheClass(ICachingService? cachingService = default)
+  public TheClass(ICachingService? cachingService = null)
   {
     this._cachingService = cachingService ?? throw new System.ArgumentNullException(nameof(cachingService));
   }

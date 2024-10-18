@@ -162,7 +162,7 @@ public class RangeAttribute : ContractBaseAttribute
 
     [CompileTime]
     private static bool IsEligibleType( IType type )
-        => type.ToNonNullableType().SpecialType switch
+        => type.ToNonNullable().SpecialType switch
         {
             SpecialType.UInt16 or
                 SpecialType.UInt32 or
@@ -220,7 +220,7 @@ public class RangeAttribute : ContractBaseAttribute
                 attribute ?? builder.Target );
         }
 
-        var basicType = (INamedType) targetType.ToNonNullableType();
+        var basicType = (INamedType) targetType.ToNonNullable();
 
         switch ( this.Range.IsTypeSupported( basicType ) )
         {

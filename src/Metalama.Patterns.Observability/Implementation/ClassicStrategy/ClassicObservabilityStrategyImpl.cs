@@ -701,7 +701,7 @@ internal sealed class ClassicObservabilityStrategyImpl : IObservabilityStrategy
             var introduceLastValueFieldResult = this.AspectBuilder.Advice.IntroduceField(
                 this.CurrentType,
                 lastValueFieldName,
-                node.ReferencedFieldOrProperty.Type.ToNullableType(),
+                node.ReferencedFieldOrProperty.Type.ToNullable(),
                 IntroductionScope.Instance,
                 OverrideStrategy.Fail,
                 b => b.Accessibility = Accessibility.Private );

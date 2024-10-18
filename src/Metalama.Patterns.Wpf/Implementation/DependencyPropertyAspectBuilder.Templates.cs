@@ -237,7 +237,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         {
             if ( method.TypeParameters.Count == 1 )
             {
-                method = method.WithTypeArguments( propertyType );
+                method = method.MakeGenericInstance( propertyType );
             }
 
             switch ( signatureKind )
@@ -302,7 +302,7 @@ internal sealed partial class DependencyPropertyAspectBuilder
         {
             if ( method.TypeParameters.Count == 1 )
             {
-                method = method.WithTypeArguments( propertyType );
+                method = method.MakeGenericInstance( propertyType );
             }
 
             switch ( signatureKind )
