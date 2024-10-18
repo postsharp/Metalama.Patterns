@@ -30,7 +30,7 @@ public class SimpleRedisDistributedTest : BaseDistributedCacheTests, IAssemblyFi
 
         return
         [
-            await RedisFactory.CreateBackendAsync( this.ClassFixture, this._redisAssemblyFixture,this.ServiceProvider, prefix ),
+            await RedisFactory.CreateBackendAsync( this.ClassFixture, this._redisAssemblyFixture, this.ServiceProvider, prefix ),
             await RedisFactory.CreateBackendAsync( this.ClassFixture, this._redisAssemblyFixture, this.ServiceProvider, prefix )
         ];
     }

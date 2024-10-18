@@ -21,7 +21,7 @@ public class C
   {
     _cacheRegistration_M = CachedMethodMetadata.Register(typeof(C).GetMethod("M", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null)!.ThrowIfMissing("C.M()"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
   }
-  public C(ICachingService? cachingService = default)
+  public C(ICachingService? cachingService = null)
   {
     this._cachingService = cachingService ?? throw new System.ArgumentNullException(nameof(cachingService));
   }

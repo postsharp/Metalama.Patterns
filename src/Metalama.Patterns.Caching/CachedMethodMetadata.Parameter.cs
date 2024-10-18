@@ -15,11 +15,11 @@ public partial class CachedMethodMetadata
         /// from the cache key. When the value of this property is <c>false</c>,
         /// the parameter should be included in the cache key.
         /// </summary>
-        public bool IsIgnored { get; }
+        public bool IsParameterIgnored { get; }
 
         internal Parameter( bool isIgnored )
         {
-            this.IsIgnored = isIgnored;
+            this.IsParameterIgnored = isIgnored;
         }
     }
 }

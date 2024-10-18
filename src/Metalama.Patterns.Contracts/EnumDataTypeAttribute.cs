@@ -58,7 +58,7 @@ public sealed class EnumDataTypeAttribute : ContractBaseAttribute
 
     [CompileTime]
     private static bool IsEligibleType( IType type )
-        => type.ToNonNullableType().SpecialType switch
+        => type.ToNonNullable().SpecialType switch
         {
             SpecialType.String or
                 SpecialType.UInt16 or
