@@ -27,7 +27,7 @@ internal class TheClass
     {
       return ((TheClass)instance).CachedMethod_Source((int)args[0], (IDisposable)args[1]);
     }
-    return _cachingService!.GetFromCacheOrExecute<int>(_cacheRegistration_CachedMethod!, this, new object[] { x, y }, Invoke);
+    return _cachingService.GetFromCacheOrExecute<int>(_cacheRegistration_CachedMethod, this, new object[] { x, y }, Invoke);
   }
   private int CachedMethod_Source(int x, IDisposable y)
   {
@@ -37,7 +37,7 @@ internal class TheClass
   private ICachingService _cachingService;
   static TheClass()
   {
-    _cacheRegistration_CachedMethod = CachedMethodMetadata.Register(typeof(TheClass).GetMethod("CachedMethod", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(IDisposable) }, null)!.ThrowIfMissing("TheClass.CachedMethod(int, IDisposable)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
+    _cacheRegistration_CachedMethod = CachedMethodMetadata.Register(typeof(TheClass).GetMethod("CachedMethod", BindingFlags.Public | BindingFlags.Instance, null, new[] { typeof(int), typeof(IDisposable) }, null).ThrowIfMissing("TheClass.CachedMethod(int, IDisposable)"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
   }
   public TheClass(ICachingService? cachingService = default)
   {
