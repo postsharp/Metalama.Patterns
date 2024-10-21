@@ -27,7 +27,7 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesCompletelyOnFirstAwaitedMoveNextAsync()
+    public async Task IteratesCompletelyOnFirstAwaitedMoveNextAsync()
     {
         _ = await this.Instance.CachedEnumerator().MoveNextAsync();
 
@@ -35,7 +35,7 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void DoesNotIterateOnSecondAwaitedMoveNextAsync()
+    public async Task DoesNotIterateOnSecondAwaitedMoveNextAsync()
     {
         _ = await this.Instance.CachedEnumerator().MoveNextAsync();
         this.StringBuilder.Clear();
@@ -45,7 +45,7 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesExpectedSequence1()
+    public async Task IteratesExpectedSequence1()
     {
         await this.Iterate( this.Instance.CachedEnumerator() );
 
@@ -53,7 +53,7 @@ public class AsyncEnumeratorTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesExpectedSequence2()
+    public async Task IteratesExpectedSequence2()
     {
         await this.Iterate( this.Instance.CachedEnumerator() );
         await this.Iterate( this.Instance.CachedEnumerator() );

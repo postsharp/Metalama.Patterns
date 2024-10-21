@@ -37,7 +37,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesCompletelyOnFirstAwaitedMoveNextAsync()
+    public async Task IteratesCompletelyOnFirstAwaitedMoveNextAsync()
     {
         // ReSharper disable once NotDisposedResource
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
@@ -46,7 +46,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void DoesNotIterateOnSecondAwaitedMoveNextAsync()
+    public async Task DoesNotIterateOnSecondAwaitedMoveNextAsync()
     {
         // ReSharper disable once NotDisposedResource
         _ = await this.Instance.CachedEnumerable().GetAsyncEnumerator().MoveNextAsync();
@@ -60,7 +60,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesExpectedSequence1()
+    public async Task IteratesExpectedSequence1()
     {
         await this.Iterate( this.Instance.CachedEnumerable().GetAsyncEnumerator() );
 
@@ -68,7 +68,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesExpectedSequence2()
+    public async Task IteratesExpectedSequence2()
     {
         await this.Iterate( this.Instance.CachedEnumerable().GetAsyncEnumerator() );
         await this.Iterate( this.Instance.CachedEnumerable().GetAsyncEnumerator() );
@@ -77,7 +77,7 @@ public sealed class AsyncEnumerableTests : AsyncEnumTestsBase
     }
 
     [Fact]
-    public async void IteratesExpectedSequence3()
+    public async Task IteratesExpectedSequence3()
     {
         var seq = this.Instance.CachedEnumerable();
 

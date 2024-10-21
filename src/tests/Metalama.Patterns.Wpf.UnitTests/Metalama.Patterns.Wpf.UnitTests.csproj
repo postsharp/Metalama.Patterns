@@ -17,6 +17,8 @@
     <!-- Prevent MSB3277 warning: -->
     <PackageReference Include="System.Threading.Tasks.Extensions" />
     <PackageReference Include="System.Collections.Immutable" />
+    <!-- Prevent MSB3277 warning: -->
+    <PackageReference Include="System.Reflection.Metadata" />
   </ItemGroup>
 
   <ItemGroup Condition="'$(TargetFramework)' == 'net471'">

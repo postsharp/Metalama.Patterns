@@ -18,6 +18,7 @@
     <PackageVersion Update="Microsoft.Extensions.Logging.Abstractions" Version="8.0.2" />
     <PackageVersion Include="Microsoft.NET.Test.Sdk" Version="17.11.1" />
     <PackageVersion Update="StackExchange.Redis" Version="2.8.16" />
+    <PackageVersion Include="System.Reflection.Metadata" Version="8.0.1" />
     <PackageVersion Include="xunit" Version="2.9.2" />
     <PackageVersion Include="xunit.abstractions" Version="2.0.3" />
     <PackageVersion Include="xunit.assemblyfixture" Condition="'$(TargetFramework)'!='net471'" Version="2.2.0" />
