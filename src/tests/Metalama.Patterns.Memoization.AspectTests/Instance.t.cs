@@ -24,10 +24,10 @@ internal sealed class TheClass
   {
     if (_NullableMethod == null)
     {
-      var value = new StrongBox<string?>(this.NullableMethod_Source()!);
+      var value = new StrongBox<string?>(this.NullableMethod_Source());
       global::System.Threading.Interlocked.CompareExchange(ref this._NullableMethod, value, null);
     }
-    return _NullableMethod!.Value;
+    return _NullableMethod.Value;
   }
   private string? NullableMethod_Source() => this._counter++.ToString(CultureInfo.InvariantCulture);
   [Memoize]
@@ -51,10 +51,10 @@ internal sealed class TheClass
     {
       if (_NullableProperty == null)
       {
-        var value = new StrongBox<string?>(NullableProperty_Source!);
+        var value = new StrongBox<string?>(NullableProperty_Source);
         global::System.Threading.Interlocked.CompareExchange(ref this._NullableProperty, value, null);
       }
-      return _NullableProperty!.Value;
+      return _NullableProperty.Value;
     }
   }
   private string? NullableProperty_Source => this._counter++.ToString(CultureInfo.InvariantCulture);
@@ -66,7 +66,7 @@ internal sealed class TheClass
       var value = new StrongBox<Guid>(this.MethodReturnsStruct_Source());
       global::System.Threading.Interlocked.CompareExchange(ref this._MethodReturnsStruct, value, null);
     }
-    return _MethodReturnsStruct!.Value;
+    return _MethodReturnsStruct.Value;
   }
   private Guid MethodReturnsStruct_Source() => Guid.NewGuid();
   [Memoize]
@@ -79,7 +79,7 @@ internal sealed class TheClass
         var value = new StrongBox<Guid>(PropertyReturnsStruct_Source);
         global::System.Threading.Interlocked.CompareExchange(ref this._PropertyReturnsStruct, value, null);
       }
-      return _PropertyReturnsStruct!.Value;
+      return _PropertyReturnsStruct.Value;
     }
   }
   private Guid PropertyReturnsStruct_Source => Guid.NewGuid();

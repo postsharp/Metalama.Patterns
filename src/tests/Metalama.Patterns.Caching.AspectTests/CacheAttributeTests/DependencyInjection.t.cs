@@ -12,14 +12,14 @@ public class C
     {
       return ((C)instance).M_Source();
     }
-    return _cachingService!.GetFromCacheOrExecute<int>(_cacheRegistration_M!, this, new object[] { }, Invoke);
+    return _cachingService.GetFromCacheOrExecute<int>(_cacheRegistration_M, this, new object[] { }, Invoke);
   }
   private int M_Source() => 5;
   private static readonly CachedMethodMetadata _cacheRegistration_M;
   private ICachingService _cachingService;
   static C()
   {
-    _cacheRegistration_M = CachedMethodMetadata.Register(typeof(C).GetMethod("M", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null)!.ThrowIfMissing("C.M()"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
+    _cacheRegistration_M = CachedMethodMetadata.Register(typeof(C).GetMethod("M", BindingFlags.Public | BindingFlags.Instance, null, Type.EmptyTypes, null).ThrowIfMissing("C.M()"), new CachedMethodConfiguration() { AbsoluteExpiration = null, AutoReload = null, IgnoreThisParameter = null, Priority = null, ProfileName = (string? )null, SlidingExpiration = null }, false);
   }
   public C(ICachingService? cachingService = null)
   {

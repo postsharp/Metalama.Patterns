@@ -24,10 +24,10 @@ internal static class TheClass
   {
     if (_NullableMethod == null)
     {
-      var value = new StrongBox<string?>(TheClass.NullableMethod_Source()!);
+      var value = new StrongBox<string?>(TheClass.NullableMethod_Source());
       global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NullableMethod, value, null);
     }
-    return _NullableMethod!.Value;
+    return _NullableMethod.Value;
   }
   private static string? NullableMethod_Source() => _counter++.ToString(CultureInfo.InvariantCulture);
   [Memoize]
@@ -51,10 +51,10 @@ internal static class TheClass
     {
       if (_NullableProperty == null)
       {
-        var value = new StrongBox<string?>(NullableProperty_Source!);
+        var value = new StrongBox<string?>(NullableProperty_Source);
         global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._NullableProperty, value, null);
       }
-      return _NullableProperty!.Value;
+      return _NullableProperty.Value;
     }
   }
   private static string? NullableProperty_Source => _counter++.ToString(CultureInfo.InvariantCulture);
@@ -66,7 +66,7 @@ internal static class TheClass
       var value = new StrongBox<Guid>(TheClass.MethodReturnsStruct_Source());
       global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._MethodReturnsStruct, value, null);
     }
-    return _MethodReturnsStruct!.Value;
+    return _MethodReturnsStruct.Value;
   }
   private static Guid MethodReturnsStruct_Source() => Guid.NewGuid();
   [Memoize]
@@ -79,7 +79,7 @@ internal static class TheClass
         var value = new StrongBox<Guid>(PropertyReturnsStruct_Source);
         global::System.Threading.Interlocked.CompareExchange(ref global::Metalama.Patterns.Memoization.AspectTests.Static.TheClass._PropertyReturnsStruct, value, null);
       }
-      return _PropertyReturnsStruct!.Value;
+      return _PropertyReturnsStruct.Value;
     }
   }
   private static Guid PropertyReturnsStruct_Source => Guid.NewGuid();
