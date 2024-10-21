@@ -1,11 +1,15 @@
 ﻿// Copyright (c) SharpCrafters s.r.o. See the LICENSE.md file in the root directory of this repository root for details.
 
+// ReSharper disable AutoPropertyCanBeMadeGetOnly.Local
+// ReSharper disable FieldCanBeMadeReadOnly.Local
+
 namespace Metalama.Patterns.Observability.AspectTests.WriteabilityInpc;
 
 [Observable]
 public class Person
 {
     public string? FirstName { get; set; }
+
     public string? LastName { get; set; }
 }
 
@@ -20,6 +24,7 @@ public class PersonViewModelField
     }
 
     public string? FirstName => this._model.FirstName;
+
     public string? LastName => this._model.LastName;
 
     public string FullName => $"{this.FirstName} {this.LastName}";
@@ -36,6 +41,7 @@ public class PersonViewModelReadonlyField
     }
 
     public string? FirstName => this._model.FirstName;
+
     public string? LastName => this._model.LastName;
 
     public string FullName => $"{this.FirstName} {this.LastName}";
@@ -47,6 +53,7 @@ public class PersonViewModelConst
     private const Person? _model = null;
 
     public string? FirstName => _model?.FirstName;
+
     public string? LastName => _model?.LastName;
 
     public string FullName => $"{this.FirstName} {this.LastName}";
@@ -63,6 +70,7 @@ public class PersonViewModelGetOnlyProperty
     }
 
     public string? FirstName => this.Model.FirstName;
+
     public string? LastName => this.Model.LastName;
 
     public string FullName => $"{this.FirstName} {this.LastName}";
@@ -79,6 +87,7 @@ public class PersonViewModelInitProperty
     }
 
     public string? FirstName => this.Model.FirstName;
+
     public string? LastName => this.Model.LastName;
 
     public string FullName => $"{this.FirstName} {this.LastName}";
@@ -95,6 +104,7 @@ public class PersonViewModelProperty
     }
 
     public string? FirstName => this.Model.FirstName;
+
     public string? LastName => this.Model.LastName;
 
     public string FullName => $"{this.FirstName} {this.LastName}";
