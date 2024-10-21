@@ -13,7 +13,9 @@ public sealed class RedisCacheBackendWithGarbageCollectorTests : RedisCacheBacke
 {
     public RedisCacheBackendWithGarbageCollectorTests(
         CachingClassFixture cachingClassFixture,
+#pragma warning disable xUnit1041 // False warning.
         RedisAssemblyFixture redisAssemblyFixture,
+#pragma warning restore xUnit1041
         ITestOutputHelper testOutputHelper ) : base( cachingClassFixture, redisAssemblyFixture, testOutputHelper ) { }
 
     protected override bool GarbageCollectorEnabled => true;

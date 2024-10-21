@@ -18,7 +18,9 @@ public class LocallyCachedRedisCacheBackendTests : BaseCacheBackendTests, IAssem
 
     public LocallyCachedRedisCacheBackendTests(
         CachingClassFixture cachingClassFixture,
+#pragma warning disable xUnit1041 // False warning.
         RedisAssemblyFixture redisAssemblyFixture,
+#pragma warning restore xUnit1041
         ITestOutputHelper testOutputHelper ) : base(
         cachingClassFixture,
         testOutputHelper )

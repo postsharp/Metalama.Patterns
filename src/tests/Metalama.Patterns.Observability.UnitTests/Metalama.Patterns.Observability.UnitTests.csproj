@@ -15,6 +15,10 @@
     <PackageReference Include="Xunit.SkippableFact" />
     <PackageReference Include="FluentAssertions" />
     <!-- Prevent MSB3277 warning: -->
+    <PackageReference Include="System.Memory" />
+    <!-- Prevent MSB3277 warning: -->
+    <PackageReference Include="System.Reflection.Metadata" />
+    <!-- Prevent MSB3277 warning: -->
     <PackageReference Include="System.Runtime.CompilerServices.Unsafe" />
     <!-- Prevent MSB3277 warning: -->
     <PackageReference Include="System.Threading.Tasks.Extensions" />
