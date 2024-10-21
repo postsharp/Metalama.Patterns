@@ -59,7 +59,7 @@ public sealed partial class CachedMethodMetadata
 
     public bool IgnoreThisParameter => this.Configuration.IgnoreThisParameter.GetValueOrDefault( false );
 
-    public bool IsParameterIgnored( int index ) => this.Parameters[index].IsIgnored;
+    public bool IsParameterIgnored( int index ) => this.Parameters[index].IsParameterIgnored;
 
     private CachedMethodMetadata(
         MethodInfo method,

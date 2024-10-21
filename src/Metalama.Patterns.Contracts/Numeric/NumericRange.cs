@@ -299,7 +299,7 @@ public readonly struct NumericRange : ICompileTimeSerializable
     {
         var range = this;
 
-        var nonNullableType = valueType.ToNonNullableType();
+        var nonNullableType = valueType.ToNonNullable();
         var isObject = nonNullableType.SpecialType == SpecialType.Object;
 
         // Check if we have checks of min or max value.
@@ -418,7 +418,7 @@ public readonly struct NumericRange : ICompileTimeSerializable
 
     internal NumericRangeTypeSupport IsTypeSupported( IType type )
     {
-        switch ( type.ToNonNullableType().SpecialType )
+        switch ( type.ToNonNullable().SpecialType )
         {
             case SpecialType.Object:
                 return NumericRangeTypeSupport.Supported;

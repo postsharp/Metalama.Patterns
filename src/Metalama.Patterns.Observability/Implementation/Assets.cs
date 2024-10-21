@@ -13,9 +13,9 @@ internal sealed class Assets
     {
         this.INotifyPropertyChanged = (INamedType) TypeFactory.GetType( typeof(INotifyPropertyChanged) );
         this.PropertyChangedEventOfINotifyPropertyChanged = this.INotifyPropertyChanged.Events.First();
-        this.NullableINotifyPropertyChanged = this.INotifyPropertyChanged.ToNullableType();
+        this.NullableINotifyPropertyChanged = this.INotifyPropertyChanged.ToNullable();
         this.PropertyChangedEventHandler = (INamedType) TypeFactory.GetType( typeof(PropertyChangedEventHandler) );
-        this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullableType();
+        this.NullablePropertyChangedEventHandler = this.PropertyChangedEventHandler.ToNullable();
         this.NotObservableAttribute = (INamedType) TypeFactory.GetType( typeof(NotObservableAttribute) );
         this.EqualityComparerOfT = (INamedType) TypeFactory.GetType( typeof(EqualityComparer<>) );
         this.InvokedForAttribute = (INamedType) TypeFactory.GetType( typeof(ObservedExpressionsAttribute) );

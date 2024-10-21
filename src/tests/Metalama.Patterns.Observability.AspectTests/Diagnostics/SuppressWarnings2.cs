@@ -8,6 +8,7 @@ namespace Metalama.Patterns.Observability.AspectTests.Diagnostics.SuppressWarnin
 public class Vector
 {
     public double X { get; set; }
+
     public double Y { get; set; }
 
     public double NormWithWarning => VectorHelper.ComputeNorm1( this );
