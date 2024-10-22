@@ -95,7 +95,7 @@ public partial class A : INotifyPropertyChanged
     {
       if (!object.ReferenceEquals(_lastA2B2, null))
       {
-        _lastA2B2!.PropertyChanged -= _handleA2B2PropertyChanged;
+        _lastA2B2.PropertyChanged -= _handleA2B2PropertyChanged;
       }
       if (newValue != null)
       {
@@ -129,7 +129,7 @@ public partial class A : INotifyPropertyChanged
     {
       if (!object.ReferenceEquals(_lastA2B2C2, null))
       {
-        _lastA2B2C2!.PropertyChanged -= _handleA2B2C2PropertyChanged;
+        _lastA2B2C2.PropertyChanged -= _handleA2B2C2PropertyChanged;
       }
       if (newValue != null)
       {
